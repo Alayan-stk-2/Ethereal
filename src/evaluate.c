@@ -710,22 +710,24 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         // Computing and storing this in the pawn cache should be more efficient ?
         if(!(Files[kingFile] & board->pieces[PAWN ]))
-        for (int i=1; i<=7; i++)
         {
-            if(kingFile + i < 8)
+            for (int i=1; i<=7; i++)
             {
-                if(Files[kingFile+i] & board->pieces[PAWN ])
+                if(kingFile + i < 8)
                 {
-                    fileDistance = i;
-                    break;
+                    if(Files[kingFile+i] & board->pieces[PAWN ])
+                    {
+                        fileDistance = i;
+                        break;
+                    }
                 }
-            }
-            if(kingFile - i >= 0)
-            {
-                if(Files[kingFile-i] & board->pieces[PAWN ])
+                if(kingFile - i >= 0)
                 {
-                    fileDistance = i;
-                    break;
+                    if(Files[kingFile-i] & board->pieces[PAWN ])
+                    {
+                        fileDistance = i;
+                        break;
+                    }
                 }
             }
         }
