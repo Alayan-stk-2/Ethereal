@@ -191,6 +191,11 @@ const int QueenMobility[28] = {
 
 /* King Evaluation Terms */
 
+const int KingPawnFileProximity[8]  = {
+    S(   0,   0), S(   0,   0), S(  -1,  -6), S(  -2, -15),
+    S(  -4, -26), S(  -6, -38), S(  -8, -52), S( -10, -70),
+};
+
 const int KingDefenders[12] = {
     S( -26,   0), S(  -7,  -3), S(   1,   2), S(   8,   5),
     S(  17,   6), S(  27,   4), S(  31,  -2), S(  13,   0),
@@ -695,6 +700,38 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
     int kingSq = ei->kingSquare[US];
     if (TRACE) T.KingValue[US]++;
     if (TRACE) T.KingPSQT32[relativeSquare32(US, kingSq)][US]++;
+
+    // Penalty for being too far away from a file with pawns.
+
+    if (board->pieces[PAWN ])
+    {
+        int kingFile = fileOf(kingSq);
+        int fileDistance = 0;
+
+        // Computing and storing this in the pawn cache should be more efficient ?
+        if(!(Files[kingFile] & board->pieces[PAWN ]))
+        for (int i=1; i<=7; i++)
+        {
+            if(kingFile + i < 8)
+            {
+                if(Files[kingFile+i] & board->pieces[PAWN ])
+                {
+                    fileDistance = i;
+                    break;
+                }
+            }
+            if(kingFile - i >= 0)
+            {
+                if(Files[kingFile-i] & board->pieces[PAWN ])
+                {
+                    fileDistance = i;
+                    break;
+                }
+            }
+        }
+
+        eval += KingPawnFileProximity[fileDistance];
+    }
 
     // Bonus for our pawns and minors sitting within our king area
     count = popcount(defenders & ei->kingAreas[US]);
