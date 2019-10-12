@@ -362,14 +362,15 @@ int evaluatePieces(EvalInfo *ei, Board *board) {
 
     int eval;
 
-    eval  =   evaluatePawns(ei, board, WHITE)   - evaluatePawns(ei, board, BLACK);
-    eval += evaluateKnights(ei, board, WHITE) - evaluateKnights(ei, board, BLACK);
-    eval += evaluateBishops(ei, board, WHITE) - evaluateBishops(ei, board, BLACK);
-    eval +=   evaluateRooks(ei, board, WHITE)   - evaluateRooks(ei, board, BLACK);
-    eval +=  evaluateQueens(ei, board, WHITE)  - evaluateQueens(ei, board, BLACK);
-    eval +=   evaluateKings(ei, board, WHITE)   - evaluateKings(ei, board, BLACK);
-    eval +=  evaluatePassed(ei, board, WHITE)  - evaluatePassed(ei, board, BLACK);
-    eval += evaluateThreats(ei, board, WHITE) - evaluateThreats(ei, board, BLACK);
+    eval  =     evaluatePawns(ei, board, WHITE)     - evaluatePawns(ei, board, BLACK);
+    eval +=   evaluateKnights(ei, board, WHITE)   - evaluateKnights(ei, board, BLACK);
+    eval +=   evaluateBishops(ei, board, WHITE)   - evaluateBishops(ei, board, BLACK);
+    eval +=     evaluateRooks(ei, board, WHITE)     - evaluateRooks(ei, board, BLACK);
+    eval +=    evaluateQueens(ei, board, WHITE)    - evaluateQueens(ei, board, BLACK);
+    eval +=     evaluateKings(ei, board, WHITE)     - evaluateKings(ei, board, BLACK);
+    eval +=    evaluatePassed(ei, board, WHITE)    - evaluatePassed(ei, board, BLACK);
+    eval +=   evaluateThreats(ei, board, WHITE)   - evaluateThreats(ei, board, BLACK);
+    eval += evaluateImbalance(ei, board, WHITE) - evaluateImbalance(ei, board, BLACK);
 
     return eval;
 }
@@ -916,6 +917,21 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     if (TRACE) T.ThreatByPawnPush[colour] += count;
 
     return eval;
+}
+
+int evaluateImbalance(EvalInfo *ei, Board *board, int colour) {
+
+  // 1. Own piece type interaction
+  // Some pieces are redundant, others are complementary
+
+ // TODO : loop over all own pieces
+
+  // 2. Enemy piece type interaction
+  // The kind of piece the enemy has influence the value of our owns
+
+  // 3. Advanced imbalance
+  // Pawns on both flanks, pawn chains, etc. affect piece type value
+  return eval;
 }
 
 int evaluateScaleFactor(Board *board) {
