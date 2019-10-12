@@ -701,40 +701,6 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
     if (TRACE) T.KingValue[US]++;
     if (TRACE) T.KingPSQT32[relativeSquare32(US, kingSq)][US]++;
 
-    // Penalty for being too far away from a file with pawns.
-
-    if (board->pieces[PAWN ])
-    {
-        int kingFile = fileOf(kingSq);
-        int fileDistance = 0;
-
-        // Computing and storing this in the pawn cache should be more efficient ?
-        if(!(Files[kingFile] & board->pieces[PAWN ]))
-        {
-            for (int i=1; i<=7; i++)
-            {
-                if(kingFile + i < 8)
-                {
-                    if(Files[kingFile+i] & board->pieces[PAWN ])
-                    {
-                        fileDistance = i;
-                        break;
-                    }
-                }
-                if(kingFile - i >= 0)
-                {
-                    if(Files[kingFile-i] & board->pieces[PAWN ])
-                    {
-                        fileDistance = i;
-                        break;
-                    }
-                }
-            }
-        }
-
-        eval += KingPawnFileProximity[fileDistance];
-    }
-
     // Bonus for our pawns and minors sitting within our king area
     count = popcount(defenders & ei->kingAreas[US]);
     eval += KingDefenders[count];
@@ -815,6 +781,35 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         int blocked = (ourDist != 7 && (ourDist == theirDist - 1));
         ei->pkeval[US] += KingStorm[blocked][mirrorFile(file)][theirDist];
         if (TRACE) T.KingStorm[blocked][mirrorFile(file)][theirDist][US]++;
+    }
+
+    // Penalty for being too far away from a file with pawns.
+    if (board->pieces[PAWN ])
+    {
+        int kingFile = fileOf(kingSq);
+        int fileDistance = 0;
+
+        // Computing and storing this in the pawn cache should be more efficient ?
+        if(!(Files[kingFile] & board->pieces[PAWN ]))
+        {
+            for (int i=1; i<=7; i++)
+            {
+                if(   kingFile + i < 8
+                   && Files[kingFile+i] & board->pieces[PAWN ])
+                {
+                    fileDistance = i;
+                    break;
+                }
+                if(   kingFile - i >= 0
+                   && Files[kingFile-i] & board->pieces[PAWN ])
+                {
+                    fileDistance = i;
+                    break;
+                }
+            }
+        }
+
+        ei->pkeval[US] += KingPawnFileProximity[fileDistance];
     }
 
     return eval;
