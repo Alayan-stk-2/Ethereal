@@ -446,8 +446,22 @@ int moveIsTactical(Board *board, uint16_t move) {
 
     // Check for captures, promotions, or enpassant. Castle moves may appear to be
     // tactical, since the King may move to its own square, or the rooks square
-    return (board->squares[MoveTo(move)] != EMPTY && MoveType(move) != CASTLE_MOVE)
-        || (move & ENPASS_MOVE & PROMOTION_MOVE);
+    if (   (board->squares[MoveTo(move)] != EMPTY && MoveType(move) != CASTLE_MOVE)
+        || (move & ENPASS_MOVE & PROMOTION_MOVE))
+        return true;
+
+    // Check for pawn pushes to the 6th or 7th rank
+    const int from = MoveFrom(move);
+    const int to   = MoveTo(move);
+    const int fromPiece = board->squares[from];
+    const int fromType  = pieceType(fromPiece);
+    if (fromType == PAWN)
+    {
+        const int fromColour = pieceColour(fromPiece);
+        return (relativeRankOf(fromColour, to) >= 5); // 5 = 6th rank
+    }
+
+    return false;
 }
 
 int moveEstimatedValue(Board *board, uint16_t move) {
