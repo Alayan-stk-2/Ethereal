@@ -120,9 +120,9 @@ const int PawnCandidatePasser[2][RANK_NB] = {
 
 const int PawnIsolated = S(  -7, -11);
 
-const int PawnStacked = S( -16, -21);
+const int PawnStacked = S( -16, -19);
 
-const int PawnStackedIsolated = S(  -6, -10);
+const int PawnStackedIsolated = S(  -12, -18);
 
 const int PawnBackwards[2] = { S(   7,   0), S(  -7, -19) };
 
@@ -414,7 +414,7 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         uint64_t pushThreats = enemyPawns & pawnAttacks(US, sq + Forward);
         uint64_t pushSupport = myPawns    & pawnAttacks(THEM, sq + Forward);
         uint64_t leftovers   = stoppers ^ threats ^ pushThreats;
-        int      isolated    = !threats && !(adjacentFilesMasks(fileOf(sq)) & myPawns);
+        int      isolated    = !(adjacentFilesMasks(fileOf(sq)) & myPawns);
         int      stacked     = (Files[fileOf(sq)] & tempPawns) != 0;
 
         // Save passed pawn information for later evaluation
@@ -430,12 +430,13 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
 
         // Apply a penalty if the pawn is isolated, and there is not an
         // immediate pawn capture to potentially remedy the isolation
-        if (isolated) {
+        if (isolated && !threats) {
             pkeval += PawnIsolated;
             if (TRACE) T.PawnIsolated[US]++;
         }
 
         // Apply a penalty if the pawn is stacked
+        // If N pawns are stacked in a file, N-1 receive this penalty
         if (stacked) {
             pkeval += PawnStacked;
             if (TRACE) T.PawnStacked[US]++;
