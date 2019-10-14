@@ -496,7 +496,7 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
                 defended = 2;
             if (   fileOf(sq) >= 2
                 && fileOf(sq) <= 5
-                && testBit(forwardRanksMasks(US, 4), sq)) //Rank 5+)
+                && relativeRankOf(US, sq) >= 4) //Rank 5+)
                 deepOutpost = 1;
             eval += KnightOutpost[deepOutpost][defended];
             if (TRACE) T.KnightOutpost[defended][US]++;
