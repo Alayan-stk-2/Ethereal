@@ -708,7 +708,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
     // Perform King Safety when we have two attackers, or
     // one attacker with a potential for a Queen attacker
-    if (ei->kingAttackersCount[THEM] > 1 - popcount(enemyQueens)) {
+    if (ei->kingAttackersCount[THEM] > 1 - ei->queenCount[THEM]) {
 
         // Weak squares are attacked by the enemy, defended no more
         // than once and only defended by our Queens or our King
@@ -945,21 +945,21 @@ int evaluateScaleFactor(Board *board) {
     uint64_t rooks   = board->pieces[ROOK  ];
     uint64_t queens  = board->pieces[QUEEN ];
 
-    if (   onlyOne(white & bishops)
-        && onlyOne(black & bishops)
+    if (   ei->bishopCount[WHITE] == 1
+        && ei->bishopCount[BLACK] == 1
         && onlyOne(bishops & WHITE_SQUARES)) {
 
         if (!(knights | rooks | queens))
             return SCALE_OCB_BISHOPS_ONLY;
 
         if (   !(rooks | queens)
-            &&  onlyOne(white & knights)
-            &&  onlyOne(black & knights))
+            &&  ei->knightCount[WHITE] == 1
+            &&  ei->knightCount[BLACK] == 1)
             return SCALE_OCB_ONE_KNIGHT;
 
         if (   !(knights | queens)
-            && onlyOne(white & rooks)
-            && onlyOne(black & rooks))
+            && ei->rookCount[WHITE] == 1
+            && ei->rookCount[BLACK] == 1)
             return SCALE_OCB_ONE_ROOK;
     }
 
@@ -985,7 +985,7 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     uint64_t queens  = board->pieces[QUEEN ];
 
     // Compute the initiative bonus or malus for the attacking side
-    complexity =  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
+    complexity =  ComplexityTotalPawns  * (board->pieces[PAWN])popcount
                +  ComplexityPawnFlanks  * pawnsOnBothFlanks
                +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
                +  ComplexityAdjustment;
@@ -1018,6 +1018,19 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->rammedPawns[BLACK]  = pawnAdvance(white & pawns, ~(black & pawns), WHITE);
     ei->blockedPawns[WHITE] = pawnAdvance(white | black, ~(white & pawns), BLACK);
     ei->blockedPawns[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
+
+    // Save piece count data for later use (imbalance and misc. checks)
+    ei->pawnCount[WHITE]   = popcount(white & board->pieces[PAWN  ]);
+    ei->bishopCount[WHITE] = popcount(white & board->pieces[BISHOP]);
+    ei->knightCount[WHITE] = popcount(white & board->pieces[KNIGHT]);
+    ei->rookCount[WHITE]   = popcount(white & board->pieces[ROOK  ]);
+    ei->queenCount[WHITE]  = popcount(white & board->pieces[QUEEN ]);
+
+    ei->pawnCount[BLACK]   = popcount(black & board->pieces[PAWN  ]);
+    ei->bishopCount[BLACK] = popcount(black & board->pieces[BISHOP]);
+    ei->knightCount[BLACK] = popcount(black & board->pieces[KNIGHT]);
+    ei->rookCount[BLACK]   = popcount(black & board->pieces[ROOK  ]);
+    ei->queenCount[BLACK]  = popcount(black & board->pieces[QUEEN ]);
 
     // Compute an area for evaluating our King's safety.
     // The definition of the King Area can be found in masks.c
