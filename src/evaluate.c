@@ -947,6 +947,24 @@ int evaluateScaleFactor(Board *board) {
             return SCALE_OCB_ONE_ROOK;
     }
 
+    // Pawnless Rook vs minor endgames are usually drawn
+    if (   onlyOne(rooks)
+        && onlyOne(bishops | knights)
+        && !queens
+        && !board->pieces[PAWN]
+        && (((white & (bishops | knights))!=0) != ((white & rooks)!=0)))
+    {
+        // If the bishop and the enemy king are close or
+        // not on the same rank or file, this is almost alway a draw
+        if(bishops)
+            return SCALE_KRKB;
+        // The knight can sometimes be won.
+        // A specialized eval that tries to push king and knight away
+        // is required for best efficiency
+        else
+            return SCALE_KRKN;
+    }
+
     return SCALE_NORMAL;
 }
 

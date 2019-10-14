@@ -29,6 +29,8 @@
 #endif
 
 enum {
+    SCALE_KRKB             =  16,
+    SCALE_KRKN             =  32,
     SCALE_OCB_BISHOPS_ONLY =  64,
     SCALE_OCB_ONE_KNIGHT   = 106,
     SCALE_OCB_ONE_ROOK     =  96,
