@@ -141,7 +141,7 @@ const int KnightOutpost[2] = { S(   7, -26), S(  31,  -4) };
 
 const int KnightBehindPawn = S(   4,  19);
 
-const int KnightDistantPawns[2] = { S(  0, -10), S(  0, -25) };
+const int KnightDistantPawns[2] = { S(  0, -10), S(  0, -25) };
 
 const int KnightMobility[9] = {
     S( -77,-104), S( -32,-100), S( -18, -43), S(  -5, -18),
@@ -503,9 +503,9 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
         // distant pawns, less so if we still have long-ranging pieces
         if(distanceBetweenOutermostPawns(board->pieces[PAWN]) >= 5)
         {
-            int knightOnly = (board->colours[US] & (  board->pieces[QUEEN ]
-                                                    | board->pieces[ROOK  ]
-                                                    | board->pieces[BISHOP]) != 0);
+            int knightOnly = ((board->colours[US] & (  board->pieces[QUEEN ]
+                                                     | board->pieces[ROOK  ]
+                                                     | board->pieces[BISHOP])) == 0);
             eval += KnightDistantPawns[knightOnly];
         }
 
