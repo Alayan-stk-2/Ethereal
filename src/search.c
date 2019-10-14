@@ -473,7 +473,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         extension =  (inCheck)
                   || (isQuiet && quiets <= 4 && cmhist >= 10000 && fmhist >= 10000)
                   || (singular && moveIsSingular(thread, ttMove, ttValue, depth, height))
-                  || (isDeepPawnPush);
+                  || (isDeepPawnPush && movePicker.stage < STAGE_QUIET);
 
         // Factor the extension into the new depth. Do not extend at the root
         newDepth = depth + (extension && !RootNode);
