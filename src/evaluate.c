@@ -294,6 +294,8 @@ const int PassedEnemyDistance[8] = {
 
 const int PassedSafePromotionPath = S( -29,  37);
 
+const int MajorBlock = S(25, 30);
+
 /* Threat Evaluation Terms */
 
 const int ThreatWeakPawn             = S( -13, -26);
@@ -831,6 +833,13 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         flag = !(bitboard & (board->colours[THEM] | ei->attacked[THEM]));
         eval += flag * PassedSafePromotionPath;
         if (TRACE) T.PassedSafePromotionPath[US] += flag;
+
+        // Apply a bonus for protected 7th ranked passed pawn
+        // when the promotion square is occupied by an enemy major
+        if (   rank == 6
+            && testBit(ei->attacked[US], sq)
+            && bitboard & (board->colours[THEM] & (board->pieces[ROOK] | board->pieces[QUEEN])))
+            eval += MajorBlock;
     }
 
     return eval;
