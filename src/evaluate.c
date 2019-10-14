@@ -294,6 +294,11 @@ const int PassedEnemyDistance[8] = {
 
 const int PassedSafePromotionPath = S( -29,  37);
 
+const int PassedRookSupported[RANK_NB] = {
+    S(   0,   0), S(  -4,  -4), S(  -4,  -4), S(  -3,   0),
+    S(  -3,   8), S(  -2,  12), S(  -2,  16), S(   0,   0),
+};
+
 /* Threat Evaluation Terms */
 
 const int ThreatWeakPawn             = S( -13, -26);
@@ -825,6 +830,11 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         dist = distanceBetween(sq, ei->kingSquare[THEM]);
         eval += dist * PassedEnemyDistance[rank];
         if (TRACE) T.PassedEnemyDistance[rank][US] += dist;
+
+        // Apply a bonus when supported from behind by a rook
+        if (  board->pieces[ROOK  ] & board->colours[  US]
+            & forwardRanksMasks(THEM, rankOf(sq)) & Files[fileOf(sq)])
+            eval += PassedRookSupported[rank];
 
         // Apply a bonus when the path to promoting is uncontested
         bitboard = forwardRanksMasks(US, rankOf(sq)) & Files[fileOf(sq)];
