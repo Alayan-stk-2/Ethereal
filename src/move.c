@@ -450,6 +450,25 @@ int moveIsTactical(Board *board, uint16_t move) {
         || (move & ENPASS_MOVE & PROMOTION_MOVE);
 }
 
+int moveIsDeepPawnPush(Board *board, uint16_t move) {
+    // Check for advanced pass pawn pushes
+    const int from = MoveFrom(move);
+    const int to   = MoveTo(move);
+    const int fromPiece = board->squares[from];
+    const int fromType  = pieceType(fromPiece);
+    const int fromColour = pieceColour(fromPiece);
+    if (   fromType == PAWN
+        && relativeRankOf(fromColour, to) >= 5) // 5 = 6th rank
+    {
+
+        uint64_t stoppers =   passedPawnMasks(fromColour, to) & board->pieces[PAWN]
+                            & board->colours[(fromColour == WHITE) ? BLACK : WHITE];
+        return (!stoppers);
+    }
+
+    return false;
+}
+
 int moveEstimatedValue(Board *board, uint16_t move) {
 
     // Start with the value of the piece on the target square

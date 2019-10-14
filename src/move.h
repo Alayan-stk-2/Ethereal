@@ -54,9 +54,10 @@ void revertMove(Board *board, uint16_t move, Undo *undo);
 void revertNullMove(Board *board, Undo *undo);
 
 int moveIsTactical(Board *board, uint16_t move);
+int moveIsDeepPawnPush(Board *board, uint16_t move);
 int moveEstimatedValue(Board *board, uint16_t move);
 int moveBestCaseValue(Board *board);
-int moveIsPsuedoLegal(Board *board, uint16_t move);
+int moveIsPseudoLegal(Board *board, uint16_t move);
 int moveWasLegal(Board *board);
 void moveToString(uint16_t move, char *str, int chess960);
 
