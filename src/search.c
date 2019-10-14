@@ -188,7 +188,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
     int quiets = 0, played = 0, hist = 0, cmhist = 0, fmhist = 0;
     int ttHit, ttValue = 0, ttEval = 0, ttDepth = 0, ttBound = 0;
     int R, newDepth, rAlpha, rBeta, oldAlpha = alpha;
-    int inCheck, isQuiet, improving, extension, singular, skipQuiets = 0;
+    int inCheck, isQuiet, isDeepPawnPush, improving, extension, singular, skipQuiets = 0;
     int eval, value = -MATE, best = -MATE, futilityMargin, seeMargin[2];
     uint16_t move, ttMove = NONE_MOVE, bestMove = NONE_MOVE, quietsTried[MAX_MOVES];
     MovePicker movePicker;
@@ -382,6 +382,8 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             getHistory(thread, move, height, &hist, &cmhist, &fmhist);
         }
 
+        isDeepPawnPush = moveIsDeepPawnPush(board, move);
+
         // Step 12. Quiet Move Pruning. Prune any quiet move that meets one
         // of the criteria below, only after proving a non mated line exists
         if (isQuiet && best > MATED_IN_MAX) {
@@ -471,7 +473,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         extension =  (inCheck)
                   || (isQuiet && quiets <= 4 && cmhist >= 10000 && fmhist >= 10000)
                   || (singular && moveIsSingular(thread, ttMove, ttValue, depth, height))
-                  || (moveIsDeepPawnPush(board, move));
+                  || (isDeepPawnPush);
 
         // Factor the extension into the new depth. Do not extend at the root
         newDepth = depth + (extension && !RootNode);
