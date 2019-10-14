@@ -35,7 +35,7 @@ int PSQT[32][SQUARE_NB];
 /* Material Value Evaluation Terms */
 
 const int PawnValue   = S( 105, 118);
-const int KnightValue = S( 450, 405);
+const int KnightValue = S( 450, 410);
 const int BishopValue = S( 473, 423);
 const int RookValue   = S( 669, 695);
 const int QueenValue  = S(1295,1380);
@@ -140,6 +140,8 @@ const int PawnConnected32[32] = {
 const int KnightOutpost[2] = { S(   7, -26), S(  31,  -4) };
 
 const int KnightBehindPawn = S(   4,  19);
+
+const int KnightDistantPawns[2] = { S(  0, -10), S(  0, -25) };
 
 const int KnightMobility[9] = {
     S( -77,-104), S( -32,-100), S( -18, -43), S(  -5, -18),
@@ -495,6 +497,16 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
         if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
             eval += KnightBehindPawn;
             if (TRACE) T.KnightBehindPawn[US]++;
+        }
+
+        // Apply a penalty for knights in endgames with
+        // distant pawns, less so if we still have long-ranging pieces
+        if(distanceBetweenOutermostPawns(board->pieces[PAWN]) >= 5)
+        {
+            int knightOnly = (board->colours[US] & (  board->pieces[QUEEN ]
+                                                    | board->pieces[ROOK  ]
+                                                    | board->pieces[BISHOP]) != 0);
+            eval += KnightDistantPawns[knightOnly];
         }
 
         // Apply a bonus (or penalty) based on the mobility of the knight
