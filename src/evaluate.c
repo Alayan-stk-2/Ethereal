@@ -338,7 +338,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     phase = (phase * 256 + 12) / 24;
 
     // Scale evaluation based on remaining material
-    factor = evaluateScaleFactor(board);
+    factor = evaluateScaleFactor(&ei, board);
 
     // Compute the interpolated and scaled evaluation
     eval = (ScoreMG(eval) * (256 - phase)
@@ -920,6 +920,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
 
 int evaluateImbalance(EvalInfo *ei, Board *board, int colour) {
 
+  int eval = 0;
   // 1. Own piece type interaction
   // Some pieces are redundant, others are complementary
 
@@ -933,7 +934,7 @@ int evaluateImbalance(EvalInfo *ei, Board *board, int colour) {
   return eval;
 }
 
-int evaluateScaleFactor(Board *board) {
+int evaluateScaleFactor(EvalInfo *ei, Board *board) {
 
     // Scale endgames based on remaining material. Currently, we only
     // look for OCB endgames that include only one Knight or one Rook
@@ -985,7 +986,7 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     uint64_t queens  = board->pieces[QUEEN ];
 
     // Compute the initiative bonus or malus for the attacking side
-    complexity =  ComplexityTotalPawns  * (board->pieces[PAWN])popcount
+    complexity =  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
                +  ComplexityPawnFlanks  * pawnsOnBothFlanks
                +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
                +  ComplexityAdjustment;
