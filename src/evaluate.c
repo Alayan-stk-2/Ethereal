@@ -149,8 +149,6 @@ const int KnightMobility[9] = {
 
 /* Bishop Evaluation Terms */
 
-const int BishopPair = S(  22,  69);
-
 const int BishopRammedPawns = S( -10, -15);
 
 const int BishopOutpost[2] = { S(  10, -12), S(  40,   0) };
@@ -304,6 +302,37 @@ const int ThreatRookAttackedByLesser = S( -49, -19);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
+
+/* Imbalance Evaluation Terms */
+
+// Values are scaled 16x compared to 1 internal unit
+const int PieceComplementarityMg[5][5] = {
+    // Pawn Knight Bishop   Rook  Queen
+    {     0,     0,     0,     0,     0 }, // Pawn
+    {     0,     0,     0,     0,     0 }, // Knight
+    {     0,     0,     0,     0,     0 }, // Bishop
+    {     0,     0,     0,     0,     0 }, // Rook
+    {     0,     0,     0,     0,     0 }, // Queen
+  };
+
+const int PieceComplementarityEg[5][5] = {
+    // Pawn Knight Bishop   Rook  Queen
+    {     0,     0,     0,     0,     0 }, // Pawn
+    {     0,     0,     0,     0,     0 }, // Knight
+    {     0,     0,     0,     0,     0 }, // Bishop
+    {     0,     0,     0,     0,     0 }, // Rook
+    {     0,     0,     0,     0,     0 }, // Queen
+  };
+
+const int BishopPairComplementarityMg[5] = {
+    // Pawn Knight Bishop   Rook  Queen
+          0,     0,   176,     0,     0
+};
+
+const int BishopPairComplementarityEg[5] = {
+    // Pawn Knight Bishop   Rook  Queen
+          0,     0,   552,     0,     0
+};
 
 /* Complexity Evaluation Terms */
 
@@ -526,12 +555,6 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
     ei->attackedBy[US][BISHOP] = 0ull;
 
-    // Apply a bonus for having a pair of bishops
-    if ((tempBishops & WHITE_SQUARES) && (tempBishops & BLACK_SQUARES)) {
-        eval += BishopPair;
-        if (TRACE) T.BishopPair[US]++;
-    }
-
     // Evaluate each bishop
     while (tempBishops) {
 
@@ -708,7 +731,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
     // Perform King Safety when we have two attackers, or
     // one attacker with a potential for a Queen attacker
-    if (ei->kingAttackersCount[THEM] > 1 - ei->queenCount[THEM]) {
+    if (ei->kingAttackersCount[THEM] > 1 - ei->pieceCount[QUEEN][THEM]) {
 
         // Weak squares are attacked by the enemy, defended no more
         // than once and only defended by our Queens or our King
@@ -920,18 +943,44 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
 
 int evaluateImbalance(EvalInfo *ei, Board *board, int colour) {
 
-  int eval = 0;
-  // 1. Own piece type interaction
-  // Some pieces are redundant, others are complementary
+    const int US = colour;//, THEM = !colour;
+    int mg_eval = 0, eg_eval = 0;
 
- // TODO : loop over all own pieces
+    // 1. Own piece type interaction
+    // Some pieces are redundant, others are complementary
 
-  // 2. Enemy piece type interaction
-  // The kind of piece the enemy has influence the value of our owns
+    for (int i = 0; i <= QUEEN; i++)
+    {
+        if (!ei->pieceCount[i][US])
+            continue;
+        for (int j = 0; j <= QUEEN; j++)
+        {
+            mg_eval += ei->pieceCount[i][US] * ei->pieceCount[j][US] * PieceComplementarityMg[i][j];
+            eg_eval += ei->pieceCount[i][US] * ei->pieceCount[j][US] * PieceComplementarityEg[i][j];
+        }
+    }
 
-  // 3. Advanced imbalance
-  // Pawns on both flanks, pawn chains, etc. affect piece type value
-  return eval;
+    // Special case for the bishop pair
+    if (ei->pieceCount[BISHOP][US] == 2)
+    {
+        int64_t bishops = board->pieces[US] & board->pieces[BISHOP];
+        if (   bishops & WHITE_SQUARES
+            && bishops & BLACK_SQUARES)
+        {
+            for (int j = 0; j <= QUEEN; j++)
+            {
+                mg_eval += ei->pieceCount[j][US] * BishopPairComplementarityMg[j];
+                eg_eval += ei->pieceCount[j][US] * BishopPairComplementarityEg[j];
+            }
+        }
+    }
+
+    // 2. Enemy piece type interaction
+    // The kind of piece the enemy has influence the value of our owns
+
+    // 3. Advanced imbalance
+    // Pawns on both flanks, pawn chains, etc. affect piece type value
+    return MakeScore(mg_eval/16, eg_eval/16);
 }
 
 int evaluateScaleFactor(EvalInfo *ei, Board *board) {
@@ -939,28 +988,26 @@ int evaluateScaleFactor(EvalInfo *ei, Board *board) {
     // Scale endgames based on remaining material. Currently, we only
     // look for OCB endgames that include only one Knight or one Rook
 
-    uint64_t white   = board->colours[WHITE];
-    uint64_t black   = board->colours[BLACK];
     uint64_t knights = board->pieces[KNIGHT];
     uint64_t bishops = board->pieces[BISHOP];
     uint64_t rooks   = board->pieces[ROOK  ];
     uint64_t queens  = board->pieces[QUEEN ];
 
-    if (   ei->bishopCount[WHITE] == 1
-        && ei->bishopCount[BLACK] == 1
+    if (   ei->pieceCount[BISHOP][WHITE] == 1
+        && ei->pieceCount[BISHOP][BLACK] == 1
         && onlyOne(bishops & WHITE_SQUARES)) {
 
         if (!(knights | rooks | queens))
             return SCALE_OCB_BISHOPS_ONLY;
 
         if (   !(rooks | queens)
-            &&  ei->knightCount[WHITE] == 1
-            &&  ei->knightCount[BLACK] == 1)
+            &&  ei->pieceCount[KNIGHT][WHITE] == 1
+            &&  ei->pieceCount[KNIGHT][BLACK] == 1)
             return SCALE_OCB_ONE_KNIGHT;
 
         if (   !(knights | queens)
-            && ei->rookCount[WHITE] == 1
-            && ei->rookCount[BLACK] == 1)
+            && ei->pieceCount[ROOK][WHITE] == 1
+            && ei->pieceCount[ROOK][BLACK] == 1)
             return SCALE_OCB_ONE_ROOK;
     }
 
@@ -1021,17 +1068,17 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->blockedPawns[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
 
     // Save piece count data for later use (imbalance and misc. checks)
-    ei->pawnCount[WHITE]   = popcount(white & board->pieces[PAWN  ]);
-    ei->bishopCount[WHITE] = popcount(white & board->pieces[BISHOP]);
-    ei->knightCount[WHITE] = popcount(white & board->pieces[KNIGHT]);
-    ei->rookCount[WHITE]   = popcount(white & board->pieces[ROOK  ]);
-    ei->queenCount[WHITE]  = popcount(white & board->pieces[QUEEN ]);
+    ei->pieceCount[PAWN  ][WHITE]   = popcount(white & board->pieces[PAWN  ]);
+    ei->pieceCount[BISHOP][WHITE] = popcount(white & board->pieces[BISHOP]);
+    ei->pieceCount[KNIGHT][WHITE] = popcount(white & board->pieces[KNIGHT]);
+    ei->pieceCount[ROOK  ][WHITE]   = popcount(white & board->pieces[ROOK  ]);
+    ei->pieceCount[QUEEN ][WHITE]  = popcount(white & board->pieces[QUEEN ]);
 
-    ei->pawnCount[BLACK]   = popcount(black & board->pieces[PAWN  ]);
-    ei->bishopCount[BLACK] = popcount(black & board->pieces[BISHOP]);
-    ei->knightCount[BLACK] = popcount(black & board->pieces[KNIGHT]);
-    ei->rookCount[BLACK]   = popcount(black & board->pieces[ROOK  ]);
-    ei->queenCount[BLACK]  = popcount(black & board->pieces[QUEEN ]);
+    ei->pieceCount[PAWN  ][BLACK]   = popcount(black & board->pieces[PAWN  ]);
+    ei->pieceCount[BISHOP][BLACK] = popcount(black & board->pieces[BISHOP]);
+    ei->pieceCount[KNIGHT][BLACK] = popcount(black & board->pieces[KNIGHT]);
+    ei->pieceCount[ROOK  ][BLACK]   = popcount(black & board->pieces[ROOK  ]);
+    ei->pieceCount[QUEEN ][BLACK]  = popcount(black & board->pieces[QUEEN ]);
 
     // Compute an area for evaluating our King's safety.
     // The definition of the King Area can be found in masks.c
