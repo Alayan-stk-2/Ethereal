@@ -137,7 +137,10 @@ const int PawnConnected32[32] = {
 
 /* Knight Evaluation Terms */
 
-const int KnightOutpost[2] = { S(   7, -26), S(  31,  -4) };
+const int KnightOutpost[3][2] = {
+    { S(   7, -26), S(  31,  -4), S(  31,  -4) },
+    { S(   7, -26), S(  31,  -4), S(  31,  -4) }
+};
 
 const int KnightBehindPawn = S(   4,  19);
 
@@ -461,7 +464,7 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, defended, count, eval = 0;
+    int sq, defended, deepOutpost, count, eval = 0;
     uint64_t attacks;
 
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
@@ -488,7 +491,14 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
         if (     testBit(outpostRanksMasks(US), sq)
             && !(outpostSquareMasks(US, sq) & enemyPawns)) {
             defended = testBit(ei->pawnAttacks[US], sq);
-            eval += KnightOutpost[defended];
+            if (   defended 
+                && !(pawns & board->colours[THEM] & passedPawnMasks(US, sq)))
+                defended++;
+            if (   fileOf(sq) >= 2
+                && fileOf(sq) <= 5
+                && testBit(forwardRanksMasks(US, 4), sq) //Rank 5+)
+                deepOutpost = 1;
+            eval += KnightOutpost[defended][deepOutpost];
             if (TRACE) T.KnightOutpost[defended][US]++;
         }
 
