@@ -191,15 +191,15 @@ const int QueenMobility[28] = {
 
 /* King Evaluation Terms */
 
-const int KingPawnFileProximity[FILE_NB]  = {
-    S(   0,   0), S(   0,   0), S(  -1,  -6), S(  -2, -15),
-    S(  -4, -26), S(  -6, -38), S(  -8, -52), S( -10, -70),
-};
-
 const int KingDefenders[12] = {
     S( -26,   0), S(  -7,  -3), S(   1,   2), S(   8,   5),
     S(  17,   6), S(  27,   4), S(  31,  -2), S(  13,   0),
     S(  12,   6), S(  12,   6), S(  12,   6), S(  12,   6),
+};
+
+const int KingPawnFileProximity[FILE_NB]  = {
+    S(  27,  19), S(  15,  15), S(   3,  10), S( -13, -12),
+    S( -15, -40), S( -14, -56), S( -14, -65), S( -11, -70),
 };
 
 const int KingShelter[2][FILE_NB][RANK_NB] = {
@@ -307,7 +307,6 @@ const int ThreatByPawnPush           = S(  15,  21);
 
 /* Complexity Evaluation Terms */
 
-const int ComplexityPassedPawns = S(   0,   2);
 const int ComplexityTotalPawns  = S(   0,   7);
 const int ComplexityPawnFlanks  = S(   0,  49);
 const int ComplexityPawnEndgame = S(   0,  34);
@@ -756,7 +755,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         if (count > 0) eval -= MakeScore(count * count / 720, count / 20);
     }
 
-    // King Shelter & King Storm are stored in the Pawn King Table
+    // Everything else is stored in the Pawn King Table
     if (ei->pkentry != NULL) return eval;
 
     // Evaluate based on the number of files between our King and the nearest
@@ -986,13 +985,11 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     uint64_t queens  = board->pieces[QUEEN ];
 
     // Compute the initiative bonus or malus for the attacking side
-    complexity =  ComplexityPassedPawns * popcount(ei->passedPawns)
-               +  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
+    complexity =  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
                +  ComplexityPawnFlanks  * pawnsOnBothFlanks
                +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
                +  ComplexityAdjustment;
 
-    if (TRACE) T.ComplexityPassedPawns[WHITE] += sign * popcount(ei->passedPawns);
     if (TRACE) T.ComplexityTotalPawns[WHITE]  += sign * popcount(board->pieces[PAWN]);
     if (TRACE) T.ComplexityPawnFlanks[WHITE]  += sign * pawnsOnBothFlanks;
     if (TRACE) T.ComplexityPawnEndgame[WHITE] += sign * !(knights | bishops | rooks | queens);

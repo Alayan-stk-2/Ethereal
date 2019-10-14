@@ -25,7 +25,7 @@
 #define KPRECISION  (     10) // Iterations for computing K
 #define NPARTITIONS (     64) // Total thread partitions
 #define REPORTING   (     25) // How often to report progress
-#define NTERMS      (      0) // Total terms in the Tuner (601)
+#define NTERMS      (      0) // Total terms in the Tuner (600)
 
 #define LEARNING    (    1.0) // Learning rate
 #define LRDROPRATE  (   1.25) // Cut LR by this each failure
@@ -63,8 +63,8 @@
 #define TuneRookOnSeventh               (0)
 #define TuneRookMobility                (0)
 #define TuneQueenMobility               (0)
-#define TuneKingPawnFileProximity       (0)
 #define TuneKingDefenders               (0)
+#define TuneKingPawnFileProximity       (0)
 #define TuneKingShelter                 (0)
 #define TuneKingStorm                   (0)
 #define TunePassedPawn                  (0)
@@ -79,7 +79,6 @@
 #define TuneThreatQueenAttackedByOne    (0)
 #define TuneThreatOverloadedPieces      (0)
 #define TuneThreatByPawnPush            (0)
-#define TuneComplexityPassedPawns       (0)
 #define TuneComplexityTotalPawns        (0)
 #define TuneComplexityPawnFlanks        (0)
 #define TuneComplexityPawnEndgame       (0)
@@ -252,8 +251,8 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_0(fname, RookOnSeventh, NORMAL);                     \
     ENABLE_1(fname, RookMobility, 15, NORMAL);                  \
     ENABLE_1(fname, QueenMobility, 28, NORMAL);                 \
-    ENABLE_1(fname, KingPawnFileProximity, 8, NORMAL);          \
     ENABLE_1(fname, KingDefenders, 12, NORMAL);                 \
+    ENABLE_1(fname, KingPawnFileProximity, 8, NORMAL);          \
     ENABLE_3(fname, KingShelter, 2, 8, 8, NORMAL);              \
     ENABLE_3(fname, KingStorm, 2, 4, 8, NORMAL);                \
     ENABLE_3(fname, PassedPawn, 2, 2, 8, NORMAL);               \
@@ -268,7 +267,6 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_0(fname, ThreatQueenAttackedByOne, NORMAL);          \
     ENABLE_0(fname, ThreatOverloadedPieces, NORMAL);            \
     ENABLE_0(fname, ThreatByPawnPush, NORMAL);                  \
-    ENABLE_0(fname, ComplexityPassedPawns, EGONLY);             \
     ENABLE_0(fname, ComplexityTotalPawns, EGONLY);              \
     ENABLE_0(fname, ComplexityPawnFlanks, EGONLY);              \
     ENABLE_0(fname, ComplexityPawnEndgame, EGONLY);             \
