@@ -137,6 +137,8 @@ int distanceBetween(int s1, int s2) {
 }
 
 int distanceBetweenOutermostPawns(uint64_t pawns) {
+    if(!pawns)
+        return -1;
     pawns |= pawns >> 8;  pawns |= pawns >> 16; pawns |= pawns >> 32;
     return getmsb(pawns & 0xFFull) - getlsb(pawns & 0xFFull);
 }
