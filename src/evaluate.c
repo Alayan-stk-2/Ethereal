@@ -310,7 +310,8 @@ const int ThreatByPawnPush           = S(  15,  21);
 const int ComplexityTotalPawns  = S(   0,   7);
 const int ComplexityPawnFlanks  = S(   0,  49);
 const int ComplexityPawnEndgame = S(   0,  34);
-const int ComplexityAdjustment  = S(   0,-110);
+const int ComplexityPawnless    = S(   0, -30);
+const int ComplexityAdjustment  = S(   0,-100);
 
 /* General Evaluation Terms */
 
@@ -959,6 +960,7 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     int complexity;
     int eg = ScoreEG(eval);
     int sign = (eg > 0) - (eg < 0);
+    int strongSide = (sign > 0) ? WHITE : BLACK;
 
     int pawnsOnBothFlanks = (board->pieces[PAWN] & LEFT_FLANK )
                          && (board->pieces[PAWN] & RIGHT_FLANK);
@@ -972,6 +974,7 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     complexity =  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
                +  ComplexityPawnFlanks  * pawnsOnBothFlanks
                +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
+               +  ComplexityPawnless    * !(board->pieces[PAWN] & board->colours[strongSide])
                +  ComplexityAdjustment;
 
     if (TRACE) T.ComplexityTotalPawns[WHITE]  += sign * popcount(board->pieces[PAWN]);
