@@ -305,12 +305,16 @@ const int ThreatQueenAttackedByOne   = S( -39, -29);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
 
+/* Scaling Evaluation Terms */
+
+const int ScalingPawns  = 8;
+const int ScalingPawnsOCB = 4;
+
 /* Complexity Evaluation Terms */
 
 const int ComplexityTotalPawns  = S(   0,   7);
 const int ComplexityPawnFlanks  = S(   0,  49);
 const int ComplexityPawnEndgame = S(   0,  34);
-const int ComplexityPawnless    = S(   0, -30);
 const int ComplexityAdjustment  = S(   0,-100);
 
 /* General Evaluation Terms */
@@ -339,7 +343,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     phase = (phase * 256 + 12) / 24;
 
     // Scale evaluation based on remaining material
-    factor = evaluateScaleFactor(board);
+    factor = evaluateScaleFactor(board, eval);
 
     // Compute the interpolated and scaled evaluation
     eval = (ScoreMG(eval) * (256 - phase)
@@ -918,7 +922,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluateScaleFactor(Board *board) {
+int evaluateScaleFactor(Board *board, int eval) {
 
     // Scale endgames based on remaining material. Currently, we only
     // look for OCB endgames that include only one Knight or one Rook
@@ -930,25 +934,30 @@ int evaluateScaleFactor(Board *board) {
     uint64_t rooks   = board->pieces[ROOK  ];
     uint64_t queens  = board->pieces[QUEEN ];
 
+    int eg = ScoreEG(eval);
+    int strongSide = (eg > 0) ? WHITE : BLACK;
+    int strongSidePawns = popcount(board->pieces[PAWN] & board->colours[strongSide]);
+    int scaleFactor = SCALE_BASE;
+
     if (   onlyOne(white & bishops)
         && onlyOne(black & bishops)
         && onlyOne(bishops & WHITE_SQUARES)) {
 
         if (!(knights | rooks | queens))
-            return SCALE_OCB_BISHOPS_ONLY;
+            return SCALE_OCB_BISHOPS_ONLY + ScalingPawnsOCB*strongSidePawns;
 
         if (   !(rooks | queens)
             &&  onlyOne(white & knights)
             &&  onlyOne(black & knights))
-            return SCALE_OCB_ONE_KNIGHT;
+            scaleFactor = SCALE_OCB_ONE_KNIGHT;
 
-        if (   !(knights | queens)
+        else if (   !(knights | queens)
             && onlyOne(white & rooks)
             && onlyOne(black & rooks))
-            return SCALE_OCB_ONE_ROOK;
+            scaleFactor = SCALE_OCB_ONE_ROOK;
     }
 
-    return SCALE_NORMAL;
+    return (scaleFactor + ScalingPawns*strongSidePawns);
 }
 
 int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
@@ -960,7 +969,6 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     int complexity;
     int eg = ScoreEG(eval);
     int sign = (eg > 0) - (eg < 0);
-    int strongSide = (sign > 0) ? WHITE : BLACK;
 
     int pawnsOnBothFlanks = (board->pieces[PAWN] & LEFT_FLANK )
                          && (board->pieces[PAWN] & RIGHT_FLANK);
@@ -974,7 +982,6 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     complexity =  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
                +  ComplexityPawnFlanks  * pawnsOnBothFlanks
                +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
-               +  ComplexityPawnless    * !(board->pieces[PAWN] & board->colours[strongSide])
                +  ComplexityAdjustment;
 
     if (TRACE) T.ComplexityTotalPawns[WHITE]  += sign * popcount(board->pieces[PAWN]);

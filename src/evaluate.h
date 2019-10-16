@@ -29,9 +29,10 @@
 #endif
 
 enum {
-    SCALE_OCB_BISHOPS_ONLY =  64,
-    SCALE_OCB_ONE_KNIGHT   = 106,
-    SCALE_OCB_ONE_ROOK     =  96,
+    SCALE_OCB_BISHOPS_ONLY =  48,
+    SCALE_OCB_ONE_KNIGHT   =  80,
+    SCALE_OCB_ONE_ROOK     =  64,
+    SCALE_BASE             =  96,
     SCALE_NORMAL           = 128,
 };
 
@@ -117,7 +118,7 @@ int evaluateQueens(EvalInfo *ei, Board *board, int colour);
 int evaluateKings(EvalInfo *ei, Board *board, int colour);
 int evaluatePassed(EvalInfo *ei, Board *board, int colour);
 int evaluateThreats(EvalInfo *ei, Board *board, int colour);
-int evaluateScaleFactor(Board *board);
+int evaluateScaleFactor(Board *board, int eval);
 int evaluateComplexity(EvalInfo *ei, Board *board, int eval);
 void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable);
 void initEval();
