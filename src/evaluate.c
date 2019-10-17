@@ -166,7 +166,7 @@ const int BishopMobility[14] = {
 
 /* Rook Evaluation Terms */
 
-const int RookFile[2] = { S(  15,   4), S(  35,   3) };
+const int RookFile[3] = { S(  13,   4), S(  19,   4), S(  35,   3) };
 
 const int RookOnSeventh = S(  -2,  26);
 
@@ -586,7 +586,7 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, open, count, eval = 0;
+    int sq, openness, count, eval = 0;
     uint64_t attacks;
 
     uint64_t myPawns    = board->pieces[PAWN] & board->colours[  US];
@@ -610,11 +610,17 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
         ei->attackedBy[US][ROOK] |= attacks;
 
         // Rook is on a semi-open file if there are no pawns of the rook's
-        // colour on the file. If there are no pawns at all, it is an open file
+        // colour on the file.
+        // If the enemy pawn is unsupported, the semi-open file is better.
+        // If there are no pawns at all, it is an open file
         if (!(myPawns & Files[fileOf(sq)])) {
-            open = !(enemyPawns & Files[fileOf(sq)]);
-            eval += RookFile[open];
-            if (TRACE) T.RookFile[open][US]++;
+            if (!(enemyPawns & Files[fileOf(sq)]))
+                openness = 2;
+            else if (!(enemyPawns & ei->pawnAttacks[THEM] & Files[fileOf(sq)]))
+                openness = 1;
+
+            eval += RookFile[openness];
+            if (TRACE) T.RookFile[openness][US]++;
         }
 
         // Rook gains a bonus for being located on seventh rank relative to its
