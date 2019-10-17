@@ -618,6 +618,8 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
                 openness = 2;
             else if (!(enemyPawns & ei->pawnAttacks[THEM] & Files[fileOf(sq)]))
                 openness = 1;
+            else
+                openness = 0;
 
             eval += RookFile[openness];
             if (TRACE) T.RookFile[openness][US]++;
