@@ -634,7 +634,7 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
         // With enemy queens: pin and discovered attack threats
         // With friendly queens: coordinated attack in a file
         if (Files[fileOf(sq)] & board->pieces[QUEEN])
-            score += RookOnQueenFile;
+            eval += RookOnQueenFile;
 
         // Apply a bonus (or penalty) based on the mobility of the rook
         count = popcount(ei->mobilityAreas[US] & attacks);
@@ -966,6 +966,8 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     // Adjust endgame evaluation based on features related to how
     // likely the stronger side is to convert the position.
     // More often than not, this is a penalty for drawish positions.
+
+    (void) ei; // Silence compiler warning
 
     int complexity;
     int eg = ScoreEG(eval);
