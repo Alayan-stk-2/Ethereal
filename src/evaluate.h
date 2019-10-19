@@ -90,6 +90,7 @@ struct EvalTrace {
 struct EvalInfo {
     uint64_t pawnAttacks[COLOUR_NB];
     uint64_t rammedPawns[COLOUR_NB];
+    uint64_t touchStackedPawns[COLOUR_NB];
     uint64_t blockedPawns[COLOUR_NB];
     uint64_t kingAreas[COLOUR_NB];
     uint64_t mobilityAreas[COLOUR_NB];

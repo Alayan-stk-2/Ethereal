@@ -550,7 +550,7 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
         // Apply a penalty for the bishop based on number of rammed pawns
         // of our own colour, which reside on the same shade of square as the bishop
-        count = popcount(ei->rammedPawns[US] & squaresOfMatchingColour(sq));
+        count = popcount((ei->rammedPawns[US] | ei->touchStackedPawns[US]) & squaresOfMatchingColour(sq));
         eval += count * BishopRammedPawns;
         if (TRACE) T.BishopRammedPawns[US] += count;
 
@@ -1001,12 +1001,14 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     uint64_t kings   = board->pieces[KING  ];
 
     // Save some general information about the pawn structure for later
-    ei->pawnAttacks[WHITE]  = pawnAttackSpan(white & pawns, ~0ull, WHITE);
-    ei->pawnAttacks[BLACK]  = pawnAttackSpan(black & pawns, ~0ull, BLACK);
-    ei->rammedPawns[WHITE]  = pawnAdvance(black & pawns, ~(white & pawns), BLACK);
-    ei->rammedPawns[BLACK]  = pawnAdvance(white & pawns, ~(black & pawns), WHITE);
-    ei->blockedPawns[WHITE] = pawnAdvance(white | black, ~(white & pawns), BLACK);
-    ei->blockedPawns[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
+    ei->pawnAttacks[WHITE]       = pawnAttackSpan(white & pawns, ~0ull, WHITE);
+    ei->pawnAttacks[BLACK]       = pawnAttackSpan(black & pawns, ~0ull, BLACK);
+    ei->rammedPawns[WHITE]       = pawnAdvance(black & pawns, ~(white & pawns), BLACK);
+    ei->rammedPawns[BLACK]       = pawnAdvance(white & pawns, ~(black & pawns), WHITE);
+    ei->touchStackedPawns[WHITE] = pawnAdvance(white & pawns, ~(white & pawns), BLACK);
+    ei->touchStackedPawns[BLACK] = pawnAdvance(black & pawns, ~(black & pawns), WHITE);
+    ei->blockedPawns[WHITE]      = pawnAdvance(white | black, ~(white & pawns), BLACK);
+    ei->blockedPawns[BLACK]      = pawnAdvance(white | black, ~(black & pawns), WHITE);
 
     // Compute an area for evaluating our King's safety.
     // The definition of the King Area can be found in masks.c
