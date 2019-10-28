@@ -973,25 +973,6 @@ int evaluateScaleFactor(Board *board, int eval) {
     else if ( (eg < 0) && (black & (knights | bishops)) && popcount(black) == 2)
         return SCALE_DRAW;
 
-    // RNRx and RBRx endgames
-    // Assumes that the side with the minor piece is better
-    if (   !(queens)
-        && onlyOne(white & rooks)
-        && onlyOne(black & rooks)
-        && onlyOne(knights | bishops)) {
-        int PieceSide = (white & (knights | bishops)) ? WHITE : BLACK;
-        if (!(board->pieces[PAWN] & board->colours[PieceSide])) {
-/*            int edgeKing = 0;
-            if(board->pieces[KING] & nearEdgeMask() & board->colours[(PieceSide == WHITE) ? BLACK : WHITE])
-                edgeKing = true;*/
-
-            if (knights)
-                return SCALE_RNR;
-            else
-                return SCALE_RBR;
-        }
-    }
-
     return SCALE_NORMAL;
 }
 
