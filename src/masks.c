@@ -36,6 +36,7 @@ uint64_t PassedPawnMasks[COLOUR_NB][SQUARE_NB];
 uint64_t PawnConnectedMasks[COLOUR_NB][SQUARE_NB];
 uint64_t OutpostSquareMasks[COLOUR_NB][SQUARE_NB];
 uint64_t OutpostRanksMasks[COLOUR_NB];
+uint64_t NearEdgeMask;
 
 void initMasks() {
 
@@ -130,6 +131,9 @@ void initMasks() {
     OutpostRanksMasks[WHITE] = RANK_4 | RANK_5 | RANK_6;
     OutpostRanksMasks[BLACK] = RANK_3 | RANK_4 | RANK_5;
 
+    // Init a mask for squares on the edge or adjacent to the edge
+    NearEdgeMask = RANK_1 | RANK_2 | RANK_7 | RANK_8 | FILE_A | FILE_B | FILE_G | FILE_H;
+
     // Init a table of bitmasks to check for supports for a given pawn
     for (int sq = 8 ; sq < 56; sq++) {
         PawnConnectedMasks[WHITE][sq] = pawnAttacks(BLACK, sq) | pawnAttacks(BLACK, sq + 8);
@@ -200,4 +204,8 @@ uint64_t outpostSquareMasks(int colour, int sq) {
 uint64_t outpostRanksMasks(int colour) {
     assert(0 <= colour && colour < COLOUR_NB);
     return OutpostRanksMasks[colour];
+}
+
+uint64_t nearEdgeMask() {
+    return NearEdgeMask;
 }
