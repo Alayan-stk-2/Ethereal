@@ -92,13 +92,13 @@ void updateTimeManagment(SearchInfo *info, Limits *limits) {
     if (!limits->limitedBySelf || info->depth < 4) return;
 
     // Increase our time if the score suddenly dropped
-    if (lastValue > thisValue + 10) info->idealUsage *= 1.050;
     if (lastValue > thisValue + 20) info->idealUsage *= 1.050;
     if (lastValue > thisValue + 40) info->idealUsage *= 1.050;
+    if (lastValue > thisValue + 80) info->idealUsage *= 1.050;
 
     // Increase our time if the score suddenly jumped
-    if (lastValue + 15 < thisValue) info->idealUsage *= 1.025;
-    if (lastValue + 30 < thisValue) info->idealUsage *= 1.050;
+    if (lastValue + 30 < thisValue) info->idealUsage *= 1.025;
+    if (lastValue + 60 < thisValue) info->idealUsage *= 1.050;
 
     // Always scale back the PV time factor, but also look
     // to reset the PV time factor if the best move changed
