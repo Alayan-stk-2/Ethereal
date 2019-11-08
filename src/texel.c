@@ -138,7 +138,8 @@ void runTexelTuning(Thread *thread) {
 
             // Check for a regression in tuning
             error = completeLinearError(tes, params, K);
-            if (error > best) rate = rate / LRDROPRATE;
+            double lr_offset = 0.00000044;
+            if (error + lr_offset > best) rate = rate / LRDROPRATE;
 
             // Report current best parameters
             best = error;
@@ -186,6 +187,7 @@ void initTexelEntries(TexelEntry *tes, Thread *thread) {
 
         // Fetch and cap a white POV search
         searchEval = atoi(strstr(line, "] ") + 2);
+        searchEval *= 2;
         if (strstr(line, " b ")) searchEval *= -1;
 
         // Determine the result of the game
