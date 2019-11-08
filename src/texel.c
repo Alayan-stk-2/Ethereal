@@ -143,7 +143,7 @@ void runTexelTuning(Thread *thread) {
             // Report current best parameters
             best = error;
             printParameters(params, cparams);
-            printf("\nIteration [%d] Error = %g \n", iteration, best);
+            printf("\nIteration [%d] Error = %g, Learning rate = %g \n", iteration, best, rate);
         }
 
         for (int batch = 0; batch < NPOSITIONS / BATCHSIZE; batch++) {
