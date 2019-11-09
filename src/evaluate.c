@@ -145,11 +145,11 @@ const int KnightOutpost[2][2] = {
 const int KnightBehindPawn = S(   4,  19);
 
 const int KnightLockedPawns[17] = {
-    S(   0,   0), S (   0,  0), S(   0,   0), S (   0,  0),
-    S(   0,   0), S (   0,  0), S(   0,   0), S (   0,  0),
-    S(   0,   0), S (   0,  0), S(   0,   0), S (   0,  0),
-    S(   0,   0), S (   0,  0), S(   0,   0), S (   0,  0),
-    S(   0,   0),
+    S(  -3, -12), S(   0,   0), S(  -3,   0), S(   1,   1), 
+    S(  -1,   3), S(   0,   4), S(   0,   7), S(  -2,   8), 
+    S(  -2,   9), S(  -1,   9), S(  -1,  10), S(   3,   5), 
+    S(   5,   4), S(   3,   3), S(   4,   4), S(   5,   5), 
+    S(   5,   5), 
 };
 
 const int KnightMobility[9] = {
