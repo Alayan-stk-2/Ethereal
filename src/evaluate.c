@@ -144,6 +144,14 @@ const int KnightOutpost[2][2] = {
 
 const int KnightBehindPawn = S(   4,  19);
 
+const int KnightLockedPawns[17] = {
+    S(   0,   0), S (   0,  0), S(   0,   0), S (   0,  0),
+    S(   0,   0), S (   0,  0), S(   0,   0), S (   0,  0),
+    S(   0,   0), S (   0,  0), S(   0,   0), S (   0,  0),
+    S(   0,   0), S (   0,  0), S(   0,   0), S (   0,  0),
+    S(   0,   0),
+};
+
 const int KnightMobility[9] = {
     S( -77,-104), S( -32,-100), S( -18, -43), S(  -5, -18),
     S(   6,  -8), S(  12,   9), S(  21,  11), S(  30,  11),
@@ -513,6 +521,10 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
             eval += KnightBehindPawn;
             if (TRACE) T.KnightBehindPawn[US]++;
         }
+
+        // Apply a bonus (or penalty) based on the amount of low-mobility pawns
+        eval += KnightLockedPawns[ei->restrainedPawnsCount[WHITE] + ei->restrainedPawnsCount[BLACK]];
+        if (TRACE) T.KnightLockedPawns[ei->restrainedPawnsCount[WHITE] + ei->restrainedPawnsCount[BLACK]][US]++;
 
         // Apply a bonus (or penalty) based on the mobility of the knight
         count = popcount(ei->mobilityAreas[US] & attacks);
@@ -1030,6 +1042,10 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->rammedPawns[BLACK]  = pawnAdvance(white & pawns, ~(black & pawns), WHITE);
     ei->blockedPawns[WHITE] = pawnAdvance(white | black, ~(white & pawns), BLACK);
     ei->blockedPawns[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
+
+    //TODO : store this in some pawn cache
+    ei->restrainedPawnsCount[WHITE] = popcount(pawnAdvance((black & pawns) | ei->pawnAttacks[BLACK], ~(white & pawns), BLACK));
+    ei->restrainedPawnsCount[BLACK] = popcount(pawnAdvance((white & pawns) | ei->pawnAttacks[WHITE], ~(black & pawns), WHITE));
 
     // Compute an area for evaluating our King's safety.
     // The definition of the King Area can be found in masks.c
