@@ -35,7 +35,7 @@ int PSQT[32][SQUARE_NB];
 /* Material Value Evaluation Terms */
 
 const int PawnValue   = S( 105, 118);
-const int KnightValue = S( 450, 405);
+const int KnightValue = S( 449, 410);
 const int BishopValue = S( 473, 423);
 const int RookValue   = S( 669, 695);
 const int QueenValue  = S(1295,1380);
@@ -144,18 +144,16 @@ const int KnightOutpost[2][2] = {
 
 const int KnightBehindPawn = S(   4,  19);
 
-const int KnightLockedPawns[17] = {
-    S(  -3, -12), S(   0,   0), S(  -3,   0), S(   1,   1), 
-    S(  -1,   3), S(   0,   4), S(   0,   7), S(  -2,   8), 
-    S(  -2,   9), S(  -1,   9), S(  -1,  10), S(   3,   5), 
-    S(   5,   4), S(   3,   3), S(   4,   4), S(   5,   5), 
-    S(   5,   5), 
+const int KnightInClosed[9] = {
+    S( -11, -11), S(  -9,   3), S(  -8,  11), S(  -3,  13), 
+    S(  -1,  18), S(   2,  16), S(   5,  13), S(  -6,  28), 
+    S(  -7,  16), 
 };
 
 const int KnightMobility[9] = {
-    S( -77,-104), S( -32,-100), S( -18, -43), S(  -5, -18),
-    S(   6,  -8), S(  12,   9), S(  21,  11), S(  30,  11),
-    S(  42,  -3),
+    S( -74,-104), S( -31, -96), S( -16, -41), S(  -5, -16), 
+    S(   6,  -8), S(  11,   8), S(  19,  11), S(  28,  11), 
+    S(  40,  -3), 
 };
 
 /* Bishop Evaluation Terms */
@@ -523,8 +521,8 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
         }
 
         // Apply a bonus (or penalty) based on the amount of low-mobility pawns
-        eval += KnightLockedPawns[ei->restrainedPawnsCount[WHITE] + ei->restrainedPawnsCount[BLACK]];
-        if (TRACE) T.KnightLockedPawns[ei->restrainedPawnsCount[WHITE] + ei->restrainedPawnsCount[BLACK]][US]++;
+        eval += KnightInClosed[ei->closedness];
+        if (TRACE) T.KnightInClosed[ei->closedness][US]++;
 
         // Apply a bonus (or penalty) based on the mobility of the knight
         count = popcount(ei->mobilityAreas[US] & attacks);
@@ -1040,12 +1038,17 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->pawnAttacks[BLACK]  = pawnAttackSpan(black & pawns, ~0ull, BLACK);
     ei->rammedPawns[WHITE]  = pawnAdvance(black & pawns, ~(white & pawns), BLACK);
     ei->rammedPawns[BLACK]  = pawnAdvance(white & pawns, ~(black & pawns), WHITE);
-    ei->blockedPawns[WHITE] = pawnAdvance(white | black, ~(white & pawns), BLACK);
-    ei->blockedPawns[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
+    ei->bInClosed[WHITE] = pawnAdvance(white | black, ~(white & pawns), BLACK);
+    ei->bInClosed[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
 
     //TODO : store this in some pawn cache
-    ei->restrainedPawnsCount[WHITE] = popcount(pawnAdvance((black & pawns) | ei->pawnAttacks[BLACK], ~(white & pawns), BLACK));
-    ei->restrainedPawnsCount[BLACK] = popcount(pawnAdvance((white & pawns) | ei->pawnAttacks[WHITE], ~(black & pawns), WHITE));
+    int openFiles = 0;
+    for (int file = 0; file <= 7; file++) {
+        if(!(pawns & Files[file]))
+            openFiles++;
+    }
+    // The starting pos has closedness = 5
+    ei->closedness = MAX(0, MIN(8, (popcount(pawns) - (4 * openFiles) + 3 * popcount(pawnAdvance((black & pawns), ~(white & pawns), BLACK)))/3));
 
     // Compute an area for evaluating our King's safety.
     // The definition of the King Area can be found in masks.c
@@ -1055,8 +1058,8 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->kingAreas[BLACK] = kingAreaMasks(BLACK, ei->kingSquare[BLACK]);
 
     // Exclude squares attacked by our opponents, our blocked pawns, and our own King
-    ei->mobilityAreas[WHITE] = ~(ei->pawnAttacks[BLACK] | (white & kings) | ei->blockedPawns[WHITE]);
-    ei->mobilityAreas[BLACK] = ~(ei->pawnAttacks[WHITE] | (black & kings) | ei->blockedPawns[BLACK]);
+    ei->mobilityAreas[WHITE] = ~(ei->pawnAttacks[BLACK] | (white & kings) | ei->bInClosed[WHITE]);
+    ei->mobilityAreas[BLACK] = ~(ei->pawnAttacks[WHITE] | (black & kings) | ei->bInClosed[BLACK]);
 
     // Init part of the attack tables. By doing this step here, evaluatePawns()
     // can start by setting up the attackedBy2 table, since King attacks are resolved

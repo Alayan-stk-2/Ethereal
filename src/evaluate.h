@@ -56,7 +56,7 @@ struct EvalTrace {
     int PawnConnected32[32][COLOUR_NB];
     int KnightOutpost[2][2][COLOUR_NB];
     int KnightBehindPawn[COLOUR_NB];
-    int KnightLockedPawns[17][COLOUR_NB];
+    int KnightInClosed[17][COLOUR_NB];
     int KnightMobility[9][COLOUR_NB];
     int BishopPair[COLOUR_NB];
     int BishopRammedPawns[COLOUR_NB];
@@ -92,7 +92,7 @@ struct EvalTrace {
 struct EvalInfo {
     uint64_t pawnAttacks[COLOUR_NB];
     uint64_t rammedPawns[COLOUR_NB];
-    uint64_t blockedPawns[COLOUR_NB];
+    uint64_t bInClosed[COLOUR_NB];
     uint64_t kingAreas[COLOUR_NB];
     uint64_t mobilityAreas[COLOUR_NB];
     uint64_t attacked[COLOUR_NB];
@@ -101,7 +101,7 @@ struct EvalInfo {
     uint64_t occupiedMinusBishops[COLOUR_NB];
     uint64_t occupiedMinusRooks[COLOUR_NB];
     uint64_t passedPawns;
-    int restrainedPawnsCount[COLOUR_NB];
+    int closedness;
     int kingSquare[COLOUR_NB];
     int kingAttacksCount[COLOUR_NB];
     int kingAttackersCount[COLOUR_NB];
