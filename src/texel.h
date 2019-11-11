@@ -25,9 +25,9 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     15) // How often to report progress
-#define NTERMS       (     19) // Total terms in the Tuner (614)
+#define NTERMS       (     10) // Total terms in the Tuner (623)
 
-#define LEARNING     (    8.0) // Learning rate
+#define LEARNING     (    6.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
 #define BATCHSIZE    (  16384) // FENs per mini-batch
 #define NPOSITIONS   (7400000) // Total FENS in the book
@@ -38,9 +38,9 @@
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 8))
 
 #define TunePawnValue                   (0)
-#define TuneKnightValue                 (1)
+#define TuneKnightValue                 (0)
 #define TuneBishopValue                 (0)
-#define TuneRookValue                   (0)
+#define TuneRookValue                   (1)
 #define TuneQueenValue                  (0)
 #define TuneKingValue                   (0)
 #define TunePawnPSQT32                  (0)
@@ -56,8 +56,8 @@
 #define TunePawnConnected32             (0)
 #define TuneKnightOutpost               (0)
 #define TuneKnightBehindPawn            (0)
-#define TuneKnightInClosed              (1)
-#define TuneKnightMobility              (1)
+#define TuneKnightInClosed              (0)
+#define TuneKnightMobility              (0)
 #define TuneBishopPair                  (0)
 #define TuneBishopRammedPawns           (0)
 #define TuneBishopOutpost               (0)
@@ -65,6 +65,7 @@
 #define TuneBishopMobility              (0)
 #define TuneRookFile                    (0)
 #define TuneRookOnSeventh               (0)
+#define TuneRookInClosed                (1)
 #define TuneRookMobility                (0)
 #define TuneQueenMobility               (0)
 #define TuneKingDefenders               (0)
@@ -254,6 +255,7 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_1(fname, BishopMobility, 14, NORMAL);                \
     ENABLE_1(fname, RookFile, 2, NORMAL);                       \
     ENABLE_0(fname, RookOnSeventh, NORMAL);                     \
+    ENABLE_1(fname, RookInClosed, 9, NORMAL);                   \
     ENABLE_1(fname, RookMobility, 15, NORMAL);                  \
     ENABLE_1(fname, QueenMobility, 28, NORMAL);                 \
     ENABLE_1(fname, KingDefenders, 12, NORMAL);                 \

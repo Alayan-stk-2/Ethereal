@@ -37,7 +37,7 @@ int PSQT[32][SQUARE_NB];
 const int PawnValue   = S( 105, 118);
 const int KnightValue = S( 449, 410);
 const int BishopValue = S( 473, 423);
-const int RookValue   = S( 669, 695);
+const int RookValue   = S( 654, 684);
 const int QueenValue  = S(1295,1380);
 const int KingValue   = S(   0,   0);
 
@@ -181,6 +181,12 @@ const int BishopMobility[14] = {
 const int RookFile[2] = { S(  15,   4), S(  35,   3) };
 
 const int RookOnSeventh = S(  -2,  26);
+
+const int RookInClosed[9] = {
+    S(  47,  -9), S(   7,  23), S(   3,  13), S(  -3,   4), 
+    S(  -7,   3), S(  -9,  -8), S( -13, -11), S( -21, -15), 
+    S( -26, -16), 
+};
 
 const int RookMobility[15] = {
     S(-148,-113), S( -52,-113), S( -15, -61), S(  -7, -21),
@@ -652,6 +658,10 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
             eval += RookOnSeventh;
             if (TRACE) T.RookOnSeventh[US]++;
         }
+
+        // Apply a bonus (or penalty) based on the amount of low-mobility pawns
+        eval += RookInClosed[ei->closedness];
+        if (TRACE) T.RookInClosed[ei->closedness][US]++;
 
         // Apply a bonus (or penalty) based on the mobility of the rook
         count = popcount(ei->mobilityAreas[US] & attacks);
