@@ -369,7 +369,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
-        storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
+        storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval, ei.closedness);
 
     // Return the evaluation relative to the side to move
     return board->turn == WHITE ? eval : -eval;
@@ -1051,15 +1051,6 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->bInClosed[WHITE] = pawnAdvance(white | black, ~(white & pawns), BLACK);
     ei->bInClosed[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
 
-    //TODO : store this in some pawn cache
-    int openFiles = 0;
-    for (int file = 0; file <= 7; file++) {
-        if(!(pawns & Files[file]))
-            openFiles++;
-    }
-    // The starting pos has closedness = 5
-    ei->closedness = MAX(0, MIN(8, (popcount(pawns) - (4 * openFiles) + 3 * popcount(pawnAdvance((black & pawns), ~(white & pawns), BLACK)))/3));
-
     // Compute an area for evaluating our King's safety.
     // The definition of the King Area can be found in masks.c
     ei->kingSquare[WHITE] = getlsb(white & kings);
@@ -1094,6 +1085,19 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->passedPawns   = ei->pkentry == NULL ? 0ull : ei->pkentry->passed;
     ei->pkeval[WHITE] = ei->pkentry == NULL ? 0    : ei->pkentry->eval;
     ei->pkeval[BLACK] = ei->pkentry == NULL ? 0    : 0;
+    if (ei->pkentry == NULL)
+    {
+        int openFiles = 0;
+        for (int file = 0; file <= 7; file++) {
+            if(!(pawns & Files[file]))
+                openFiles++;
+        }
+        // The starting pos has closedness = 5
+        ei->closedness = MAX(0, MIN(8, (popcount(pawns) - (4 * openFiles) + 3 * popcount(pawnAdvance((black & pawns), ~(white & pawns), BLACK)))/3));
+    }
+    else {
+        ei->closedness = ei->pkentry->closedness;
+    }
 }
 
 void initEval() {
