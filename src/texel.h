@@ -56,7 +56,7 @@
 #define TunePawnConnected32             (0)
 #define TuneKnightOutpost               (0)
 #define TuneKnightBehindPawn            (0)
-#define TuneKnightClosednessAdjustment  (0)
+#define TuneClosednessKnightAdjustment  (0)
 #define TuneKnightMobility              (0)
 #define TuneBishopPair                  (0)
 #define TuneBishopRammedPawns           (0)
@@ -65,7 +65,7 @@
 #define TuneBishopMobility              (0)
 #define TuneRookFile                    (0)
 #define TuneRookOnSeventh               (0)
-#define TuneRookClosednessAdjustment    (0)
+#define TuneClosednessRookAdjustment    (0)
 #define TuneRookMobility                (0)
 #define TuneQueenMobility               (0)
 #define TuneKingDefenders               (0)
@@ -246,7 +246,7 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_1(fname, PawnConnected32, 32, NORMAL);               \
     ENABLE_2(fname, KnightOutpost, 2, 2, NORMAL);               \
     ENABLE_0(fname, KnightBehindPawn, NORMAL);                  \
-    ENABLE_1(fname, KnightClosednessAdjustment, 9, NORMAL);     \
+    ENABLE_1(fname, ClosednessKnightAdjustment, 9, NORMAL);     \
     ENABLE_1(fname, KnightMobility, 9, NORMAL);                 \
     ENABLE_0(fname, BishopPair, NORMAL);                        \
     ENABLE_0(fname, BishopRammedPawns, NORMAL);                 \
@@ -255,7 +255,7 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_1(fname, BishopMobility, 14, NORMAL);                \
     ENABLE_1(fname, RookFile, 2, NORMAL);                       \
     ENABLE_0(fname, RookOnSeventh, NORMAL);                     \
-    ENABLE_1(fname, RookClosednessAdjustment, 9, NORMAL);       \
+    ENABLE_1(fname, ClosednessRookAdjustment, 9, NORMAL);       \
     ENABLE_1(fname, RookMobility, 15, NORMAL);                  \
     ENABLE_1(fname, QueenMobility, 28, NORMAL);                 \
     ENABLE_1(fname, KingDefenders, 12, NORMAL);                 \
