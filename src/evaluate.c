@@ -38,7 +38,7 @@ const int PawnValue   = S( 105, 118);
 const int KnightValue = S( 449, 410);
 const int BishopValue = S( 473, 423);
 const int RookValue   = S( 654, 684);
-const int QueenValue  = S(1295,1380);
+const int QueenValue  = S(1315,1314);
 const int KingValue   = S(   0,   0);
 
 /* Piece Square Evaluation Terms */
@@ -196,6 +196,12 @@ const int RookMobility[15] = {
 };
 
 /* Queen Evaluation Terms */
+
+const int QueenInClosed[9] = {
+    S(  64, -75), S(  -2,   4), S(  13,  14), S(   3,  14), 
+    S( -10,   1), S( -16, -10), S( -17, -11), S(  -7,  -6), 
+    S(  -7,  -6), 
+};
 
 const int QueenMobility[28] = {
     S( -61,-263), S(-210,-387), S( -58,-201), S( -16,-192),
@@ -704,6 +710,10 @@ int evaluateQueens(EvalInfo *ei, Board *board, int colour) {
         ei->attacked[US]          |= attacks;
         ei->attackedBy[US][QUEEN] |= attacks;
 
+        // Apply a bonus (or penalty) based on the amount of low-mobility pawns
+        eval += QueenInClosed[ei->closedness];
+        if (TRACE) T.QueenInClosed[ei->closedness][US]++;
+
         // Apply a bonus (or penalty) based on the mobility of the queen
         count = popcount(ei->mobilityAreas[US] & attacks);
         eval += QueenMobility[count];
@@ -1048,8 +1058,8 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->pawnAttacks[BLACK]  = pawnAttackSpan(black & pawns, ~0ull, BLACK);
     ei->rammedPawns[WHITE]  = pawnAdvance(black & pawns, ~(white & pawns), BLACK);
     ei->rammedPawns[BLACK]  = pawnAdvance(white & pawns, ~(black & pawns), WHITE);
-    ei->bInClosed[WHITE] = pawnAdvance(white | black, ~(white & pawns), BLACK);
-    ei->bInClosed[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
+    ei->blockedPawns[WHITE] = pawnAdvance(white | black, ~(white & pawns), BLACK);
+    ei->blockedPawns[BLACK] = pawnAdvance(white | black, ~(black & pawns), WHITE);
 
     // Compute an area for evaluating our King's safety.
     // The definition of the King Area can be found in masks.c
@@ -1059,8 +1069,8 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->kingAreas[BLACK] = kingAreaMasks(BLACK, ei->kingSquare[BLACK]);
 
     // Exclude squares attacked by our opponents, our blocked pawns, and our own King
-    ei->mobilityAreas[WHITE] = ~(ei->pawnAttacks[BLACK] | (white & kings) | ei->bInClosed[WHITE]);
-    ei->mobilityAreas[BLACK] = ~(ei->pawnAttacks[WHITE] | (black & kings) | ei->bInClosed[BLACK]);
+    ei->mobilityAreas[WHITE] = ~(ei->pawnAttacks[BLACK] | (white & kings) | ei->blockedPawns[WHITE]);
+    ei->mobilityAreas[BLACK] = ~(ei->pawnAttacks[WHITE] | (black & kings) | ei->blockedPawns[BLACK]);
 
     // Init part of the attack tables. By doing this step here, evaluatePawns()
     // can start by setting up the attackedBy2 table, since King attacks are resolved
