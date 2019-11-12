@@ -308,6 +308,10 @@ const int ThreatMinorAttackedByMinor = S( -26, -36);
 const int ThreatMinorAttackedByMajor = S( -23, -44);
 const int ThreatRookAttackedByLesser = S( -49, -19);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
+const int ThreatPawnPinnedToQueen[2]   = { S(   0,   0), S(   0,   0) };
+const int ThreatKnightPinnedToQueen[2] = { S(   0,   0), S(   0,   0) };
+const int ThreatBishopPinnedToQueen  = S(   0,   0);
+const int ThreatRookPinnedToQueen    = S(   0,   0);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
 
@@ -874,7 +878,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
     const uint64_t Rank3Rel = US == WHITE ? RANK_3 : RANK_6;
 
-    int count, eval = 0;
+    int sq, sq2, count, eval = 0;
 
     uint64_t friendly = board->colours[  US];
     uint64_t enemy    = board->colours[THEM];
@@ -898,6 +902,9 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     uint64_t overloaded = (knights | bishops | rooks | queens)
                         & ei->attacked[  US] & ~ei->attackedBy2[  US]
                         & ei->attacked[THEM] & ~ei->attackedBy2[THEM];
+
+    // Squares defended by our queen only
+    uint64_t queenDefended = ei->attackedBy[US][QUEEN] & ~ei->attackedBy2[US];
 
     // Look for enemy non-pawn pieces which we may threaten with a pawn advance.
     // Don't consider pieces we already threaten, pawn moves which would be countered
@@ -936,6 +943,61 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     count = popcount(queens & ei->attacked[THEM]);
     eval += count * ThreatQueenAttackedByOne;
     if (TRACE) T.ThreatQueenAttackedByOne[US] += count;
+
+    uint64_t b = 0ull;
+    uint64_t bb = 0ull;
+
+    // Penalty for a piece pinned by a bishop to a queen that is its lone defender
+    b = (pawns | knights | bishops | rooks) & queenDefended;
+    bb = b;
+    b = b & ~bishops & ei->attackedBy[THEM][BISHOP];
+    while (b) {
+        sq = poplsb(&b);
+        uint64_t b3 = enemy & board->pieces[BISHOP] & bishopAttacks(sq, occupied);
+        while (b3) {
+            sq2 = poplsb(&b3);
+            // This isn't entirely correct with 2+ same-colored queens
+            if (bishopAttacks(sq2, enemy) & queens) {
+                if (testBit(pawns, sq)) {
+                    eval += count * ThreatPawnPinnedToQueen[0];
+                if (TRACE) T.ThreatPawnPinnedToQueen[0][US]++;
+                }
+                else if (testBit(knights, sq)) {
+                    eval += count * ThreatKnightPinnedToQueen[0];
+                    if (TRACE) T.ThreatKnightPinnedToQueen[0][US]++;
+                }
+                else if (testBit(rooks, sq))  {
+                    eval += count * ThreatRookPinnedToQueen;
+                    if (TRACE) T.ThreatRookPinnedToQueen[US]++;
+                }
+            }
+        }
+    }
+
+    // Penalty for a piece pinned by a rook to a queen that is its lone defender
+    b = bb & ~rooks & ei->attackedBy[THEM][ROOK];
+    while (b) {
+        sq = poplsb(&b);
+        uint64_t b3 = enemy & board->pieces[ROOK] & rookAttacks(sq, occupied);
+        while (b3) {
+            sq2 = poplsb(&b3);
+            // This isn't entirely correct with 2+ same-colored queens
+            if (rookAttacks(sq2, enemy) & queens) {
+                if (testBit(pawns, sq)) {
+                    eval += count * ThreatPawnPinnedToQueen[1];
+                if (TRACE) T.ThreatPawnPinnedToQueen[1][US]++;
+                }
+                else if (testBit(knights, sq)) {
+                    eval += count * ThreatKnightPinnedToQueen[1];
+                    if (TRACE) T.ThreatKnightPinnedToQueen[1][US]++;
+                }
+                else if (testBit(bishops, sq))  {
+                    eval += count * ThreatBishopPinnedToQueen;
+                    if (TRACE) T.ThreatBishopPinnedToQueen[US]++;
+                }
+            }
+        }
+    }
 
     // Penalty for any overloaded minors or majors
     count = popcount(overloaded);
