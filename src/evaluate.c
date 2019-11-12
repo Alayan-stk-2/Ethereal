@@ -169,6 +169,8 @@ const int BishopOutpost[2][2] = {
 
 const int BishopBehindPawn = S(   3,  18);
 
+const int BishopLongDiagonal = S(   5,   2);
+
 const int BishopMobility[14] = {
     S( -65,-147), S( -30, -95), S( -11, -56), S(  -1, -30),
     S(   9, -18), S(  17,  -4), S(  20,   6), S(  21,  11),
@@ -598,6 +600,14 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
             eval += BishopBehindPawn;
             if (TRACE) T.BishopBehindPawn[US]++;
+        }
+
+        // Apply a bonus if the bishop is on a long diagonal
+        // and if it controls both central squares
+        if (   testBit(LONG_DIAGONALS & ~CENTER_SQUARES, sq)
+            && popcount(bishopAttacks(sq, board->pieces[PAWN]) & CENTER_SQUARES) == 2) {
+            eval += BishopLongDiagonal;
+            if (TRACE) T.BishopLongDiagonal[US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
