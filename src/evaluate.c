@@ -38,7 +38,7 @@ const int PawnValue   = S( 105, 118);
 const int KnightValue = S( 449, 410);
 const int BishopValue = S( 473, 423);
 const int RookValue   = S( 654, 684);
-const int QueenValue  = S(1295,1380);
+const int QueenValue  = S(1315,1314);
 const int KingValue   = S(   0,   0);
 
 /* Piece Square Evaluation Terms */
@@ -196,6 +196,12 @@ const int RookMobility[15] = {
 };
 
 /* Queen Evaluation Terms */
+
+const int QueenClosednessAdjustment[9] = {
+    S(  64, -75), S(  -2,   4), S(  13,  14), S(   3,  14), 
+    S( -10,   1), S( -16, -10), S( -17, -11), S(  -7,  -6), 
+    S(  -7,  -6), 
+};
 
 const int QueenMobility[28] = {
     S( -61,-263), S(-210,-387), S( -58,-201), S( -16,-192),
@@ -703,6 +709,10 @@ int evaluateQueens(EvalInfo *ei, Board *board, int colour) {
         ei->attackedBy2[US]       |= attacks & ei->attacked[US];
         ei->attacked[US]          |= attacks;
         ei->attackedBy[US][QUEEN] |= attacks;
+
+        // Apply a bonus/penalty adjustment depending on how closed the position is.
+        eval += QueenClosednessAdjustment[ei->closedness];
+        if (TRACE) T.QueenClosednessAdjustment[ei->closedness][US]++;
 
         // Apply a bonus (or penalty) based on the mobility of the queen
         count = popcount(ei->mobilityAreas[US] & attacks);
