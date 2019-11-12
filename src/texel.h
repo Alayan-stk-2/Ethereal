@@ -25,7 +25,7 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (      9) // Total terms in the Tuner (629)
+#define NTERMS       (      8) // Total terms in the Tuner (628)
 
 #define LEARNING     (    5.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
@@ -85,7 +85,6 @@
 #define TuneThreatPawnPinnedToQueen     (1)
 #define TuneThreatKnightPinnedToQueen   (1)
 #define TuneThreatBishopPinnedToQueen   (1)
-#define TuneThreatRookPinnedToQueen     (1)
 #define TuneThreatOverloadedPieces      (0)
 #define TuneThreatByPawnPush            (0)
 #define TuneComplexityTotalPawns        (0)
@@ -279,7 +278,6 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_1(fname, ThreatPawnPinnedToQueen, 2,  NORMAL);       \
     ENABLE_1(fname, ThreatKnightPinnedToQueen, 2, NORMAL);      \
     ENABLE_0(fname, ThreatBishopPinnedToQueen, NORMAL);         \
-    ENABLE_0(fname, ThreatRookPinnedToQueen, NORMAL);           \
     ENABLE_0(fname, ThreatOverloadedPieces, NORMAL);            \
     ENABLE_0(fname, ThreatByPawnPush, NORMAL);                  \
     ENABLE_0(fname, ComplexityTotalPawns, EGONLY);              \

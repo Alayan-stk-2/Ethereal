@@ -304,14 +304,13 @@ const int PassedSafePromotionPath = S( -29,  37);
 
 const int ThreatWeakPawn             = S( -13, -26);
 const int ThreatMinorAttackedByPawn  = S( -51, -53);
-const int ThreatMinorAttackedByMinor = S( -26, -36);
-const int ThreatMinorAttackedByMajor = S( -23, -44);
-const int ThreatRookAttackedByLesser = S( -49, -19);
+const int ThreatMinorAttackedByMinor = S( -24, -36);
+const int ThreatMinorAttackedByMajor = S( -20, -46);
+const int ThreatRookAttackedByLesser = S( -41, -23);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
-const int ThreatPawnPinnedToQueen[2]   = { S(   0,   0), S(   0,   0) };
-const int ThreatKnightPinnedToQueen[2] = { S(   0,   0), S(   0,   0) };
-const int ThreatBishopPinnedToQueen  = S(   0,   0);
-const int ThreatRookPinnedToQueen    = S(   0,   0);
+const int ThreatPawnPinnedToQueen[2] = { S(  -5,  -1), S( -10,  -5), };
+const int ThreatKnightPinnedToQueen[2] = { S( -13,  -2), S( -12,  -3), };
+const int ThreatBishopPinnedToQueen = S( -17,  -4);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
 
@@ -965,10 +964,6 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
                 else if (testBit(knights, sq)) {
                     eval += count * ThreatKnightPinnedToQueen[0];
                     if (TRACE) T.ThreatKnightPinnedToQueen[0][US]++;
-                }
-                else if (testBit(rooks, sq))  {
-                    eval += count * ThreatRookPinnedToQueen;
-                    if (TRACE) T.ThreatRookPinnedToQueen[US]++;
                 }
             }
         }
