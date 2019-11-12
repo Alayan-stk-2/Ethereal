@@ -169,7 +169,7 @@ const int BishopOutpost[2][2] = {
 
 const int BishopBehindPawn = S(   3,  18);
 
-const int BishopLongDiagonal = S(   5,   2);
+const int BishopLongDiagonal = S(   9,   3);
 
 const int BishopMobility[14] = {
     S( -65,-147), S( -30, -95), S( -11, -56), S(  -1, -30),
