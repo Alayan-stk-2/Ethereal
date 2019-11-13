@@ -316,15 +316,15 @@ const int ThreatByPawnPush           = S(  15,  21);
 /* Closedness Evaluation Terms */
 
 const int ClosednessKnightAdjustment[9] = {
-    S( -11, -11), S(  -9,   3), S(  -8,  11), S(  -3,  13),
-    S(  -1,  18), S(   2,  16), S(   5,  13), S(  -6,  28),
-    S(  -7,  16),
+    S(  -9, -17), S( -15,   5), S( -12,  11), S(  -5,  14), 
+    S(  -3,  21), S(   2,  16), S(   3,  16), S( -11,  27), 
+    S(  -7,  16), 
 };
 
 const int ClosednessRookAdjustment[9] = {
-    S(  47,  -9), S(   7,  23), S(   3,  13), S(  -3,   4),
-    S(  -7,   3), S(  -9,  -8), S( -13, -11), S( -21, -15),
-    S( -26, -16),
+    S(  75, -28), S(   6,  28), S(  -4,  16), S( -10,   1), 
+    S( -19,  -2), S( -23, -18), S( -28, -20), S( -27, -18), 
+    S( -28, -17), 
 };
 
 /* Complexity Evaluation Terms */
@@ -977,8 +977,8 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
 
     // Compute Closedness factor for this position
     closedness = 1 * popcount(board->pieces[PAWN])
-               + 3 * popcount(ei->rammedPawns[WHITE])
-               - 4 * openFileCount(board->pieces[PAWN]);
+               + 2 * popcount(ei->rammedPawns[WHITE])
+               - 3 * openFileCount(board->pieces[PAWN]);
     closedness = MAX(0, MIN(8, closedness / 3));
 
     // Evaluate Knights based on how Closed the position is
