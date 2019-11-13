@@ -302,16 +302,17 @@ const int PassedSafePromotionPath = S( -29,  37);
 
 /* Threat Evaluation Terms */
 
-const int ThreatWeakPawn             = S( -13, -26);
-const int ThreatMinorAttackedByPawn  = S( -51, -53);
-const int ThreatMinorAttackedByMinor = S( -26, -36);
-const int ThreatMinorAttackedByMajor = S( -23, -44);
-const int ThreatRookAttackedByLesser = S( -49, -19);
-const int ThreatMinorAttackedByKing  = S( -16, -15);
-const int ThreatRookAttackedByKing   = S( -13, -18);
-const int ThreatQueenAttackedByOne   = S( -39, -29);
-const int ThreatOverloadedPieces     = S(  -8, -13);
-const int ThreatByPawnPush           = S(  15,  21);
+const int ThreatWeakPawn                 = S( -13, -26);
+const int ThreatMinorAttackedByPawn      = S( -51, -53);
+const int ThreatWeakMinorAttackedByMinor = S(  -7, -14);
+const int ThreatMinorAttackedByMinor     = S( -19, -30);
+const int ThreatMinorAttackedByMajor     = S( -23, -44);
+const int ThreatRookAttackedByLesser     = S( -49, -19);
+const int ThreatMinorAttackedByKing      = S( -16, -15);
+const int ThreatRookAttackedByKing       = S( -13, -18);
+const int ThreatQueenAttackedByOne       = S( -39, -29);
+const int ThreatOverloadedPieces         = S(  -8, -13);
+const int ThreatByPawnPush               = S(  15,  21);
 
 /* Closedness Evaluation Terms */
 
@@ -921,6 +922,11 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     count = popcount((knights | bishops) & attacksByPawns);
     eval += count * ThreatMinorAttackedByPawn;
     if (TRACE) T.ThreatMinorAttackedByPawn[US] += count;
+
+    // Penalty for minor threats against our poorly defended minors
+    count = popcount(weakMinors & attacksByMinors);
+    eval += count * ThreatWeakMinorAttackedByMinor;
+    if (TRACE) T.ThreatWeakMinorAttackedByMinor[US] += count;
 
     // Penalty for any minor threat against minor pieces
     count = popcount((knights | bishops) & attacksByMinors);
