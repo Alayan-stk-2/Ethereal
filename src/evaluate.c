@@ -947,7 +947,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     uint64_t bb = 0ull;
 
     // Penalty for a piece pinned by a bishop to a queen that is its lone defender
-    b = (pawns | knights | bishops | rooks) & queenDefended;
+    b = (pawns | knights | bishops) & queenDefended;
     bb = b;
     b = b & ~bishops & ei->attackedBy[THEM][BISHOP];
     while (b) {
@@ -970,7 +970,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     }
 
     // Penalty for a piece pinned by a rook to a queen that is its lone defender
-    b = bb & ~rooks & ei->attackedBy[THEM][ROOK];
+    b = bb & ei->attackedBy[THEM][ROOK];
     while (b) {
         sq = poplsb(&b);
         uint64_t b3 = enemy & board->pieces[ROOK] & rookAttacks(sq, occupied);
