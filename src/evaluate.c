@@ -315,16 +315,16 @@ const int ThreatByPawnPush           = S(  15,  21);
 
 /* Closedness Evaluation Terms */
 
-const int ClosednessKnightAdjustment[9] = {
-    S(  -9, -17), S( -15,   5), S( -12,  11), S(  -5,  14), 
-    S(  -3,  21), S(   2,  16), S(   3,  16), S( -11,  27), 
-    S(  -7,  16), 
+const int ClosednessKnightAdjustment[10] = {
+    S(  -2, -22), S( -18,  -6), S( -15,   4), S( -13,  12), 
+    S(  -6,  14), S(  -2,  17), S(   2,  16), S(   5,  10), 
+    S(  -7,  28), S( -10,  19), 
 };
 
-const int ClosednessRookAdjustment[9] = {
-    S(  75, -28), S(   6,  28), S(  -4,  16), S( -10,   1), 
-    S( -19,  -2), S( -23, -18), S( -28, -20), S( -27, -18), 
-    S( -28, -17), 
+const int ClosednessRookAdjustment[10] = {
+    S( 110, -47), S(  25,  15), S(   6,  29), S(  -5,  21), 
+    S( -13,   9), S( -16,  -2), S( -22, -13), S( -28, -19), 
+    S( -34, -23), S( -39, -23), 
 };
 
 /* Complexity Evaluation Terms */
@@ -976,10 +976,11 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
     uint64_t rooks   = board->pieces[ROOK  ];
 
     // Compute Closedness factor for this position
-    closedness = 1 * popcount(board->pieces[PAWN])
-               + 2 * popcount(ei->rammedPawns[WHITE])
+    closedness = 3
+               + 1 * popcount(board->pieces[PAWN])
+               + 3 * popcount(ei->rammedPawns[WHITE])
                - 3 * openFileCount(board->pieces[PAWN]);
-    closedness = MAX(0, MIN(8, closedness / 3));
+    closedness = MAX(0, MIN(9, closedness / 3));
 
     // Evaluate Knights based on how Closed the position is
     count = popcount(white & knights) - popcount(black & knights);
