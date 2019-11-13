@@ -105,6 +105,7 @@ struct EvalInfo {
     uint64_t occupiedMinusRooks[COLOUR_NB];
     uint64_t passedPawns;
     uint8_t closedness;
+    int KSMobility[COLOUR_NB];
     int kingSquare[COLOUR_NB];
     int kingAttacksCount[COLOUR_NB];
     int kingAttackersCount[COLOUR_NB];

@@ -145,9 +145,9 @@ const int KnightOutpost[2][2] = {
 const int KnightBehindPawn = S(   4,  19);
 
 const int KnightMobility[9] = {
-    S( -74,-104), S( -31, -96), S( -16, -41), S(  -5, -16),
-    S(   6,  -8), S(  11,   8), S(  19,  11), S(  28,  11),
-    S(  40,  -3),
+    S( -74,-104), S( -42, -94), S( -29, -42), S( -20, -20), 
+    S( -10, -12), S(  -5,   3), S(   2,   5), S(  10,   4), 
+    S(  22, -11), 
 };
 
 /* Bishop Evaluation Terms */
@@ -164,10 +164,10 @@ const int BishopOutpost[2][2] = {
 const int BishopBehindPawn = S(   3,  18);
 
 const int BishopMobility[14] = {
-    S( -65,-147), S( -30, -95), S( -11, -56), S(  -1, -30),
-    S(   9, -18), S(  17,  -4), S(  20,   6), S(  21,  11),
-    S(  20,  17), S(  24,  18), S(  23,  19), S(  42,   8),
-    S(  42,  18), S(  71, -14),
+    S( -67,-146), S( -44, -88), S( -26, -49), S( -17, -26), 
+    S(  -8, -17), S(  -1,  -5), S(   1,   3), S(   2,   8), 
+    S(   1,  13), S(   5,  14), S(   7,  12), S(  27,  -1), 
+    S(  37,  10), S(  66, -28), 
 };
 
 /* Rook Evaluation Terms */
@@ -177,22 +177,22 @@ const int RookFile[2] = { S(  15,   4), S(  35,   3) };
 const int RookOnSeventh = S(  -2,  26);
 
 const int RookMobility[15] = {
-    S(-148,-113), S( -52,-113), S( -15, -61), S(  -7, -21),
-    S(  -7,  -1), S(  -8,  14), S(  -7,  24), S(  -1,  27),
-    S(   6,  30), S(  10,  34), S(  13,  40), S(  18,  43),
-    S(  19,  47), S(  30,  39), S(  80,   4),
+    S(-147,-113), S( -58,-111), S( -25, -62), S( -19, -26), 
+    S( -20,  -9), S( -20,   5), S( -20,  14), S( -15,  17), 
+    S(  -9,  19), S(  -7,  23), S(  -5,  28), S(  -1,  31), 
+    S(  -1,  36), S(  14,  24), S(  76, -32), 
 };
 
 /* Queen Evaluation Terms */
 
 const int QueenMobility[28] = {
-    S( -61,-263), S(-210,-387), S( -58,-201), S( -16,-192),
-    S(  -4,-139), S(   0, -84), S(   5, -52), S(   5, -23),
-    S(   9, -16), S(  10,   6), S(  13,  13), S(  14,  28),
-    S(  16,  24), S(  17,  33), S(  15,  37), S(  12,  41),
-    S(  11,  44), S(   3,  45), S(   4,  42), S(  -1,  37),
-    S(   7,  16), S(  22,  -6), S(  27, -34), S(  30, -51),
-    S(  12, -68), S(  24, -95), S( -56, -39), S( -31, -61),
+    S( -61,-263), S(-210,-387), S( -54,-200), S( -15,-191), 
+    S(  -4,-136), S(  -3, -78), S(  -1, -48), S(  -3, -20), 
+    S(   1, -19), S(   1,  -2), S(   3,  -1), S(   3,  12), 
+    S(   5,   3), S(   6,   9), S(   3,  10), S(  -2,  17), 
+    S(  -1,  15), S( -10,  20), S(  -8,  17), S( -13,  13), 
+    S(  -5, -12), S(   7, -37), S(  11, -62), S(  18, -76), 
+    S(   5, -83), S(  19,-107), S( -56, -40), S( -32, -65), 
 };
 
 /* King Evaluation Terms */
@@ -274,6 +274,27 @@ const int KSSafeRookCheck   =   94;
 const int KSSafeBishopCheck =   51;
 const int KSSafeKnightCheck =  123;
 const int KSAdjustment      =  -18;
+
+const int KSKnightMobility[9] = {
+    -74, -31, -16,  -5,   6,  11,  19,  28,  40,
+};
+
+const int KSBishopMobility[14] = {
+    -65, -30, -11,  -1,   9,  17,  20,  21, 
+     20,  24,  23,  42,  42,  71,
+};
+
+const int KSRookMobility[15] = {
+    -170, -74, -27, -11,  -7,  -8,  -7,  -1,
+       6,  10,  13,  18,  19,  30,  80,
+};
+
+const int KSQueenMobility[28] = {
+    -113,-287, -98, -54, -32, -16,  -5,   1,
+       6,  11,  15,  19,  21,  23,  22,  20,
+      16,   7,   5,   0,   7,  22,  27,  30,
+      12,  24, -56, -31,
+};
 
 /* Passed Pawn Evaluation Terms */
 
@@ -536,6 +557,8 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
         eval += KnightMobility[count];
         if (TRACE) T.KnightMobility[count][US]++;
 
+        ei->KSMobility[US] += KSKnightMobility[count];
+
         // Update King Safety calculations
         if ((attacks &= ei->kingAreas[THEM])) {
             ei->kingAttacksCount[US] += popcount(attacks);
@@ -606,6 +629,8 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         eval += BishopMobility[count];
         if (TRACE) T.BishopMobility[count][US]++;
 
+        ei->KSMobility[US] += KSBishopMobility[count];
+
         // Update King Safety calculations
         if ((attacks &= ei->kingAreas[THEM])) {
             ei->kingAttacksCount[US] += popcount(attacks);
@@ -665,6 +690,8 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
         eval += RookMobility[count];
         if (TRACE) T.RookMobility[count][US]++;
 
+        ei->KSMobility[US] += KSRookMobility[count];
+
         // Update King Safety calculations
         if ((attacks &= ei->kingAreas[THEM])) {
             ei->kingAttacksCount[US] += popcount(attacks);
@@ -706,6 +733,8 @@ int evaluateQueens(EvalInfo *ei, Board *board, int colour) {
         eval += QueenMobility[count];
         if (TRACE) T.QueenMobility[count][US]++;
 
+        ei->KSMobility[US] += KSQueenMobility[count];
+
         // Update King Safety calculations
         if ((attacks &= ei->kingAreas[THEM])) {
             ei->kingAttacksCount[US] += popcount(attacks);
@@ -742,7 +771,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
     // Perform King Safety when we have two attackers, or
     // one attacker with a potential for a Queen attacker
-    if (ei->kingAttackersCount[THEM] > 1 - popcount(enemyQueens)) {
+    if (enemyQueens || ei->kingAttackersCount[THEM] >= 1) {
 
         // Weak squares are attacked by the enemy, defended no more
         // than once and only defended by our Queens or our King
@@ -783,6 +812,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
                + KSSafeRookCheck   * popcount(rookChecks)
                + KSSafeBishopCheck * popcount(bishopChecks)
                + KSSafeKnightCheck * popcount(knightChecks)
+               + (ei->KSMobility[THEM] - ei->KSMobility[US])/3
                + KSAdjustment;
 
         // Convert safety to an MG and EG score, if we are unsafe
@@ -1118,6 +1148,7 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->kingAttacksCount[WHITE]    = ei->kingAttacksCount[BLACK]    = 0;
     ei->kingAttackersCount[WHITE]  = ei->kingAttackersCount[BLACK]  = 0;
     ei->kingAttackersWeight[WHITE] = ei->kingAttackersWeight[BLACK] = 0;
+    ei->KSMobility[WHITE]          = ei->KSMobility[BLACK]          = 0;
 
     // Try to read a hashed Pawn King Eval. Otherwise, start from scratch
     ei->pkentry       =     pktable == NULL ? NULL : getPKEntry(pktable, board->pkhash);
