@@ -186,7 +186,10 @@ void aspirationWindow(Thread *thread) {
             beta = MIN(MATE, beta + delta);
 
         // Expand the search window
-        delta = delta + delta / 2;
+        delta = delta + 4 + delta / 3;
+// 14-21-31-46-69-103 (delta/2)
+// 12-18-27-40-60-90 (delta/2)
+// 12-20-30-44-62-86 (4+delta/3)
     }
 }
 
