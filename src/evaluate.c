@@ -327,6 +327,18 @@ const int ClosednessRookAdjustment[9] = {
     S( -26, -16),
 };
 
+const int ClosednessPawnAdjustment[9] = {
+    S( -13, -12), S( -14,   0), S( -14,   3), S( -11,   4), 
+    S(  -5,   4), S(  -2,   2), S(  -3,  -4), S(  -3,   1), 
+    S(  -5,  -3), 
+};
+
+const int ClosednessPassedAdjustment[9] = {
+    S(  10,   2), S(   6,   1), S(   6,  -2), S(   5,  -3), 
+    S(  -3,  -1), S(  -3,  -1), S(  -2,   0), S(  -1,   0), 
+    S(  -5,  -3), 
+};
+
 /* Complexity Evaluation Terms */
 
 const int ComplexityTotalPawns  = S(   0,   7);
@@ -974,6 +986,7 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
 
     uint64_t knights = board->pieces[KNIGHT];
     uint64_t rooks   = board->pieces[ROOK  ];
+    uint64_t pawns   = board->pieces[PAWN  ];
 
     // Compute Closedness factor for this position
     closedness = 1 * popcount(board->pieces[PAWN])
@@ -990,6 +1003,16 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
     count = popcount(white & rooks) - popcount(black & rooks);
     eval += count * ClosednessRookAdjustment[closedness];
     if (TRACE) T.ClosednessRookAdjustment[closedness][WHITE] += count;
+
+    // Evaluate additional pawns based on how Closed the position is
+    count = popcount(white & pawns) - popcount(black & pawns);
+    eval += count * ClosednessPawnAdjustment[closedness];
+    if (TRACE) T.ClosednessPawnAdjustment[closedness][WHITE] += count;
+
+    // Evaluate additional passed pawns based on how Closed the position is
+    count = popcount(white & ei->passedPawns) - popcount(black & ei->passedPawns);
+    eval += count * ClosednessPassedAdjustment[closedness];
+    if (TRACE) T.ClosednessPassedAdjustment[closedness][WHITE] += count;
 
     return eval;
 }
