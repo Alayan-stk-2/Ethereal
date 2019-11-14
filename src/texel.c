@@ -64,7 +64,7 @@ extern const int KnightOutpost[2][2];
 extern const int KnightBehindPawn;
 extern const int ClosednessKnightAdjustment[9];
 extern const int KnightMobility[9];
-extern const int BishopPair;
+extern const int BishopPair[2][2];
 extern const int BishopRammedPawns;
 extern const int BishopOutpost[2][2];
 extern const int BishopBehindPawn;

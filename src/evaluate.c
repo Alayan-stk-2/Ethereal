@@ -152,7 +152,10 @@ const int KnightMobility[9] = {
 
 /* Bishop Evaluation Terms */
 
-const int BishopPair = S(  22,  69);
+const int BishopPair[2][2] = {
+   {S(  42,  74), S(  29,  64)},
+   {S(  28,  67), S(  22,  55)},
+};
 
 const int BishopRammedPawns = S( -10, -15);
 
@@ -561,8 +564,10 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
     // Apply a bonus for having a pair of bishops
     if ((tempBishops & WHITE_SQUARES) && (tempBishops & BLACK_SQUARES)) {
-        eval += BishopPair;
-        if (TRACE) T.BishopPair[US]++;
+        uint64_t ourQueens = board->pieces[QUEEN] & board->colours[US];
+        uint64_t theirBishops = board->pieces[BISHOP] & board->colours[THEM];
+        eval += BishopPair[ourQueens != 0][theirBishops != 0];
+        if (TRACE) T.BishopPair[ourQueens != 0][theirBishops != 0][US]++;
     }
 
     // Evaluate each bishop
