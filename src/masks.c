@@ -29,6 +29,7 @@ int DistanceBetween[SQUARE_NB][SQUARE_NB];
 int KingPawnFileDistance[FILE_NB][1 << FILE_NB];
 uint64_t BitsBetweenMasks[SQUARE_NB][SQUARE_NB];
 uint64_t KingAreaMasks[COLOUR_NB][SQUARE_NB];
+uint64_t LargeKingAreaMasks[SQUARE_NB];
 uint64_t ForwardRanksMasks[COLOUR_NB][RANK_NB];
 uint64_t ForwardFileMasks[COLOUR_NB][SQUARE_NB];
 uint64_t AdjacentFilesMasks[FILE_NB];
@@ -83,7 +84,6 @@ void initMasks() {
     // squares, and the squares within the pawn shield. When on the A/H files, extend
     // the King Area to include an additional file, namely the C and F file respectively
     for (int sq = 0; sq < SQUARE_NB; sq++) {
-
         KingAreaMasks[WHITE][sq] = kingAttacks(sq) | (1ull << sq) | (kingAttacks(sq) << 8);
         KingAreaMasks[BLACK][sq] = kingAttacks(sq) | (1ull << sq) | (kingAttacks(sq) >> 8);
 
@@ -92,6 +92,25 @@ void initMasks() {
 
         KingAreaMasks[WHITE][sq] |= fileOf(sq) != 7 ? 0ull : KingAreaMasks[WHITE][sq] >> 1;
         KingAreaMasks[BLACK][sq] |= fileOf(sq) != 7 ? 0ull : KingAreaMasks[BLACK][sq] >> 1;
+    }
+
+    // Init a table for the large King Areas. 2 squares in each direction while still inside the board
+    for (int sq = 0; sq < SQUARE_NB; sq++) {
+        LargeKingAreaMasks[sq] = 0ull;
+        int file = fileOf(sq);
+        for (int i=-2; i<=2; i++) {
+            if (file+i >= 0 && file+i <= 7)
+                LargeKingAreaMasks[sq] |= Files[file+i];
+        }
+
+        uint64_t temp = 0ull;
+        int rank = rankOf(sq);
+        for (int i=-2; i<=2; i++) {
+            if (rank+i >= 0 && rank+i <= 7)
+                temp |= Ranks[rank+i];
+        }
+
+        LargeKingAreaMasks[sq] = LargeKingAreaMasks[sq] & temp;
     }
 
     // Init a table of bitmasks for the ranks at or above a given rank, by colour
@@ -165,6 +184,11 @@ uint64_t kingAreaMasks(int colour, int sq) {
     assert(0 <= colour && colour < COLOUR_NB);
     assert(0 <= sq && sq < SQUARE_NB);
     return KingAreaMasks[colour][sq];
+}
+
+uint64_t largeKingAreaMasks(int sq) {
+    assert(0 <= sq && sq < SQUARE_NB);
+    return LargeKingAreaMasks[sq];
 }
 
 uint64_t forwardRanksMasks(int colour, int rank) {

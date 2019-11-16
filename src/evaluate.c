@@ -773,6 +773,15 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         uint64_t rookChecks   = rookThreats   & safe & ei->attackedBy[THEM][ROOK  ];
         uint64_t queenChecks  = queenThreats  & safe & ei->attackedBy[THEM][QUEEN ];
 
+        // Count the squares in our large king area that are attacked by the enemy once or twice,
+        // And the squares in our large king area that are defended.
+        uint64_t areaAttacks = ei->attacked[THEM] & largeKingAreaMasks(kingSq);
+        uint64_t areaAttacks2 = areaAttacks & ei->attackedBy2[THEM];
+        uint64_t areaDefense = ei->attacked[US] & largeKingAreaMasks(kingSq);
+
+        int kingAreaAttacks = popcount(areaAttacks) + popcount(areaAttacks2);
+        int kingAreaDefense = popcount(areaDefense);
+
         count  = ei->kingAttackersCount[THEM] * ei->kingAttackersWeight[THEM];
 
         count += KSAttackValue     * scaledAttackCounts
@@ -783,6 +792,8 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
                + KSSafeRookCheck   * popcount(rookChecks)
                + KSSafeBishopCheck * popcount(bishopChecks)
                + KSSafeKnightCheck * popcount(knightChecks)
+               + 2 * (kingAreaAttacks - kingAreaDefense)
+               + (kingAreaAttacks * kingAreaAttacks) / 8
                + KSAdjustment;
 
         // Convert safety to an MG and EG score, if we are unsafe
