@@ -142,6 +142,12 @@ const int KnightOutpost[2][2] = {
     { S(   4, -26), S(  15,  -4) },
 };
 
+/*
+const int KnightOutpost[2][2][2] = {
+    { { S(   7, -26), S(  31,  -4) }, { S(   7, -26), S(  31,  -4) }, }
+    { { S(   4, -26), S(  15,  -4) }, { S(   4, -26), S(  15,  -4) }, }
+};*/
+
 const int KnightBehindPawn = S(   4,  19);
 
 const int KnightMobility[9] = {
@@ -312,6 +318,7 @@ const int ThreatRookAttackedByKing   = S( -13, -18);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
+const int ThreatKnightOnQueen        = S(   2,   5);
 
 /* Closedness Evaluation Terms */
 
@@ -876,7 +883,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
     const uint64_t Rank3Rel = US == WHITE ? RANK_3 : RANK_6;
 
-    int count, eval = 0;
+    int sq, count, eval = 0;
 
     uint64_t friendly = board->colours[  US];
     uint64_t enemy    = board->colours[THEM];
@@ -960,7 +967,26 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     // Bonus for giving threats by safe pawn pushes
     count = popcount(pushThreat);
     eval += count * ThreatByPawnPush;
-    if (TRACE) T.ThreatByPawnPush[colour] += count;
+    if (TRACE) T.ThreatByPawnPush[US] += count;
+
+    // Bonus for knight threats against enemy queens
+    uint64_t tempQueens = board->pieces[QUEEN] & board->colours[THEM];
+
+    while (tempQueens) {
+        // Pop off the next queen
+        sq = poplsb(&tempQueens);
+
+        uint64_t knightThreats = ei->attackedBy[US][KNIGHT] & knightAttacks(sq);
+        uint64_t unsafe = ei->attackedBy[THEM][PAWN] | (ei->attackedBy2[THEM] & ~ei->attackedBy2[US]);
+
+        count = popcount(knightThreats & ~unsafe);
+        eval += count * ThreatKnightOnQueen;
+        if (TRACE) T.ThreatKnightOnQueen[US] += count;
+/*
+        count = popcount(knightThreats & ~ei->attackedBy[THEM]);
+        eval += count * ThreatKnightOnQueenSafe;
+        if (TRACE) T.ThreatKnightOnQueenSafe[US] += count;*/
+    }
 
     return eval;
 }
