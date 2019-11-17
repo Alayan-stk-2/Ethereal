@@ -618,9 +618,9 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             && onlyOne(black & bishops)
             && !((bishops & WHITE_SQUARES) && (bishops & BLACK_SQUARES))) {
             if (bishops & WHITE_SQUARES)
-                eval += SameColoredBishopsWeakPawns[MIN(3, popcount(board->colours[US] & board->pieces[PAWN] & WHITE_SQUARES))];
+                eval += SameColoredBishopsWeakPawns[MIN(3, popcount(board->colours[US] & ei->passedPawns & WHITE_SQUARES))];
             else
-                eval += SameColoredBishopsWeakPawns[MIN(3, popcount(board->colours[US] & board->pieces[PAWN] & BLACK_SQUARES))];
+                eval += SameColoredBishopsWeakPawns[MIN(3, popcount(board->colours[US] & ei->passedPawns & BLACK_SQUARES))];
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
