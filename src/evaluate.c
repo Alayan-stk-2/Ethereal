@@ -302,7 +302,7 @@ const int PassedSafePromotionPath = S( -29,  37);
 
 /* Space Evaluation Terms */
 
-const int SpaceSquare = S(   2,   0);
+const int SpaceSquare = S(   1,   0);
 
 /* Threat Evaluation Terms */
 
