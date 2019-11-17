@@ -881,7 +881,7 @@ int evaluateSpace(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
     int eval = 0;
 
-    if (popcount(board->pieces[KNIGHT] | board->pieces[BISHOP] | board->pieces[BISHOP]) <= 7)
+    if (popcount(board->pieces[KNIGHT] | board->pieces[BISHOP] | board->pieces[ROOK]) <= 7)
         return eval;
 
     uint64_t SpaceMask = (US == WHITE) ? WHITE_SPACE : BLACK_SPACE;
