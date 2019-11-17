@@ -618,12 +618,12 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             && onlyOne(black & bishops)
             && !((bishops & WHITE_SQUARES) && (bishops & BLACK_SQUARES))) {
             if (bishops & WHITE_SQUARES) {
-                eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & ~ei->attackedBy[US][PAWN] & WHITE_SQUARES))];
-                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & ~ei->attackedBy[US][PAWN] & WHITE_SQUARES))][US]++;
+                eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & board->pieces[PAWN] & ~ei->attackedBy[US][PAWN] & WHITE_SQUARES))];
+                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & board->pieces[PAWN] & ~ei->attackedBy[US][PAWN] & WHITE_SQUARES))][US]++;
             }
             else {
-                eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & BLACK_SQUARES))];
-                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & ~ei->attackedBy[US][PAWN] & BLACK_SQUARES))][US]++;
+                eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & board->pieces[PAWN] & ~ei->attackedBy[US][PAWN] & BLACK_SQUARES))];
+                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & board->pieces[PAWN] & ~ei->attackedBy[US][PAWN] & BLACK_SQUARES))][US]++;
             }
         }
 
