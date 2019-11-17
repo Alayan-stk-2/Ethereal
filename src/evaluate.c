@@ -163,6 +163,10 @@ const int BishopOutpost[2][2] = {
 
 const int BishopBehindPawn = S(   3,  18);
 
+const int SameColoredBishopsWeakPawns[4] = {
+    S(   0,   0), S(   0, -20), S(   0, -50), S(   0, -90),
+};
+
 const int BishopMobility[14] = {
     S( -65,-147), S( -30, -95), S( -11, -56), S(  -1, -30),
     S(   9, -18), S(  17,  -4), S(  20,   6), S(  21,  11),
@@ -554,6 +558,13 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
     int sq, outside, defended, count, eval = 0;
     uint64_t attacks;
 
+    uint64_t white   = board->colours[WHITE];
+    uint64_t black   = board->colours[BLACK];
+    uint64_t knights = board->pieces[KNIGHT];
+    uint64_t bishops = board->pieces[BISHOP];
+    uint64_t rooks   = board->pieces[ROOK  ];
+    uint64_t queens  = board->pieces[QUEEN ];
+
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
     uint64_t tempBishops = board->pieces[BISHOP] & board->colours[US  ];
 
@@ -599,6 +610,17 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
             eval += BishopBehindPawn;
             if (TRACE) T.BishopBehindPawn[US]++;
+        }
+
+        // Appply an additional penalty for pawns on the same color in SCB endgames
+        if (   !(knights | rooks | queens)
+            && onlyOne(white & bishops)
+            && onlyOne(black & bishops)
+            && !((bishops & WHITE_SQUARES) && (bishops & BLACK_SQUARES))) {
+            if (bishops & WHITE_SQUARES)
+                eval += SameColoredBishopsWeakPawns[MIN(3, popcount(board->colours[US] & board->pieces[PAWN] & WHITE_SQUARES))];
+            else
+                eval += SameColoredBishopsWeakPawns[MIN(3, popcount(board->colours[US] & board->pieces[PAWN] & BLACK_SQUARES))];
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
