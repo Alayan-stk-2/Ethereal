@@ -164,7 +164,8 @@ const int BishopOutpost[2][2] = {
 const int BishopBehindPawn = S(   3,  18);
 
 const int SameColoredBishopsWeakPawns[5] = {
-    S(   0,   0), S(   0, -24), S(   0, -54), S(   0, -90), S(   0, -140),
+    S(   0,   0), S(   0, -31), S(   0, -59), S(   0, -82), 
+    S(   0,-135), 
 };
 
 const int BishopMobility[14] = {
