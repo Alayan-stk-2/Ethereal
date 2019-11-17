@@ -164,7 +164,7 @@ const int BishopOutpost[2][2] = {
 const int BishopBehindPawn = S(   3,  18);
 
 const int SameColoredBishopsWeakPawns[5] = {
-    S(   0,   0), S(   0, -24), S(   0, -48), S(   0, -84), S(   0, -130),
+    S(   0,   0), S(   0, -24), S(   0, -54), S(   0, -90), S(   0, -140),
 };
 
 const int BishopMobility[14] = {
@@ -618,12 +618,12 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             && onlyOne(black & bishops)
             && !((bishops & WHITE_SQUARES) && (bishops & BLACK_SQUARES))) {
             if (bishops & WHITE_SQUARES) {
-                eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & WHITE_SQUARES))];
-                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & WHITE_SQUARES))][US]++;
+                eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & ~ei->attackedBy[US][PAWN] & WHITE_SQUARES))];
+                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & ~ei->attackedBy[US][PAWN] & WHITE_SQUARES))][US]++;
             }
             else {
                 eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & BLACK_SQUARES))];
-                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & BLACK_SQUARES))][US]++;
+                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & ~ei->attackedBy[US][PAWN] & BLACK_SQUARES))][US]++;
             }
         }
 
