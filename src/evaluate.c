@@ -163,8 +163,8 @@ const int BishopOutpost[2][2] = {
 
 const int BishopBehindPawn = S(   3,  18);
 
-const int SameColoredBishopsWeakPawns[4] = {
-    S(   0,   0), S(   0, -20), S(   0, -50), S(   0, -90),
+const int SameColoredBishopsWeakPawns[5] = {
+    S(   0,   0), S(   0, -24), S(   0, -48), S(   0, -84), S(   0, -130),
 };
 
 const int BishopMobility[14] = {
@@ -617,10 +617,14 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             && onlyOne(white & bishops)
             && onlyOne(black & bishops)
             && !((bishops & WHITE_SQUARES) && (bishops & BLACK_SQUARES))) {
-            if (bishops & WHITE_SQUARES)
-                eval += SameColoredBishopsWeakPawns[MIN(3, popcount(board->colours[US] & ei->passedPawns & WHITE_SQUARES))];
-            else
-                eval += SameColoredBishopsWeakPawns[MIN(3, popcount(board->colours[US] & ei->passedPawns & BLACK_SQUARES))];
+            if (bishops & WHITE_SQUARES) {
+                eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & WHITE_SQUARES))];
+                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & WHITE_SQUARES))][US]++;
+            }
+            else {
+                eval += SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & BLACK_SQUARES))];
+                if (TRACE) T.SameColoredBishopsWeakPawns[MIN(4, popcount(board->colours[US] & ei->passedPawns & BLACK_SQUARES))][US]++;
+            }
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
