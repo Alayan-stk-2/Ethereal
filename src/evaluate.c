@@ -300,6 +300,10 @@ const int PassedEnemyDistance[8] = {
 
 const int PassedSafePromotionPath = S( -29,  37);
 
+/* Space Evaluation Terms */
+
+const int SpaceSquare = S(   2,   0);
+
 /* Threat Evaluation Terms */
 
 const int ThreatWeakPawn             = S( -13, -26);
@@ -392,6 +396,7 @@ int evaluatePieces(EvalInfo *ei, Board *board) {
     eval +=   evaluateKings(ei, board, WHITE)   - evaluateKings(ei, board, BLACK);
     eval +=  evaluatePassed(ei, board, WHITE)  - evaluatePassed(ei, board, BLACK);
     eval += evaluateThreats(ei, board, WHITE) - evaluateThreats(ei, board, BLACK);
+    eval +=   evaluateSpace(ei, board, WHITE) -   evaluateSpace(ei, board, BLACK);
 
     return eval;
 }
@@ -867,6 +872,37 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         eval += flag * PassedSafePromotionPath;
         if (TRACE) T.PassedSafePromotionPath[US] += flag;
     }
+
+    return eval;
+}
+
+int evaluateSpace(EvalInfo *ei, Board *board, int colour) {
+
+    const int US = colour, THEM = !colour;
+    int eval = 0;
+
+    if (popcount(board->pieces[KNIGHT] | board->pieces[BISHOP] | board->pieces[BISHOP]) <= 7)
+        return eval;
+
+    uint64_t SpaceMask = (US == WHITE) ? WHITE_SPACE : BLACK_SPACE;
+    uint64_t Space = SpaceMask & ~ei->attackedBy[THEM][PAWN] & ~ei->attackedBy2[THEM];
+    uint64_t BehindPawnFront = board->colours[US] & board->pieces[PAWN];
+    if (US == WHITE) {
+        BehindPawnFront  = BehindPawnFront >> 8;
+        BehindPawnFront |= BehindPawnFront >> 8;
+        BehindPawnFront |= BehindPawnFront >> 16;
+    }
+    else {
+        BehindPawnFront  = BehindPawnFront << 8;
+        BehindPawnFront |= BehindPawnFront << 8;
+        BehindPawnFront |= BehindPawnFront << 16;
+    }
+
+    int bonus  = popcount(Space) + popcount(Space & BehindPawnFront & ~ei->attacked[THEM]);
+    int weight = popcount(board->colours[US]);
+    bonus      = bonus * weight / 8;
+
+    eval = bonus * SpaceSquare;
 
     return eval;
 }
