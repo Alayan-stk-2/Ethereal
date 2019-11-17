@@ -1097,9 +1097,9 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->kingAreas[WHITE] = kingAreaMasks(WHITE, ei->kingSquare[WHITE]);
     ei->kingAreas[BLACK] = kingAreaMasks(BLACK, ei->kingSquare[BLACK]);
 
-    // Exclude squares attacked by our opponents, our blocked pawns, and our own King
-    ei->mobilityAreas[WHITE] = ~(ei->pawnAttacks[BLACK] | (white & kings) | ei->blockedPawns[WHITE]);
-    ei->mobilityAreas[BLACK] = ~(ei->pawnAttacks[WHITE] | (black & kings) | ei->blockedPawns[BLACK]);
+    // Exclude squares attacked by our opponents pawn (except pieces), our blocked pawns, and our own King
+    ei->mobilityAreas[WHITE] = ~((ei->pawnAttacks[BLACK] & ~(black & ~board->pieces[PAWN  ])) | (white & kings) | ei->blockedPawns[WHITE]);
+    ei->mobilityAreas[BLACK] = ~((ei->pawnAttacks[WHITE] & ~(white & ~board->pieces[PAWN  ])) | (black & kings) | ei->blockedPawns[BLACK]);
 
     // Init part of the attack tables. By doing this step here, evaluatePawns()
     // can start by setting up the attackedBy2 table, since King attacks are resolved
