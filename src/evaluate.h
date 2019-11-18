@@ -109,29 +109,30 @@ struct EvalInfo {
     int kingAttacksCount[COLOUR_NB];
     int kingAttackersCount[COLOUR_NB];
     int kingAttackersWeight[COLOUR_NB];
-    int pkeval[COLOUR_NB];
+    int64_t pkeval[COLOUR_NB];
     PKEntry *pkentry;
 };
 
-int evaluateBoard(Board *board, PKTable *pktable);
-int evaluatePieces(EvalInfo *ei, Board *board);
-int evaluatePawns(EvalInfo *ei, Board *board, int colour);
-int evaluateKnights(EvalInfo *ei, Board *board, int colour);
-int evaluateBishops(EvalInfo *ei, Board *board, int colour);
-int evaluateRooks(EvalInfo *ei, Board *board, int colour);
-int evaluateQueens(EvalInfo *ei, Board *board, int colour);
-int evaluateKings(EvalInfo *ei, Board *board, int colour);
-int evaluatePassed(EvalInfo *ei, Board *board, int colour);
-int evaluateThreats(EvalInfo *ei, Board *board, int colour);
-int evaluateClosedness(EvalInfo *ei, Board *board);
-int evaluateComplexity(EvalInfo *ei, Board *board, int eval);
-int evaluateScaleFactor(Board *board, int eval);
+int64_t evaluateBoard(Board *board, PKTable *pktable);
+int64_t evaluatePieces(EvalInfo *ei, Board *board);
+int64_t evaluatePawns(EvalInfo *ei, Board *board, int colour);
+int64_t evaluateKnights(EvalInfo *ei, Board *board, int colour);
+int64_t evaluateBishops(EvalInfo *ei, Board *board, int colour);
+int64_t evaluateRooks(EvalInfo *ei, Board *board, int colour);
+int64_t evaluateQueens(EvalInfo *ei, Board *board, int colour);
+int64_t evaluateKings(EvalInfo *ei, Board *board, int colour);
+int64_t evaluatePassed(EvalInfo *ei, Board *board, int colour);
+int64_t evaluateThreats(EvalInfo *ei, Board *board, int colour);
+int64_t evaluateClosedness(EvalInfo *ei, Board *board);
+int64_t evaluateComplexity(EvalInfo *ei, Board *board, int eval);
+int64_t evaluateScaleFactor(Board *board, int eval);
 void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable);
 void initEval();
 
-#define MakeScore(mg, eg) ((int)((unsigned int)(eg) << 16) + (mg))
-#define ScoreMG(s) ((int16_t)((uint16_t)((unsigned)((s)))))
-#define ScoreEG(s) ((int16_t)((uint16_t)((unsigned)((s) + 0x8000) >> 16)))
+#define MakeScore(og, mg, eg) (int64_t)((((uint64_t)og) << 40) + (((uint64_t)mg) << 20) + ((uint64_t)eg))
+#define ScoreOG(s) (((int32_t)((((uint64_t)s >> 40) + 524288) % 1048576)) - 524288)
+#define ScoreMG(s) (((int32_t)((((uint64_t)s >> 20) + 524288) % 1048576)) - 524288)
+#define ScoreEG(s) (((int32_t)(( (uint64_t)s        + 524288) % 1048576)) - 524288)
 
-extern int PSQT[32][SQUARE_NB];
-extern const int Tempo;
+extern int64_t PSQT[32][SQUARE_NB];
+extern const int64_t Tempo;
