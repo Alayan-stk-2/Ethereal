@@ -318,7 +318,8 @@ const int ThreatRookAttackedByKing   = S( -13, -18);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
-const int ThreatKnightOnQueen        = S(   2,   5);
+const int ThreatKnightOnQueen        = S(   0,   7);
+const int ThreatKnightOnQueenSafe    = S(   5,   6);
 
 /* Closedness Evaluation Terms */
 
@@ -979,13 +980,13 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
         uint64_t knightThreats = ei->attackedBy[US][KNIGHT] & knightAttacks(sq);
         uint64_t unsafe = ei->attackedBy[THEM][PAWN] | (ei->attackedBy2[THEM] & ~ei->attackedBy2[US]);
 
-        count = popcount(knightThreats & ~unsafe);
+        count = popcount(knightThreats & ~unsafe & ei->attacked[THEM]);
         eval += count * ThreatKnightOnQueen;
         if (TRACE) T.ThreatKnightOnQueen[US] += count;
-/*
-        count = popcount(knightThreats & ~ei->attackedBy[THEM]);
+
+        count = popcount(knightThreats & ~ei->attacked[THEM]);
         eval += count * ThreatKnightOnQueenSafe;
-        if (TRACE) T.ThreatKnightOnQueenSafe[US] += count;*/
+        if (TRACE) T.ThreatKnightOnQueenSafe[US] += count;
     }
 
     return eval;
