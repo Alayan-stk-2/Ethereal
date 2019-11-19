@@ -113,7 +113,7 @@ struct EvalInfo {
     PKEntry *pkentry;
 };
 
-int64_t evaluateBoard(Board *board, PKTable *pktable);
+int evaluateBoard(Board *board, PKTable *pktable);
 int64_t evaluatePieces(EvalInfo *ei, Board *board);
 int64_t evaluatePawns(EvalInfo *ei, Board *board, int colour);
 int64_t evaluateKnights(EvalInfo *ei, Board *board, int colour);
@@ -130,9 +130,10 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable);
 void initEval();
 
 #define MakeScore(og, mg, eg) (int64_t)((((uint64_t)og) << 40) + (((uint64_t)mg) << 20) + ((uint64_t)eg))
-#define ScoreOG(s) (((int32_t)((((uint64_t)s >> 40) + 524288) % 1048576)) - 524288)
-#define ScoreMG(s) (((int32_t)((((uint64_t)s >> 20) + 524288) % 1048576)) - 524288)
-#define ScoreEG(s) (((int32_t)(( (uint64_t)s        + 524288) % 1048576)) - 524288)
+#define OldMakeScore(mg, eg) (int64_t)((((uint64_t)mg) << 40) + (((uint64_t)((mg+eg)/2)) << 20) + ((uint64_t)eg))
+#define ScoreOG(s) (((int32_t)((((s + (int64_t)0x7FFFF00000) / 0x10000000000) + 0x80000) % 0x100000)) - 0x80000)
+#define ScoreMG(s) (((int32_t)((((s + 0x7FFFF              ) / 0x100000     ) + 0x80000) % 0x100000)) - 0x80000)
+#define ScoreEG(s) (((int32_t)(( s                                            + 0x80000) % 0x100000)) - 0x80000)
 
 extern int64_t PSQT[32][SQUARE_NB];
 extern const int64_t Tempo;

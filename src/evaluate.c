@@ -32,7 +32,7 @@
 EvalTrace T, EmptyTrace;
 int64_t PSQT[32][SQUARE_NB];
 
-#define S(mg, eg) (mg+eg)//MakeScore((mg), (eg)))
+#define S(mg, eg) OldMakeScore(mg, eg)
 
 /* Material Value Evaluation Terms */
 
@@ -342,11 +342,7 @@ const int64_t  Tempo = 20;
 
 #undef S
 
-int64_t evaluateBoard(Board *board, PKTable *pktable) {
-
-    int64_t test = MakeScore(-100, 200, 150);
-    printf("TEST : %" PRId64 "\n", test);
-    printf("OG : %i, MG : %i, EG : %i\n", ScoreOG(test), ScoreMG(test), ScoreEG(test));
+int evaluateBoard(Board *board, PKTable *pktable) {
 
     EvalInfo ei;
     int earlyPhase, latePhase, phase, factor;
@@ -360,12 +356,13 @@ int64_t evaluateBoard(Board *board, PKTable *pktable) {
     eval  += evaluateClosedness(&ei, board);
     eval  += evaluateComplexity(&ei, board, eval);
 
-    // Calculate the game phase based on remaining non-pawn material
-    phase = 60 - 8 * popcount(board->pieces[QUEEN ])
-               - 5 * popcount(board->pieces[ROOK  ])
-               - 3 * popcount(board->pieces[KNIGHT]
+    // Calculate the game phase based on remaining non-pawn material (Fruit method)
+    //TODO : try different phase-computation formulas
+    phase = 48 - 8 * popcount(board->pieces[QUEEN ])
+               - 4 * popcount(board->pieces[ROOK  ])
+               - 2 * popcount(board->pieces[KNIGHT]
                              |board->pieces[BISHOP]);
-    phase = (phase * 512 + 30) / 60;
+    phase = (phase * 512 + 30) / 48;
 
     latePhase = MAX(0, 384 - phase);
     earlyPhase = MAX(0, phase - 128);
@@ -389,7 +386,7 @@ int64_t evaluateBoard(Board *board, PKTable *pktable) {
         storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
 
     // Return the evaluation relative to the side to move
-    return board->turn == WHITE ? eval : -eval;
+    return board->turn == WHITE ? (int) eval : (int) -eval;
 }
 
 int64_t evaluatePieces(EvalInfo *ei, Board *board) {
@@ -804,7 +801,7 @@ int64_t evaluateKings(EvalInfo *ei, Board *board, int colour) {
                + KSAdjustment;
 
         // Convert safety to an MG and EG score, if we are unsafe
-//        if (count > 0) eval -= MakeScore(count * count / 720, count / 20);
+        if (count > 0) eval -= OldMakeScore(count * count / 720, count / 20);
     }
 
     // Everything else is stored in the Pawn King Table
@@ -1049,7 +1046,7 @@ int64_t evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     // Avoid changing which side has the advantage
     int v = sign * MAX(ScoreEG(complexity), -abs(eg));
 
-    return 0;// MakeScore(0, v);
+    return OldMakeScore(0, v);
 }
 
 int64_t evaluateScaleFactor(Board *board, int eval) {
