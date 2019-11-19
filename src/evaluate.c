@@ -138,9 +138,11 @@ const int PawnConnected32[32] = {
 /* Knight Evaluation Terms */
 
 const int KnightOutpost[2][2] = {
-    { S(   7, -26), S(  31,  -4) },
-    { S(   4, -26), S(  15,  -4) },
+    { S(   7, -28), S(  32,  -7) },
+    { S(   1, -26), S(  12,  -5) },
 };
+
+const int KnightReachableOutpost = S(  14,  -2);
 
 const int KnightBehindPawn = S(   4,  19);
 
@@ -515,6 +517,19 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
         ei->attacked[US]           |= attacks;
         ei->attackedBy[US][KNIGHT] |= attacks;
 
+        uint64_t unsafeForOutpost = ei->pawnAttacks[THEM];
+        if (US == WHITE) {
+            unsafeForOutpost |= unsafeForOutpost >> 8;
+            unsafeForOutpost |= unsafeForOutpost >> 16;
+            unsafeForOutpost |= unsafeForOutpost >> 32;
+        }
+        else {
+            unsafeForOutpost |= unsafeForOutpost << 8;
+            unsafeForOutpost |= unsafeForOutpost << 16;
+            unsafeForOutpost |= unsafeForOutpost << 32;
+        }
+        uint64_t potentialOutposts = attacks & ~unsafeForOutpost & outpostRanksMasks(US);
+
         // Apply a bonus if the knight is on an outpost square, and cannot be attacked
         // by an enemy pawn. Increase the bonus if one of our pawns supports the knight
         if (     testBit(outpostRanksMasks(US), sq)
@@ -523,6 +538,10 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
             defended = testBit(ei->pawnAttacks[US], sq);
             eval += KnightOutpost[outside][defended];
             if (TRACE) T.KnightOutpost[outside][defended][US]++;
+        }
+        else if (potentialOutposts & ei->pawnAttacks[US]) {
+            eval += KnightReachableOutpost;
+            if (TRACE) T.KnightReachableOutpost[US]++;
         }
 
         // Apply a bonus if the knight is behind a pawn
