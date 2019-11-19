@@ -362,6 +362,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
                - 4 * popcount(board->pieces[ROOK  ])
                - 2 * popcount(board->pieces[KNIGHT]
                              |board->pieces[BISHOP]);
+    phase = 48 - MAX(0, phase);
     phase = (phase * 512 + 30) / 48;
 
     latePhase = MAX(0, 384 - phase);
@@ -371,6 +372,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     factor = evaluateScaleFactor(board, eval);
 
     // Compute the interpolated and scaled evaluation
+//    printf("OG is %i, MG is %i, eg is %i --- OGw is %i, MGw is %i, EGw is %i\n", ScoreOG(eval), ScoreMG(eval), ScoreEG(eval), earlyPhase, (384-earlyPhase-latePhase), latePhase);
     eval = (ScoreOG(eval) * earlyPhase
          +  ScoreMG(eval) * (384 - earlyPhase - latePhase)
          +  ScoreEG(eval) * latePhase * factor / SCALE_NORMAL);
@@ -386,6 +388,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
         storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
 
     // Return the evaluation relative to the side to move
+//    printf("Eval is %" PRId64 "\n", eval);
     return board->turn == WHITE ? (int) eval : (int) -eval;
 }
 
