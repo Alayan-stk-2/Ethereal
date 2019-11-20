@@ -28,22 +28,22 @@
 #include "types.h"
 
 EvalTrace T, EmptyTrace;
-int PSQT[32][SQUARE_NB];
+uint64_t PSQT[32][SQUARE_NB];
 
-#define S(mg, eg) (MakeScore((mg), (eg)))
+#define S(mg, eg) (OldMakeScore((mg), (eg)))
 
 /* Material Value Evaluation Terms */
 
-const int PawnValue   = S( 105, 118);
-const int KnightValue = S( 449, 410);
-const int BishopValue = S( 473, 423);
-const int RookValue   = S( 654, 684);
-const int QueenValue  = S(1295,1380);
-const int KingValue   = S(   0,   0);
+const uint64_t PawnValue   = S( 105, 118);
+const uint64_t KnightValue = S( 449, 410);
+const uint64_t BishopValue = S( 473, 423);
+const uint64_t RookValue   = S( 654, 684);
+const uint64_t QueenValue  = S(1295,1380);
+const uint64_t KingValue   = S(   0,   0);
 
 /* Piece Square Evaluation Terms */
 
-const int PawnPSQT32[32] = {
+const uint64_t PawnPSQT32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
     S( -19,   9), S(   6,   4), S( -11,   7), S(  -6,  -1),
     S( -21,   4), S( -11,   3), S(  -8,  -5), S(  -2, -13),
@@ -54,7 +54,7 @@ const int PawnPSQT32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
 };
 
-const int KnightPSQT32[32] = {
+const uint64_t KnightPSQT32[32] = {
     S( -50, -26), S(  -8, -40), S( -16, -29), S(  -1, -19),
     S(  -6, -22), S(   3, -13), S(   1, -31), S(  11, -20),
     S(   3, -25), S(  20, -25), S(  14, -18), S(  25,  -5),
@@ -65,7 +65,7 @@ const int KnightPSQT32[32] = {
     S(-168, -17), S( -81,  -2), S(-110,  19), S( -30,   1),
 };
 
-const int BishopPSQT32[32] = {
+const uint64_t BishopPSQT32[32] = {
     S(  18, -18), S(  15, -20), S( -10,  -9), S(   9, -13),
     S(  31, -34), S(  24, -32), S(  23, -22), S(  11, -12),
     S(  16, -14), S(  29, -16), S(  17,  -7), S(  21,  -6),
@@ -76,7 +76,7 @@ const int BishopPSQT32[32] = {
     S( -40,   2), S( -48,   8), S( -87,  16), S( -91,  24),
 };
 
-const int RookPSQT32[32] = {
+const uint64_t RookPSQT32[32] = {
     S( -10, -28), S( -14, -19), S(  -2, -23), S(   7, -29),
     S( -53, -13), S( -13, -30), S(  -9, -30), S(   1, -33),
     S( -28, -13), S(  -7, -11), S( -16, -15), S(  -1, -23),
@@ -87,7 +87,7 @@ const int RookPSQT32[32] = {
     S(  35,  22), S(  25,  24), S(   6,  29), S(  16,  25),
 };
 
-const int QueenPSQT32[32] = {
+const uint64_t QueenPSQT32[32] = {
     S(  23, -52), S(   4, -39), S(  11, -49), S(  20, -41),
     S(  15, -38), S(  28, -56), S(  30, -72), S(  20, -25),
     S(  12, -22), S(  27, -19), S(   9,   5), S(  10,   0),
@@ -98,7 +98,7 @@ const int QueenPSQT32[32] = {
     S(  -7,  17), S(  18,   9), S(   9,   9), S(  -6,  20),
 };
 
-const int KingPSQT32[32] = {
+const uint64_t KingPSQT32[32] = {
     S(  41, -80), S(  41, -51), S( -11, -13), S( -26, -22),
     S(  30, -30), S(  -3, -20), S( -36,   6), S( -50,   8),
     S(   8, -31), S(  17, -27), S(  17,  -3), S(  -9,  12),
@@ -111,20 +111,20 @@ const int KingPSQT32[32] = {
 
 /* Pawn Evaluation Terms */
 
-const int PawnCandidatePasser[2][RANK_NB] = {
+const uint64_t PawnCandidatePasser[2][RANK_NB] = {
    {S(   0,   0), S( -27, -10), S( -11,   9), S( -15,  28),
     S(  -1,  60), S(  44,  66), S(   0,   0), S(   0,   0)},
    {S(   0,   0), S( -14,  17), S(  -5,  20), S(   4,  43),
     S(  17,  82), S(  32,  54), S(   0,   0), S(   0,   0)},
 };
 
-const int PawnIsolated = S(  -7, -11);
+const uint64_t PawnIsolated = S(  -7, -11);
 
-const int PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
+const uint64_t PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
 
-const int PawnBackwards[2] = { S(   7,   0), S(  -7, -19) };
+const uint64_t PawnBackwards[2] = { S(   7,   0), S(  -7, -19) };
 
-const int PawnConnected32[32] = {
+const uint64_t PawnConnected32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
     S(  -2,  -8), S(  11,   1), S(   3,   1), S(   5,  16),
     S(  14,  -1), S(  29,  -2), S(  21,   7), S(  24,  15),
@@ -137,14 +137,14 @@ const int PawnConnected32[32] = {
 
 /* Knight Evaluation Terms */
 
-const int KnightOutpost[2][2] = {
+const uint64_t KnightOutpost[2][2] = {
     { S(   7, -26), S(  31,  -4) },
     { S(   4, -26), S(  15,  -4) },
 };
 
-const int KnightBehindPawn = S(   4,  19);
+const uint64_t KnightBehindPawn = S(   4,  19);
 
-const int KnightMobility[9] = {
+const uint64_t KnightMobility[9] = {
     S( -74,-104), S( -31, -96), S( -16, -41), S(  -5, -16),
     S(   6,  -8), S(  11,   8), S(  19,  11), S(  28,  11),
     S(  40,  -3),
@@ -152,18 +152,18 @@ const int KnightMobility[9] = {
 
 /* Bishop Evaluation Terms */
 
-const int BishopPair = S(  22,  69);
+const uint64_t BishopPair = S(  22,  69);
 
-const int BishopRammedPawns = S( -10, -15);
+const uint64_t BishopRammedPawns = S( -10, -15);
 
-const int BishopOutpost[2][2] = {
+const uint64_t BishopOutpost[2][2] = {
     { S(  10, -12), S(  40,   0) },
     { S(   5, -12), S(  20,   0) },
 };
 
-const int BishopBehindPawn = S(   3,  18);
+const uint64_t BishopBehindPawn = S(   3,  18);
 
-const int BishopMobility[14] = {
+const uint64_t BishopMobility[14] = {
     S( -65,-147), S( -30, -95), S( -11, -56), S(  -1, -30),
     S(   9, -18), S(  17,  -4), S(  20,   6), S(  21,  11),
     S(  20,  17), S(  24,  18), S(  23,  19), S(  42,   8),
@@ -172,11 +172,11 @@ const int BishopMobility[14] = {
 
 /* Rook Evaluation Terms */
 
-const int RookFile[2] = { S(  15,   4), S(  35,   3) };
+const uint64_t RookFile[2] = { S(  15,   4), S(  35,   3) };
 
-const int RookOnSeventh = S(  -2,  26);
+const uint64_t RookOnSeventh = S(  -2,  26);
 
-const int RookMobility[15] = {
+const uint64_t RookMobility[15] = {
     S(-148,-113), S( -52,-113), S( -15, -61), S(  -7, -21),
     S(  -7,  -1), S(  -8,  14), S(  -7,  24), S(  -1,  27),
     S(   6,  30), S(  10,  34), S(  13,  40), S(  18,  43),
@@ -185,7 +185,7 @@ const int RookMobility[15] = {
 
 /* Queen Evaluation Terms */
 
-const int QueenMobility[28] = {
+const uint64_t QueenMobility[28] = {
     S( -61,-263), S(-210,-387), S( -58,-201), S( -16,-192),
     S(  -4,-139), S(   0, -84), S(   5, -52), S(   5, -23),
     S(   9, -16), S(  10,   6), S(  13,  13), S(  14,  28),
@@ -197,18 +197,18 @@ const int QueenMobility[28] = {
 
 /* King Evaluation Terms */
 
-const int KingDefenders[12] = {
+const uint64_t KingDefenders[12] = {
     S( -26,   0), S(  -7,  -3), S(   1,   2), S(   8,   5),
     S(  17,   6), S(  27,   4), S(  31,  -2), S(  13,   0),
     S(  12,   6), S(  12,   6), S(  12,   6), S(  12,   6),
 };
 
-const int KingPawnFileProximity[FILE_NB]  = {
+const uint64_t KingPawnFileProximity[FILE_NB]  = {
     S(  27,  19), S(  15,  15), S(   3,  10), S( -13, -12),
     S( -15, -40), S( -14, -56), S( -14, -65), S( -11, -70),
 };
 
-const int KingShelter[2][FILE_NB][RANK_NB] = {
+const uint64_t KingShelter[2][FILE_NB][RANK_NB] = {
   {{S( -11,   3), S(  15, -26), S(  20,  -9), S(  12,   4),
     S(   6,   4), S(   1,   2), S(  -3, -33), S( -49,  18)},
    {S(  17,  -8), S(  20, -18), S(   1,  -5), S( -14,   4),
@@ -243,7 +243,7 @@ const int KingShelter[2][FILE_NB][RANK_NB] = {
     S( -17,  18), S(  -5,  20), S(-228, -55), S( -22,   1)}},
 };
 
-const int KingStorm[2][FILE_NB/2][RANK_NB] = {
+const uint64_t KingStorm[2][FILE_NB/2][RANK_NB] = {
   {{S(  -4,  28), S( 117,  -8), S( -25,  26), S( -19,   8),
     S( -14,   2), S(  -8,  -4), S( -17,   5), S( -22,  -2)},
    {S(  -3,  49), S(  57,  12), S( -19,  24), S(  -5,  11),
@@ -277,7 +277,7 @@ const int KSAdjustment      =  -18;
 
 /* Passed Pawn Evaluation Terms */
 
-const int PassedPawn[2][2][RANK_NB] = {
+const uint64_t PassedPawn[2][2][RANK_NB] = {
   {{S(   0,   0), S( -38,   3), S( -55,  21), S( -82,  27),
     S(  -6,  12), S(  70,  -5), S( 157,  56), S(   0,   0)},
    {S(   0,   0), S( -29,   7), S( -51,  24), S( -73,  30),
@@ -288,40 +288,40 @@ const int PassedPawn[2][2][RANK_NB] = {
     S(  -1,  52), S(  92, 117), S( 161, 275), S(   0,   0)}},
 };
 
-const int PassedFriendlyDistance[8] = {
+const uint64_t PassedFriendlyDistance[8] = {
     S(   0,   0), S(   0,   0), S(   3,  -4), S(   7, -10),
     S(   6, -14), S(  -8, -13), S( -15,  -9), S(   0,   0),
 };
 
-const int PassedEnemyDistance[8] = {
+const uint64_t PassedEnemyDistance[8] = {
     S(   0,   0), S(   3,   0), S(   5,   2), S(   9,   9),
     S(   1,  21), S(   7,  30), S(  24,  28), S(   0,   0),
 };
 
-const int PassedSafePromotionPath = S( -29,  37);
+const uint64_t PassedSafePromotionPath = S( -29,  37);
 
 /* Threat Evaluation Terms */
 
-const int ThreatWeakPawn             = S( -13, -26);
-const int ThreatMinorAttackedByPawn  = S( -51, -53);
-const int ThreatMinorAttackedByMinor = S( -26, -36);
-const int ThreatMinorAttackedByMajor = S( -23, -44);
-const int ThreatRookAttackedByLesser = S( -49, -19);
-const int ThreatMinorAttackedByKing  = S( -16, -15);
-const int ThreatRookAttackedByKing   = S( -13, -18);
-const int ThreatQueenAttackedByOne   = S( -39, -29);
-const int ThreatOverloadedPieces     = S(  -8, -13);
-const int ThreatByPawnPush           = S(  15,  21);
+const uint64_t ThreatWeakPawn             = S( -13, -26);
+const uint64_t ThreatMinorAttackedByPawn  = S( -51, -53);
+const uint64_t ThreatMinorAttackedByMinor = S( -26, -36);
+const uint64_t ThreatMinorAttackedByMajor = S( -23, -44);
+const uint64_t ThreatRookAttackedByLesser = S( -49, -19);
+const uint64_t ThreatMinorAttackedByKing  = S( -16, -15);
+const uint64_t ThreatRookAttackedByKing   = S( -13, -18);
+const uint64_t ThreatQueenAttackedByOne   = S( -39, -29);
+const uint64_t ThreatOverloadedPieces     = S(  -8, -13);
+const uint64_t ThreatByPawnPush           = S(  15,  21);
 
 /* Closedness Evaluation Terms */
 
-const int ClosednessKnightAdjustment[9] = {
+const uint64_t ClosednessKnightAdjustment[9] = {
     S( -11, -11), S(  -9,   3), S(  -8,  11), S(  -3,  13),
     S(  -1,  18), S(   2,  16), S(   5,  13), S(  -6,  28),
     S(  -7,  16),
 };
 
-const int ClosednessRookAdjustment[9] = {
+const uint64_t ClosednessRookAdjustment[9] = {
     S(  47,  -9), S(   7,  23), S(   3,  13), S(  -3,   4),
     S(  -7,   3), S(  -9,  -8), S( -13, -11), S( -21, -15),
     S( -26, -16),
@@ -329,10 +329,10 @@ const int ClosednessRookAdjustment[9] = {
 
 /* Complexity Evaluation Terms */
 
-const int ComplexityTotalPawns  = S(   0,   7);
-const int ComplexityPawnFlanks  = S(   0,  49);
-const int ComplexityPawnEndgame = S(   0,  34);
-const int ComplexityAdjustment  = S(   0,-110);
+const uint64_t ComplexityTotalPawns  = S(   0,   7);
+const uint64_t ComplexityPawnFlanks  = S(   0,  49);
+const uint64_t ComplexityPawnEndgame = S(   0,  34);
+const uint64_t ComplexityAdjustment  = S(   0,-110);
 
 /* General Evaluation Terms */
 
@@ -343,7 +343,8 @@ const int Tempo = 20;
 int evaluateBoard(Board *board, PKTable *pktable) {
 
     EvalInfo ei;
-    int phase, factor, eval, pkeval;
+    uint64_t eval = SCORE_ZERO, pkeval = SCORE_ZERO;;
+    int interpolatedEval, phase, earlyPhase, latePhase, factor;
 
     // Setup and perform all evaluations
     initEvalInfo(&ei, board, pktable);
@@ -354,35 +355,39 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     eval  += evaluateComplexity(&ei, board, eval);
 
     // Calculate the game phase based on remaining material (Fruit Method)
+    // TODO : try out other combinations
     phase = 24 - 4 * popcount(board->pieces[QUEEN ])
                - 2 * popcount(board->pieces[ROOK  ])
                - 1 * popcount(board->pieces[KNIGHT]
                              |board->pieces[BISHOP]);
-    phase = (phase * 256 + 12) / 24;
+    phase = (phase * 512 + 12) / 24;
+    earlyPhase = MAX(0, 384 - phase);
+    latePhase = MAX(0, phase - 128);
 
     // Scale evaluation based on remaining material
     factor = evaluateScaleFactor(board, eval);
 
     // Compute the interpolated and scaled evaluation
-    eval = (ScoreMG(eval) * (256 - phase)
-         +  ScoreEG(eval) * phase * factor / SCALE_NORMAL) / 256;
+    interpolatedEval = (ScoreOG(eval) * earlyPhase
+                     + ScoreMG(eval) * (384 - earlyPhase - latePhase)
+                     + ScoreEG(eval) * latePhase * factor / SCALE_NORMAL);
 
     // Factor in the Tempo after interpolation and scaling, so that
     // in the search we can assume that if a null move is made, then
     // then `eval = last_eval + 2 * Tempo`
-    eval += board->turn == WHITE ? Tempo : -Tempo;
+    interpolatedEval += board->turn == WHITE ? Tempo : -Tempo;
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
         storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
 
     // Return the evaluation relative to the side to move
-    return board->turn == WHITE ? eval : -eval;
+    return board->turn == WHITE ? interpolatedEval : -interpolatedEval;
 }
 
-int evaluatePieces(EvalInfo *ei, Board *board) {
+uint64_t evaluatePieces(EvalInfo *ei, Board *board) {
 
-    int eval;
+    uint64_t eval = SCORE_ZERO;
 
     eval  =   evaluatePawns(ei, board, WHITE)   - evaluatePawns(ei, board, BLACK);
     eval += evaluateKnights(ei, board, WHITE) - evaluateKnights(ei, board, BLACK);
@@ -396,12 +401,13 @@ int evaluatePieces(EvalInfo *ei, Board *board) {
     return eval;
 }
 
-int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
+uint64_t evaluatePawns(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
     const int Forward = (colour == WHITE) ? 8 : -8;
 
-    int sq, flag, eval = 0, pkeval = 0;
+    uint64_t eval = SCORE_ZERO, pkeval = SCORE_ZERO;
+    int sq, flag;
     uint64_t pawns, myPawns, tempPawns, enemyPawns, attacks;
 
     // Store off pawn attacks for king safety and threat computations
@@ -489,11 +495,12 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
+uint64_t evaluateKnights(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, outside, defended, count, eval = 0;
+    uint64_t eval = SCORE_ZERO;
+    int sq, outside, defended, count;
     uint64_t attacks;
 
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
@@ -547,11 +554,12 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
+uint64_t evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, outside, defended, count, eval = 0;
+    uint64_t eval = SCORE_ZERO;
+    int sq, outside, defended, count;
     uint64_t attacks;
 
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
@@ -617,11 +625,12 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
+uint64_t evaluateRooks(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, open, count, eval = 0;
+    uint64_t eval = SCORE_ZERO;
+    int sq, open, count;
     uint64_t attacks;
 
     uint64_t myPawns    = board->pieces[PAWN] & board->colours[  US];
@@ -676,11 +685,12 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluateQueens(EvalInfo *ei, Board *board, int colour) {
+uint64_t evaluateQueens(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, count, eval = 0;
+    uint64_t eval = SCORE_ZERO;
+    int sq, count;
     uint64_t tempQueens, attacks;
 
     tempQueens = board->pieces[QUEEN] & board->colours[US];
@@ -717,11 +727,12 @@ int evaluateQueens(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluateKings(EvalInfo *ei, Board *board, int colour) {
+uint64_t evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int count, dist, blocked, eval = 0;
+    uint64_t eval = SCORE_ZERO;
+    int count, dist, blocked;
 
     uint64_t myPawns     = board->pieces[PAWN ] & board->colours[  US];
     uint64_t enemyPawns  = board->pieces[PAWN ] & board->colours[THEM];
@@ -786,7 +797,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
                + KSAdjustment;
 
         // Convert safety to an MG and EG score, if we are unsafe
-        if (count > 0) eval -= MakeScore(count * count / 720, count / 20);
+        if (count > 0) eval -= OldMakeScore(count * count / 720, count / 20);
     }
 
     // Everything else is stored in the Pawn King Table
@@ -827,11 +838,12 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
+uint64_t evaluatePassed(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, rank, dist, flag, canAdvance, safeAdvance, eval = 0;
+    uint64_t eval = SCORE_ZERO;
+    int sq, rank, dist, flag, canAdvance, safeAdvance;
 
     uint64_t bitboard;
     uint64_t tempPawns = board->colours[US] & ei->passedPawns;
@@ -871,12 +883,13 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
+uint64_t evaluateThreats(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
     const uint64_t Rank3Rel = US == WHITE ? RANK_3 : RANK_6;
 
-    int count, eval = 0;
+    uint64_t eval = SCORE_ZERO;
+    int count;
 
     uint64_t friendly = board->colours[  US];
     uint64_t enemy    = board->colours[THEM];
@@ -965,9 +978,10 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int evaluateClosedness(EvalInfo *ei, Board *board) {
+uint64_t evaluateClosedness(EvalInfo *ei, Board *board) {
 
-    int closedness, count, eval = 0;
+    uint64_t eval = SCORE_ZERO;
+    int closedness, count;
 
     uint64_t white = board->colours[WHITE];
     uint64_t black = board->colours[BLACK];
@@ -994,7 +1008,7 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
     return eval;
 }
 
-int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
+uint64_t evaluateComplexity(EvalInfo *ei, Board *board, uint64_t eval) {
 
     // Adjust endgame evaluation based on features related to how
     // likely the stronger side is to convert the position.
@@ -1028,10 +1042,10 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     // Avoid changing which side has the advantage
     int v = sign * MAX(ScoreEG(complexity), -abs(eg));
 
-    return MakeScore(0, v);
+    return OldMakeScore(0, v);
 }
 
-int evaluateScaleFactor(Board *board, int eval) {
+uint64_t evaluateScaleFactor(Board *board, uint64_t eval) {
 
     // Scale endgames based on remaining material. Currently, we only
     // look for OCB endgames that include only one Knight or one Rook
@@ -1120,10 +1134,10 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->kingAttackersWeight[WHITE] = ei->kingAttackersWeight[BLACK] = 0;
 
     // Try to read a hashed Pawn King Eval. Otherwise, start from scratch
-    ei->pkentry       =     pktable == NULL ? NULL : getPKEntry(pktable, board->pkhash);
-    ei->passedPawns   = ei->pkentry == NULL ? 0ull : ei->pkentry->passed;
-    ei->pkeval[WHITE] = ei->pkentry == NULL ? 0    : ei->pkentry->eval;
-    ei->pkeval[BLACK] = ei->pkentry == NULL ? 0    : 0;
+    ei->pkentry       =     pktable == NULL ? NULL       : getPKEntry(pktable, board->pkhash);
+    ei->passedPawns   = ei->pkentry == NULL ? 0ull       : ei->pkentry->passed;
+    ei->pkeval[WHITE] = ei->pkentry == NULL ? SCORE_ZERO : ei->pkentry->eval;
+    ei->pkeval[BLACK] = ei->pkentry == NULL ? SCORE_ZERO : SCORE_ZERO;
 }
 
 void initEval() {

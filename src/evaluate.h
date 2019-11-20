@@ -109,29 +109,35 @@ struct EvalInfo {
     int kingAttacksCount[COLOUR_NB];
     int kingAttackersCount[COLOUR_NB];
     int kingAttackersWeight[COLOUR_NB];
-    int pkeval[COLOUR_NB];
+    uint64_t pkeval[COLOUR_NB];
     PKEntry *pkentry;
 };
 
 int evaluateBoard(Board *board, PKTable *pktable);
-int evaluatePieces(EvalInfo *ei, Board *board);
-int evaluatePawns(EvalInfo *ei, Board *board, int colour);
-int evaluateKnights(EvalInfo *ei, Board *board, int colour);
-int evaluateBishops(EvalInfo *ei, Board *board, int colour);
-int evaluateRooks(EvalInfo *ei, Board *board, int colour);
-int evaluateQueens(EvalInfo *ei, Board *board, int colour);
-int evaluateKings(EvalInfo *ei, Board *board, int colour);
-int evaluatePassed(EvalInfo *ei, Board *board, int colour);
-int evaluateThreats(EvalInfo *ei, Board *board, int colour);
-int evaluateClosedness(EvalInfo *ei, Board *board);
-int evaluateComplexity(EvalInfo *ei, Board *board, int eval);
-int evaluateScaleFactor(Board *board, int eval);
+uint64_t evaluatePieces(EvalInfo *ei, Board *board);
+uint64_t evaluatePawns(EvalInfo *ei, Board *board, int colour);
+uint64_t evaluateKnights(EvalInfo *ei, Board *board, int colour);
+uint64_t evaluateBishops(EvalInfo *ei, Board *board, int colour);
+uint64_t evaluateRooks(EvalInfo *ei, Board *board, int colour);
+uint64_t evaluateQueens(EvalInfo *ei, Board *board, int colour);
+uint64_t evaluateKings(EvalInfo *ei, Board *board, int colour);
+uint64_t evaluatePassed(EvalInfo *ei, Board *board, int colour);
+uint64_t evaluateThreats(EvalInfo *ei, Board *board, int colour);
+uint64_t evaluateClosedness(EvalInfo *ei, Board *board);
+uint64_t evaluateComplexity(EvalInfo *ei, Board *board, uint64_t eval);
+uint64_t evaluateScaleFactor(Board *board, uint64_t eval);
 void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable);
 void initEval();
 
-#define MakeScore(mg, eg) ((int)((unsigned int)(eg) << 16) + (mg))
-#define ScoreMG(s) ((int16_t)((uint16_t)((unsigned)((s)))))
-#define ScoreEG(s) ((int16_t)((uint16_t)((unsigned)((s) + 0x8000) >> 16)))
+#define MakeScore(og, mg, eg) ((((uint64_t)((og) + 0x8000)) << 32)\
+                              |(((uint64_t)((mg) + 0x8000)) << 16)\
+                              |(((uint64_t)((eg) + 0x8000)) <<  0))
+#define OldMakeScore(mg, eg) (MakeScore(mg, (mg+eg)/2, eg))
+#define SCORE_ZERO MakeScore(0, 0, 0)
 
-extern int PSQT[32][SQUARE_NB];
+#define ScoreOG(s) (((int)(s >> 32) & 0xFFFF) - 0x8000)
+#define ScoreMG(s) (((int)(s >> 16) & 0xFFFF) - 0x8000)
+#define ScoreEG(s) (((int)(s >>  0) & 0xFFFF) - 0x8000)
+
+extern uint64_t PSQT[32][SQUARE_NB];
 extern const int Tempo;

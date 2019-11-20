@@ -62,7 +62,7 @@ struct TTable {
 struct PKEntry {
     uint64_t pkhash;
     uint64_t passed;
-    int eval;
+    uint64_t eval;
 };
 
 struct PKTable {
