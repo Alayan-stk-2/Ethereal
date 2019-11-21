@@ -30,238 +30,236 @@
 #include "types.h"
 
 EvalTrace T, EmptyTrace;
-int64_t PSQT[32][SQUARE_NB];
-
-#define S(mg, eg) (OldMakeScore((mg), (eg)))
+EvalScore PSQT[32][SQUARE_NB];
 
 /* Material Value Evaluation Terms */
 
-const int64_t PawnValue   = S( 105, 118);
-const int64_t KnightValue = S( 449, 410);
-const int64_t BishopValue = S( 473, 423);
-const int64_t RookValue   = S( 654, 684);
-const int64_t QueenValue  = S(1295,1380);
-const int64_t KingValue   = S(   0,   0);
+EvalScore PawnValue   = { 105, 111, 118};
+EvalScore KnightValue = { 449, 429, 410};
+EvalScore BishopValue = { 473, 448, 423};
+EvalScore RookValue   = { 654, 669, 684};
+EvalScore QueenValue  = {1295,1337,1380};
+EvalScore KingValue   = {   0,   0,   0};
 
 /* Piece Square Evaluation Terms */
 
-const int64_t PawnPSQT32[32] = {
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
-    S( -19,   9), S(   6,   4), S( -11,   7), S(  -6,  -1),
-    S( -21,   4), S( -11,   3), S(  -8,  -5), S(  -2, -13),
-    S( -16,  12), S( -10,  11), S(  14, -13), S(  12, -24),
-    S(  -4,  16), S(   4,  11), S(   0,  -2), S(  14, -21),
-    S(  -4,  32), S(   1,  30), S(  10,  19), S(  38,  -8),
-    S( -17, -40), S( -65,  -9), S(   3, -23), S(  40, -37),
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
+EvalScore PawnPSQT32[32] = {
+    {   0,   0,   0}, {   0,   0,   0}, {   0,   0,   0}, {   0,   0,   0},
+    { -19,  -4,   9}, {   6,   5,   4}, { -11,  -2,   7}, {  -6,  -3,  -1},
+    { -21,  -8,   4}, { -11,  -4,   3}, {  -8,  -6,  -5}, {  -2,  -7, -13},
+    { -16,  -2,  12}, { -10,   0,  11}, {  14,   0, -13}, {  12,  -6, -24},
+    {  -4,   6,  16}, {   4,   7,  11}, {   0,  -1,  -2}, {  14,  -3, -21},
+    {  -4,  14,  32}, {   1,  15,  30}, {  10,  14,  19}, {  38,  15,  -8},
+    { -17, -28, -40}, { -65, -37,  -9}, {   3, -10, -23}, {  40,   1, -37},
+    {   0,   0,   0}, {   0,   0,   0}, {   0,   0,   0}, {   0,   0,   0},
 };
 
-const int64_t KnightPSQT32[32] = {
-    S( -50, -26), S(  -8, -40), S( -16, -29), S(  -1, -19),
-    S(  -6, -22), S(   3, -13), S(   1, -31), S(  11, -20),
-    S(   3, -25), S(  20, -25), S(  14, -18), S(  25,  -5),
-    S(  15,   4), S(  23,   6), S(  29,  17), S(  30,  22),
-    S(  24,  17), S(  26,  11), S(  39,  26), S(  30,  39),
-    S( -14,  15), S(   6,  13), S(  32,  27), S(  33,  29),
-    S(   7, -11), S(  -5,   2), S(  36, -20), S(  43,   0),
-    S(-168, -17), S( -81,  -2), S(-110,  19), S( -30,   1),
+EvalScore KnightPSQT32[32] = {
+    { -50, -38, -26}, {  -8, -24, -40}, { -16, -22, -29}, {  -1, -10, -19},
+    {  -6, -14, -22}, {   3,  -5, -13}, {   1, -15, -31}, {  11,  -4, -20},
+    {   3, -11, -25}, {  20,  -2, -25}, {  14,  -2, -18}, {  25,  10,  -5},
+    {  15,   9,   4}, {  23,  14,   6}, {  29,  23,  17}, {  30,  26,  22},
+    {  24,  20,  17}, {  26,  18,  11}, {  39,  32,  26}, {  30,  34,  39},
+    { -14,   0,  15}, {   6,   9,  13}, {  32,  29,  27}, {  33,  31,  29},
+    {   7,  -2, -11}, {  -5,  -1,   2}, {  36,   8, -20}, {  43,  21,   0},
+    {-168, -92, -17}, { -81, -41,  -2}, {-110, -45,  19}, { -30, -15,   1},
 };
 
-const int64_t BishopPSQT32[32] = {
-    S(  18, -18), S(  15, -20), S( -10,  -9), S(   9, -13),
-    S(  31, -34), S(  24, -32), S(  23, -22), S(  11, -12),
-    S(  16, -14), S(  29, -16), S(  17,  -7), S(  21,  -6),
-    S(  16, -10), S(  18,  -3), S(  16,   4), S(  21,   8),
-    S( -11,  10), S(  18,   4), S(   6,  12), S(  11,  19),
-    S(   1,   6), S(   0,  15), S(  16,  12), S(  20,  10),
-    S( -45,  15), S( -36,  12), S(  -4,   5), S( -20,   8),
-    S( -40,   2), S( -48,   8), S( -87,  16), S( -91,  24),
+EvalScore BishopPSQT32[32] = {
+    {  18,   0, -18}, {  15,  -2, -20}, { -10,  -9,  -9}, {   9,  -2, -13},
+    {  31,  -1, -34}, {  24,  -4, -32}, {  23,   0, -22}, {  11,   0, -12},
+    {  16,   1, -14}, {  29,   6, -16}, {  17,   5,  -7}, {  21,   7,  -6},
+    {  16,   3, -10}, {  18,   7,  -3}, {  16,  10,   4}, {  21,  14,   8},
+    { -11,   0,  10}, {  18,  11,   4}, {   6,   9,  12}, {  11,  15,  19},
+    {   1,   3,   6}, {   0,   7,  15}, {  16,  14,  12}, {  20,  15,  10},
+    { -45,  15,  15}, { -36, -12,  12}, {  -4,   0,   5}, { -20,  -6,   8},
+    { -40, -19,   2}, { -48, -20,   8}, { -87, -35,  16}, { -91, -33,  24},
 };
 
-const int64_t RookPSQT32[32] = {
-    S( -10, -28), S( -14, -19), S(  -2, -23), S(   7, -29),
-    S( -53, -13), S( -13, -30), S(  -9, -30), S(   1, -33),
-    S( -28, -13), S(  -7, -11), S( -16, -15), S(  -1, -23),
-    S( -16,  -1), S(  -7,   6), S(  -6,   2), S(   6,  -4),
-    S(  -1,   8), S(  14,   5), S(  24,   1), S(  38,  -3),
-    S( -11,  18), S(  27,   5), S(   3,  17), S(  35,   1),
-    S(   2,   7), S( -17,  16), S(   8,   6), S(  22,   7),
-    S(  35,  22), S(  25,  24), S(   6,  29), S(  16,  25),
+EvalScore RookPSQT32[32] = {
+    { -10, -19, -28}, { -14, -16, -19}, {  -2, -12, -23}, {   7, -11, -29},
+    { -53, -33, -13}, { -13, -21, -30}, {  -9, -19, -30}, {   1, -16, -33},
+    { -28, -20, -13}, {  -7,  -9, -11}, { -16, -15, -15}, {  -1, -12, -23},
+    { -16,  -8,  -1}, {  -7,   0,   6}, {  -6,  -2,   2}, {   6,   1,  -4},
+    {  -1,   3,   8}, {  14,   9,   5}, {  24,  12,   1}, {  38,  17,  -3},
+    { -11,   3,  18}, {  27,  16,   5}, {   3,  10,  17}, {  35,  18,   1},
+    {   2,   4,   7}, { -17,   0,  16}, {   8,   7,   6}, {  22,  14,   7},
+    {  35,  28,  22}, {  25,  24,  24}, {   6,  17,  29}, {  16,  20,  25},
 };
 
-const int64_t QueenPSQT32[32] = {
-    S(  23, -52), S(   4, -39), S(  11, -49), S(  20, -41),
-    S(  15, -38), S(  28, -56), S(  30, -72), S(  20, -25),
-    S(  12, -22), S(  27, -19), S(   9,   5), S(  10,   0),
-    S(  13,  -3), S(  15,  17), S(   1,  21), S( -13,  63),
-    S(  -6,  18), S(  -5,  42), S( -14,  22), S( -29,  72),
-    S( -23,  28), S( -14,  19), S( -23,  23), S( -12,  26),
-    S(  -5,  27), S( -60,  64), S(  -9,  16), S( -41,  53),
-    S(  -7,  17), S(  18,   9), S(   9,   9), S(  -6,  20),
+EvalScore QueenPSQT32[32] = {
+    {  23, -14, -52}, {   4, -17, -39}, {  11, -19, -49}, {  20, -10, -41},
+    {  15, -11, -38}, {  28, -14, -56}, {  30, -21, -72}, {  20,  -2, -25},
+    {  12,  -5, -22}, {  27,   4, -19}, {   9,   7,   5}, {  10,   5,   0},
+    {  13,   5,  -3}, {  15,  16,  17}, {   1,  11,  21}, { -13,  25,  63},
+    {  -6,   6,  18}, {  -5,  18,  42}, { -14,   4,  22}, { -29,  21,  72},
+    { -23,   2,  28}, { -14,   2,  19}, { -23,   0,  23}, { -12,   7,  26},
+    {  -5,  11,  27}, { -60,   2,  64}, {  -9,   3,  16}, { -41,   6,  53},
+    {  -7,   5,  17}, {  18,  13,   9}, {   9,   9,   9}, {  -6,   7,  20},
 };
 
-const int64_t KingPSQT32[32] = {
-    S(  41, -80), S(  41, -51), S( -11, -13), S( -26, -22),
-    S(  30, -30), S(  -3, -20), S( -36,   6), S( -50,   8),
-    S(   8, -31), S(  17, -27), S(  17,  -3), S(  -9,  12),
-    S(   2, -36), S(  83, -37), S(  41,   2), S(  -6,  22),
-    S(   4, -20), S(  95, -31), S(  46,  10), S(   2,  19),
-    S(  46, -22), S( 120, -19), S(  94,   6), S(  38,   5),
-    S(   6, -42), S(  47,  -5), S(  32,  10), S(   9,   2),
-    S(   9, -98), S(  75, -51), S( -19, -11), S( -18, -10),
+EvalScore KingPSQT32[32] = {
+    {  41, -19, -80}, {  41,  -5, -51}, { -11, -12, -13}, { -26, -24, -22},
+    {  30,   0, -30}, {  -3, -11, -20}, { -36, -15,   6}, { -50, -21,   8},
+    {   8, -11, -31}, {  17,  -5, -27}, {  17,   7,  -3}, {  -9,   1,  12},
+    {   2, -17, -36}, {  83,  23, -37}, {  41,  21,   2}, {  -6,   8,  22},
+    {   4,  -8, -20}, {  95,  32, -31}, {  46,  28,  10}, {   2,  10,  19},
+    {  46,  12, -22}, { 120,  50, -19}, {  94,  50,   6}, {  38,  21,   5},
+    {   6, -18, -42}, {  47,  21,  -5}, {  32,  21,  10}, {   9,   5,   2},
+    {   9, -44, -98}, {  75,  12, -51}, { -19, -15, -11}, { -18, -14, -10},
 };
 
 /* Pawn Evaluation Terms */
 
-const int64_t PawnCandidatePasser[2][RANK_NB] = {
-   {S(   0,   0), S( -27, -10), S( -11,   9), S( -15,  28),
-    S(  -1,  60), S(  44,  66), S(   0,   0), S(   0,   0)},
-   {S(   0,   0), S( -14,  17), S(  -5,  20), S(   4,  43),
-    S(  17,  82), S(  32,  54), S(   0,   0), S(   0,   0)},
+EvalScore PawnCandidatePasser[2][RANK_NB] = {
+   {{   0,   0,   0}, { -27, -18, -10}, { -11,  -1,   9}, { -15,   6,  28},
+    {  -1,  29,  60}, {  44,  55,  66}, {   0,   0,   0}, {   0,   0,   0}},
+   {{   0,   0,   0}, { -14,   1,  17}, {  -5,   7,  20}, {   4,  23,  43},
+    {  17,  49,  82}, {  32,  43,  54}, {   0,   0,   0}, {   0,   0,   0}},
 };
 
-const int64_t PawnIsolated = S(  -7, -11);
+EvalScore PawnIsolated = {  -7,  -9, -11};
 
-const int64_t PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
+EvalScore PawnStacked[2] = { {  -9, -11, -14}, {  -9,  -9,  -9} };
 
-const int64_t PawnBackwards[2] = { S(   7,   0), S(  -7, -19) };
+EvalScore PawnBackwards[2] = { {   7,   3,   0}, {  -7, -13, -19} };
 
-const int64_t PawnConnected32[32] = {
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
-    S(  -2,  -8), S(  11,   1), S(   3,   1), S(   5,  16),
-    S(  14,  -1), S(  29,  -2), S(  21,   7), S(  24,  15),
-    S(   9,   0), S(  23,   4), S(  10,  11), S(  15,  20),
-    S(  13,   8), S(  22,  14), S(  27,  21), S(  32,  20),
-    S(  57,  25), S(  51,  48), S(  68,  54), S(  84,  58),
-    S( 112,   1), S( 204,  11), S( 228,  31), S( 240,  51),
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
+EvalScore PawnConnected32[32] = {
+    {   0,   0,   0}, {   0,   0,   0}, {   0,   0,   0}, {   0,   0,   0},
+    {  -2,  -5,  -8}, {  11,   6,   1}, {   3,   2,   1}, {   5,  10,  16},
+    {  14,   7,  -1}, {  29,  13,  -2}, {  21,  14,   7}, {  24,  19,  15},
+    {   9,   4,   0}, {  23,  13,   4}, {  10,  10,  11}, {  15,  17,  20},
+    {  13,  10,   8}, {  22,  18,  14}, {  27,  24,  21}, {  32,  26,  20},
+    {  57,  41,  25}, {  51,  49,  48}, {  68,  61,  54}, {  84,  71,  58},
+    { 112,  56,   1}, { 204, 107,  11}, { 228, 129,  31}, { 240, 145,  51},
+    {   0,   0,   0}, {   0,   0,   0}, {   0,   0,   0}, {   0,   0,   0},
 };
 
 /* Knight Evaluation Terms */
 
-const int64_t KnightOutpost[2][2] = {
-    { S(   7, -26), S(  31,  -4) },
-    { S(   4, -26), S(  15,  -4) },
+EvalScore KnightOutpost[2][2] = {
+    { {   7,  -9, -26}, {  31,  13,  -4} },
+    { {   4, -11, -26}, {  15,   5,  -4} },
 };
 
-const int64_t KnightBehindPawn = S(   4,  19);
+EvalScore KnightBehindPawn = {   4,  11,  19};
 
-const int64_t KnightMobility[9] = {
-    S( -74,-104), S( -31, -96), S( -16, -41), S(  -5, -16),
-    S(   6,  -8), S(  11,   8), S(  19,  11), S(  28,  11),
-    S(  40,  -3),
+EvalScore KnightMobility[9] = {
+    { -74, -89,-104}, { -31, -63, -96}, { -16, -28, -41}, {  -5, -10, -16},
+    {   6,  -1,  -8}, {  11,   9,   8}, {  19,  15,  11}, {  28,  19,  11},
+    {  40,  18,  -3},
 };
 
 /* Bishop Evaluation Terms */
 
-const int64_t BishopPair = S(  22,  69);
+EvalScore BishopPair = {  22,  45,  69};
 
-const int64_t BishopRammedPawns = S( -10, -15);
+EvalScore BishopRammedPawns = { -10, -12, -15};
 
-const int64_t BishopOutpost[2][2] = {
-    { S(  10, -12), S(  40,   0) },
-    { S(   5, -12), S(  20,   0) },
+EvalScore BishopOutpost[2][2] = {
+    { {  10,  -1, -12}, {  40,  20,   0} },
+    { {   5,  -3, -12}, {  20,  10,   0} },
 };
 
-const int64_t BishopBehindPawn = S(   3,  18);
+EvalScore BishopBehindPawn = {   3,  10,  18};
 
-const int64_t BishopMobility[14] = {
-    S( -65,-147), S( -30, -95), S( -11, -56), S(  -1, -30),
-    S(   9, -18), S(  17,  -4), S(  20,   6), S(  21,  11),
-    S(  20,  17), S(  24,  18), S(  23,  19), S(  42,   8),
-    S(  42,  18), S(  71, -14),
+EvalScore BishopMobility[14] = {
+    { -65,-106,-147}, { -30, -62, -95}, { -11, -33, -56}, {  -1, -15, -30},
+    {   9,  -4, -18}, {  17,   6,  -4}, {  20,  13,   6}, {  21,  16,  11},
+    {  20,  18,  17}, {  24,  21,  18}, {  23,  21,  19}, {  42,  25,   8},
+    {  42,  30,  18}, {  71,  28, -14},
 };
 
 /* Rook Evaluation Terms */
 
-const int64_t RookFile[2] = { S(  15,   4), S(  35,   3) };
+EvalScore RookFile[2] = { {  15,   9,   4}, {  35,  19,   3} };
 
-const int64_t RookOnSeventh = S(  -2,  26);
+EvalScore RookOnSeventh = {  -2,  12,  26};
 
-const int64_t RookMobility[15] = {
-    S(-148,-113), S( -52,-113), S( -15, -61), S(  -7, -21),
-    S(  -7,  -1), S(  -8,  14), S(  -7,  24), S(  -1,  27),
-    S(   6,  30), S(  10,  34), S(  13,  40), S(  18,  43),
-    S(  19,  47), S(  30,  39), S(  80,   4),
+EvalScore RookMobility[15] = {
+    {-148,-130,-113}, { -52, -82,-113}, { -15, -38, -61}, {  -7, -14, -21},
+    {  -7,  -4,  -1}, {  -8,   3,  14}, {  -7,   8,  24}, {  -1,  13,  27},
+    {   6,  18,  30}, {  10,  22,  34}, {  13,  26,  40}, {  18,  30,  43},
+    {  19,  33,  47}, {  30,  34,  39}, {  80,  42,   4},
 };
 
 /* Queen Evaluation Terms */
 
-const int64_t QueenMobility[28] = {
-    S( -61,-263), S(-210,-387), S( -58,-201), S( -16,-192),
-    S(  -4,-139), S(   0, -84), S(   5, -52), S(   5, -23),
-    S(   9, -16), S(  10,   6), S(  13,  13), S(  14,  28),
-    S(  16,  24), S(  17,  33), S(  15,  37), S(  12,  41),
-    S(  11,  44), S(   3,  45), S(   4,  42), S(  -1,  37),
-    S(   7,  16), S(  22,  -6), S(  27, -34), S(  30, -51),
-    S(  12, -68), S(  24, -95), S( -56, -39), S( -31, -61),
+EvalScore QueenMobility[28] = {
+    { -61,-162,-263}, {-210,-298,-387}, { -58,-129,-201}, { -16,-104,-192},
+    {  -4, -71,-139}, {   0, -42, -84}, {   5, -23, -52}, {   5,  -9, -23},
+    {   9,  -3, -16}, {  10,  11,   6}, {  13,  13,  13}, {  14,  21,  28},
+    {  16,  20,  24}, {  17,  25,  33}, {  15,  26,  37}, {  12,  26,  41},
+    {  11,  27,  44}, {   3,  24,  45}, {   4,  23,  42}, {  -1,  18,  37},
+    {   7,  11,  16}, {  22,  16,  -6}, {  27,  -3, -34}, {  30, -10, -51},
+    {  12, -28, -68}, {  24, -35, -95}, { -56, -47, -39}, { -31, -46, -61},
 };
 
 /* King Evaluation Terms */
 
-const int64_t KingDefenders[12] = {
-    S( -26,   0), S(  -7,  -3), S(   1,   2), S(   8,   5),
-    S(  17,   6), S(  27,   4), S(  31,  -2), S(  13,   0),
-    S(  12,   6), S(  12,   6), S(  12,   6), S(  12,   6),
+EvalScore KingDefenders[12] = {
+    { -26, -13,   0}, {  -7,  -5,  -3}, {   1,   1,   2}, {   8,   6,   5},
+    {  17,  11,   6}, {  27,  15,   4}, {  31,  14,  -2}, {  13,   6,   0},
+    {  12,   9,   6}, {  12,   9,   6}, {  12,   9,   6}, {  12,   9,   6},
 };
 
-const int64_t KingPawnFileProximity[FILE_NB]  = {
-    S(  27,  19), S(  15,  15), S(   3,  10), S( -13, -12),
-    S( -15, -40), S( -14, -56), S( -14, -65), S( -11, -70),
+EvalScore KingPawnFileProximity[FILE_NB]  = {
+    {  27,  23,  19}, {  15,  15,  15}, {   3,   6,  10}, { -13, -12, -12},
+    { -15, -27, -40}, { -14, -35, -56}, { -14, -39, -65}, { -11, -40, -70},
 };
 
-const int64_t KingShelter[2][FILE_NB][RANK_NB] = {
-  {{S( -11,   3), S(  15, -26), S(  20,  -9), S(  12,   4),
-    S(   6,   4), S(   1,   2), S(  -3, -33), S( -49,  18)},
-   {S(  17,  -8), S(  20, -18), S(   1,  -5), S( -14,   4),
-    S( -30,  15), S( -70,  68), S(  92,  82), S( -25,   1)},
-   {S(  35,  -4), S(  14,  -9), S( -28,   7), S( -11,  -8),
-    S( -20,  -4), S( -11,   1), S(   0,  66), S( -12,  -2)},
-   {S(   4,  11), S(  21, -11), S(   4, -11), S(  15, -22),
-    S(  25, -36), S( -58,   5), S(-136,  52), S(   5,  -7)},
-   {S( -15,   7), S(   4,  -4), S( -26,   1), S( -18,   5),
-    S( -20,  -6), S( -41,  -1), S(  33, -17), S(  -6,  -2)},
-   {S(  46, -18), S(  22, -17), S( -21,   2), S( -12, -18),
-    S(   5, -24), S(  17, -21), S(  41, -30), S( -24,   1)},
-   {S(  25, -13), S(  -1, -16), S( -23,  -2), S( -19,  -8),
-    S( -30,  -7), S( -36,  32), S(   0,  44), S( -10,   1)},
-   {S(  -9, -12), S(   6, -19), S(   7,   0), S(  -2,  11),
-    S( -11,  15), S(  -9,  37), S(-190,  87), S( -17,  14)}},
-  {{S(   0,   0), S( -11, -23), S(   4, -18), S( -40,  16),
-    S( -22,   2), S(   3,  42), S(-167,  -8), S( -46,   7)},
-   {S(   0,   0), S(  24, -21), S(   7,  -7), S( -18,  -1),
-    S(  -1, -12), S(  26,  66), S(-184,  -3), S( -39,   3)},
-   {S(   0,   0), S(  30, -11), S(  -2,  -7), S(   7, -17),
-    S(  15,  -7), S( -87,  47), S( -84, -73), S( -20,  -5)},
-   {S(   0,   0), S(  -3,   9), S(  -2,   0), S( -17,   2),
-    S( -27,   1), S( -99,  31), S(   7, -41), S( -22,  -7)},
-   {S(   0,   0), S(  12,   2), S(  11,  -5), S(  14, -11),
-    S(  14, -26), S( -57,  15), S(-104, -61), S(  -1,  -7)},
-   {S(   0,   0), S(   6,  -8), S( -20,   0), S( -27,  -6),
-    S(  17, -24), S( -38,   3), S(  55,  38), S( -18,  -6)},
-   {S(   0,   0), S(  22, -15), S(  11, -13), S(  -9,  -7),
-    S( -27,   9), S(  -9,  15), S( -56, -49), S( -31,  11)},
-   {S(   0,   0), S(  12, -38), S(  19, -27), S( -18,  -4),
-    S( -17,  18), S(  -5,  20), S(-228, -55), S( -22,   1)}},
+EvalScore KingShelter[2][FILE_NB][RANK_NB] = {
+  {{{ -11,  -4,   3}, {  15,  -5, -26}, {  20,   5,  -9}, {  12,   8,   4},
+    {   6,   5,   4}, {   1,   1,   2}, {  -3, -18, -33}, { -49, -15,  18}},
+   {{  17,   4,  -8}, {  20,   1, -18}, {   1,  -2,  -5}, { -14,  -5,   4},
+    { -30,  -7,  15}, { -70,  -1,  68}, {  92,  87,  82}, { -25, -12,   1}},
+   {{  35,  15,  -4}, {  14,   2,  -9}, { -28, -10,   7}, { -11,  -9,  -8},
+    { -20, -12,  -4}, { -11,  -5,   1}, {   0,  33,  66}, { -12,  -7,  -2}},
+   {{   4,   7,  11}, {  21,   5, -11}, {   4,  -3, -11}, {  15,  -3, -22},
+    {  25,  -5, -36}, { -58, -26,   5}, {-136, -42,  52}, {   5,  -1,  -7}},
+   {{ -15,  -4,   7}, {   4,   0,  -4}, { -26, -13,   1}, { -18,  -6,   5},
+    { -20, -13,  -6}, { -41, -21,  -1}, {  33,   8, -17}, {  -6,  -4,  -2}},
+   {{  46,  14, -18}, {  22,   2, -17}, { -21,  -9,   2}, { -12, -15, -18},
+    {   5,  -9, -24}, {  17,  -2, -21}, {  41,   5, -30}, { -24, -12,   1}},
+   {{  25,   6, -13}, {  -1,  -8, -16}, { -23, -12,  -2}, { -19, -13,  -8},
+    { -30, -18,  -7}, { -36,  -2,  32}, {   0,  22,  44}, { -10,  -4,   1}},
+   {{  -9, -10, -12}, {   6,  -6, -19}, {   7,   3,   0}, {  -2,   4,  11},
+    { -11,   2,  15}, {  -9,  14,  37}, {-190, -51,  87}, { -17,  -1,  14}}},
+  {{{   0,   0,   0}, { -11, -17, -23}, {   4,  -7, -18}, { -40, -12,  16},
+    { -22, -10,   2}, {   3,  22,  42}, {-167, -87,  -8}, { -46, -19,   7}},
+   {{   0,   0,   0}, {  24,   1, -21}, {   7,   0,  -7}, { -18,  -9,  -1},
+    {  -1,  -6, -12}, {  26,  46,  66}, {-184, -93,  -3}, { -39, -18,   3}},
+   {{   0,   0,   0}, {  30,   9, -11}, {  -2,  -4,  -7}, {   7,  -5, -17},
+    {  15,   4,  -7}, { -87, -20,  47}, { -84, -78, -73}, { -20, -12,  -5}},
+   {{   0,   0,   0}, {  -3,   3,   9}, {  -2,  -1,   0}, { -17,  -7,   2},
+    { -27, -13,   1}, { -99, -34,  31}, {   7, -17, -41}, { -22, -14,  -7}},
+   {{   0,   0,   0}, {  12,   7,   2}, {  11,   3,  -5}, {  14,   1, -11},
+    {  14,  -6, -26}, { -57, -21,  15}, {-104, -82, -61}, {  -1,  -4,  -7}},
+   {{   0,   0,   0}, {   6,  -1,  -8}, { -20, -10,   0}, { -27, -16,  -6},
+    {  17,  -3, -24}, { -38, -17,   3}, {  55,  46,  38}, { -18, -12,  -6}},
+   {{   0,   0,   0}, {  22,   3, -15}, {  11,  -1, -13}, {  -9,  -8,  -7},
+    { -27,  -9,   9}, {  -9,   3,  15}, { -56, -52, -49}, { -31, -10,  11}},
+   {{   0,   0,   0}, {  12, -13, -38}, {  19,  -4, -27}, { -18, -11,  -4},
+    { -17,   0,  18}, {  -5,   7,  20}, {-228,-141, -55}, { -22, -10,   1}}},
 };
 
-const int64_t KingStorm[2][FILE_NB/2][RANK_NB] = {
-  {{S(  -4,  28), S( 117,  -8), S( -25,  26), S( -19,   8),
-    S( -14,   2), S(  -8,  -4), S( -17,   5), S( -22,  -2)},
-   {S(  -3,  49), S(  57,  12), S( -19,  24), S(  -5,  11),
-    S(  -4,   5), S(   5,  -4), S(  -1,   0), S( -11,   0)},
-   {S(   8,  38), S(  17,  23), S( -23,  21), S( -11,   9),
-    S(   3,   2), S(   7,   0), S(   9,  -7), S(   3,  -1)},
-   {S(  -2,  25), S(  16,  21), S( -17,   9), S( -14,   2),
-    S( -13,   2), S(   7, -11), S(   1,  -8), S( -13,   2)}},
-  {{S(   0,   0), S( -15, -16), S( -17,  -1), S(  18, -17),
-    S(   9,  -7), S(   3, -18), S(  -3,  -1), S(  17,  29)},
-   {S(   0,   0), S( -16, -34), S(  -3,  -8), S(  35, -12),
-    S(  -1,  -2), S(  13, -23), S(  -7, -10), S( -17,   2)},
-   {S(   0,   0), S( -28, -49), S( -27,  -6), S(  11, -11),
-    S(   3,  -2), S(  -8, -14), S( -13, -15), S( -11,   6)},
-   {S(   0,   0), S(  -2, -18), S( -16, -18), S( -12,  -4),
-    S(  -4,  -7), S(   4, -26), S(  72, -11), S(  13,  20)}},
+EvalScore KingStorm[2][FILE_NB/2][RANK_NB] = {
+  {{{  -4,  12,  28}, { 117,  54,  -8}, { -25,   0,  26}, { -19,  -5,   8},
+    { -14,  -6,   2}, {  -8,  -6,  -4}, { -17,  -6,   5}, { -22, -12,  -2}},
+   {{  -3,  23,  49}, {  57,  34,  12}, { -19,   2,  24}, {  -5,   3,  11},
+    {  -4,   0,   5}, {   5,   0,  -4}, {  -1,   0,   0}, { -11,  -5,   0}},
+   {{   8,  23,  38}, {  17,  20,  23}, { -23,  -1,  21}, { -11,  -1,   9},
+    {   3,   2,   2}, {   7,   3,   0}, {   9,   1,  -7}, {   3,   1,  -1}},
+   {{  -2,  11,  25}, {  16,  18,  21}, { -17,  -4,   9}, { -14,  -6,   2},
+    { -13,  -5,   2}, {   7,  -2, -11}, {   1,  -3,  -8}, { -13,  -5,   2}}},
+  {{{   0,   0,   0}, { -15, -15, -16}, { -17,  -9,  -1}, {  18,   0, -17},
+    {   9,   1,  -7}, {   3,  -7, -18}, {  -3,  -2,  -1}, {  17,  23,  29}},
+   {{   0,   0,   0}, { -16, -25, -34}, {  -3,  -5,  -8}, {  35,  11, -12},
+    {  -1,  -1,  -2}, {  13,  -5, -23}, {  -7,  -8, -10}, { -17,  -7,   2}},
+   {{   0,   0,   0}, { -28, -38, -49}, { -27, -16,  -6}, {  11,   0, -11},
+    {   3,   0,  -2}, {  -8, -11, -14}, { -13, -14, -15}, { -11,  -2,   6}},
+   {{   0,   0,   0}, {  -2, -10, -18}, { -16, -17, -18}, { -12,  -8,  -4},
+    {  -4,  -5,  -7}, {   4, -11, -26}, {  72,  30, -11}, {  13,  16,  20}}},
 };
 
 /* King Safety Evaluation Terms */
@@ -279,64 +277,66 @@ const int KSAdjustment      =  -18;
 
 /* Passed Pawn Evaluation Terms */
 
-const int64_t PassedPawn[2][2][RANK_NB] = {
-  {{S(   0,   0), S( -38,   3), S( -55,  21), S( -82,  27),
-    S(  -6,  12), S(  70,  -5), S( 157,  56), S(   0,   0)},
-   {S(   0,   0), S( -29,   7), S( -51,  24), S( -73,  30),
-    S( -13,  31), S(  89,  32), S( 182, 101), S(   0,   0)}},
-  {{S(   0,   0), S( -24,  16), S( -50,  19), S( -73,  33),
-    S(  -3,  36), S(  89,  40), S( 263, 114), S(   0,   0)},
-   {S(   0,   0), S( -29,  12), S( -45,  17), S( -67,  38),
-    S(  -1,  52), S(  92, 117), S( 161, 275), S(   0,   0)}},
+EvalScore PassedPawn[2][2][RANK_NB] = {
+  {{{   0,   0,   0}, { -38, -17,   3}, { -55, -17,  21}, { -82, -27,  27},
+    {  -6,   3,  12}, {  70,  32,  -5}, { 157, 106,  56}, {   0,   0,   0}},
+   {{   0,   0,   0}, { -29, -11,   7}, { -51, -13,  24}, { -73, -21,  30},
+    { -13,   9,  31}, {  89,  60,  32}, { 182, 141, 101}, {   0,   0,   0}}},
+  {{{   0,   0,   0}, { -24,  -4,  16}, { -50, -15,  19}, { -73, -20,  33},
+    {  -3,  16,  36}, {  89,  64,  40}, { 263, 188, 114}, {   0,   0,   0}},
+   {{   0,   0,   0}, { -29,  -8,  12}, { -45, -14,  17}, { -67, -14,  38},
+    {  -1,  25,  52}, {  92, 104, 117}, { 161, 218, 275}, {   0,   0,   0}}},
 };
 
-const int64_t PassedFriendlyDistance[8] = {
-    S(   0,   0), S(   0,   0), S(   3,  -4), S(   7, -10),
-    S(   6, -14), S(  -8, -13), S( -15,  -9), S(   0,   0),
+EvalScore PassedFriendlyDistance[8] = {
+    {   0,   0,   0}, {   0,   0,   0}, {   3,   0,  -4}, {   7,  -1, -10},
+    {   6,  -4, -14}, {  -8, -10, -13}, { -15, -12,  -9}, {   0,   0,   0},
 };
 
-const int64_t PassedEnemyDistance[8] = {
-    S(   0,   0), S(   3,   0), S(   5,   2), S(   9,   9),
-    S(   1,  21), S(   7,  30), S(  24,  28), S(   0,   0),
+EvalScore PassedEnemyDistance[8] = {
+    {   0,   0,   0}, {   3,   1,   0}, {   5,   3,   2}, {   9,   9,   9},
+    {   1,  11,  21}, {   7,  18,  30}, {  24,  26,  28}, {   0,   0,   0},
 };
 
-const int64_t PassedSafePromotionPath = S( -29,  37);
+EvalScore PassedSafePromotionPath = { -29,   4,  37};
 
 /* Threat Evaluation Terms */
 
-const int64_t ThreatWeakPawn             = S( -13, -26);
-const int64_t ThreatMinorAttackedByPawn  = S( -51, -53);
-const int64_t ThreatMinorAttackedByMinor = S( -26, -36);
-const int64_t ThreatMinorAttackedByMajor = S( -23, -44);
-const int64_t ThreatRookAttackedByLesser = S( -49, -19);
-const int64_t ThreatMinorAttackedByKing  = S( -16, -15);
-const int64_t ThreatRookAttackedByKing   = S( -13, -18);
-const int64_t ThreatQueenAttackedByOne   = S( -39, -29);
-const int64_t ThreatOverloadedPieces     = S(  -8, -13);
-const int64_t ThreatByPawnPush           = S(  15,  21);
+EvalScore ThreatWeakPawn             = { -13, -19, -26};
+EvalScore ThreatMinorAttackedByPawn  = { -51, -52, -53};
+EvalScore ThreatMinorAttackedByMinor = { -26, -31, -36};
+EvalScore ThreatMinorAttackedByMajor = { -23, -33, -44};
+EvalScore ThreatRookAttackedByLesser = { -49, -34, -19};
+EvalScore ThreatMinorAttackedByKing  = { -16, -15, -15};
+EvalScore ThreatRookAttackedByKing   = { -13, -15, -18};
+EvalScore ThreatQueenAttackedByOne   = { -39, -34, -29};
+EvalScore ThreatOverloadedPieces     = {  -8, -10, -13};
+EvalScore ThreatByPawnPush           = {  15,  18,  21};
 
 /* Closedness Evaluation Terms */
 
-const int64_t ClosednessKnightAdjustment[9] = {
-    S( -11, -11), S(  -9,   3), S(  -8,  11), S(  -3,  13),
-    S(  -1,  18), S(   2,  16), S(   5,  13), S(  -6,  28),
-    S(  -7,  16),
+EvalScore ClosednessKnightAdjustment[9] = {
+    { -11, -11, -11}, {  -9,  -3,   3}, {  -8,   1,  11}, {  -3,   5,  13},
+    {  -1,   8,  18}, {   2,   9,  16}, {   5,   9,  13}, {  -6,  11,  28},
+    {  -7, -11,  16},
 };
 
-const int64_t ClosednessRookAdjustment[9] = {
-    S(  47,  -9), S(   7,  23), S(   3,  13), S(  -3,   4),
-    S(  -7,   3), S(  -9,  -8), S( -13, -11), S( -21, -15),
-    S( -26, -16),
+EvalScore ClosednessRookAdjustment[9] = {
+    {  47,  18,  -9}, {   7,  15,  23}, {   3,   8,  13}, {  -3,   0,   4},
+    {  -7,  -2,   3}, {  -9,  -8,  -8}, { -13, -12, -11}, { -21, -18, -15},
+    { -26, -21, -16},
 };
 
 /* Complexity Evaluation Terms */
 
-const int64_t ComplexityTotalPawns  = S(   0,   7);
-const int64_t ComplexityPawnFlanks  = S(   0,  49);
-const int64_t ComplexityPawnEndgame = S(   0,  34);
-const int64_t ComplexityAdjustment  = S(   0,-110);
+EvalScore ComplexityTotalPawns  = {   0,   0,   7};
+EvalScore ComplexityPawnFlanks  = {   0,   0,  49};
+EvalScore ComplexityPawnEndgame = {   0,   0,  34};
+EvalScore ComplexityAdjustment  = {   0,   0,-110};
 
 /* General Evaluation Terms */
+
+//FIXME COUNT : 495/625
 
 const int Tempo = 20;
 
@@ -345,19 +345,18 @@ const int Tempo = 20;
 int evaluateBoard(Board *board, PKTable *pktable) {
 
     EvalInfo ei;
-    int64_t eval = SCORE_ZERO, pkeval = SCORE_ZERO;;
+    EvalScore eval = SCORE_ZERO, pkeval = SCORE_ZERO;;
     int interpolatedEval, phase, earlyPhase, latePhase, factor;
-
-    printf("----------NEW POSITION -------------\n");
 
     // Setup and perform all evaluations
     initEvalInfo(&ei, board, pktable);
     eval   = evaluatePieces(&ei, board);
-    pkeval = ei.pkeval[WHITE] - ei.pkeval[BLACK];
-    eval  += pkeval + board->psqtmat;
-    printf("PSQT Eval: %" PRId64 " --- OG: %i, MG: %i, EG: %i\n", board->psqtmat, ScoreOG(board->psqtmat), ScoreMG(board->psqtmat), ScoreEG(board->psqtmat));
-    eval  += evaluateClosedness(&ei, board);
-    eval  += evaluateComplexity(&ei, board, eval);
+    pkeval = ei.pkeval[WHITE];
+    addTo(&pkeval, neg(&ei.pkeval[BLACK]));
+    addTo(&eval, pkeval);
+    addTo(&eval, board->psqtmat);
+    addTo(&eval, evaluateClosedness(&ei, board));
+    addTo(&eval, evaluateComplexity(&ei, board, eval));
 
     // Calculate the game phase based on remaining material (Fruit Method)
     // TODO : try out other combinations
@@ -374,11 +373,11 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     factor = evaluateScaleFactor(board, eval);
 
     // Compute the interpolated and scaled evaluation
-    interpolatedEval = (ScoreOG(eval) * earlyPhase
-                     + ScoreMG(eval) * (384 - earlyPhase - latePhase)
-                     + ScoreEG(eval) * latePhase * factor / SCALE_NORMAL);
+    interpolatedEval = eval.og * earlyPhase
+                     + eval.mg * (384 - earlyPhase - latePhase)
+                     + eval.eg * latePhase * factor / SCALE_NORMAL;
 
-    printf("Eval: %" PRId64 " --- OG: %i, MG: %i, EG: %i\n", eval, ScoreOG(eval), ScoreMG(eval), ScoreEG(eval));
+    printf("Eval: --- OG: %i, MG: %i, EG: %i\n", eval.og, eval.mg, eval.eg);
 
     // Factor in the Tempo after interpolation and scaling, so that
     // in the search we can assume that if a null move is made, then
@@ -393,28 +392,45 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     return board->turn == WHITE ? interpolatedEval : -interpolatedEval;
 }
 
-int64_t evaluatePieces(EvalInfo *ei, Board *board) {
+EvalScore evaluatePieces(EvalInfo *ei, Board *board) {
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
+    EvalScore temp;
 
-    eval  =   evaluatePawns(ei, board, WHITE)   - evaluatePawns(ei, board, BLACK);
-    eval += evaluateKnights(ei, board, WHITE) - evaluateKnights(ei, board, BLACK);
-    eval += evaluateBishops(ei, board, WHITE) - evaluateBishops(ei, board, BLACK);
-    eval +=   evaluateRooks(ei, board, WHITE)   - evaluateRooks(ei, board, BLACK);
-    eval +=  evaluateQueens(ei, board, WHITE)  - evaluateQueens(ei, board, BLACK);
-    eval +=   evaluateKings(ei, board, WHITE)   - evaluateKings(ei, board, BLACK);
-    eval +=  evaluatePassed(ei, board, WHITE)  - evaluatePassed(ei, board, BLACK);
-    eval += evaluateThreats(ei, board, WHITE) - evaluateThreats(ei, board, BLACK);
+    addTo(&eval,  evaluatePawns(ei, board, WHITE) );
+    temp =        evaluatePawns(ei, board, BLACK);
+    addTo(&eval, neg(&temp));
+    addTo(&eval, evaluateKnights(ei, board, WHITE) );
+    temp =       evaluateKnights(ei, board, BLACK);
+    addTo(&eval, neg(&temp));
+    addTo(&eval,evaluateBishops(ei, board, WHITE) );
+    temp =      evaluateBishops(ei, board, BLACK);
+    addTo(&eval, neg(&temp));
+    addTo(&eval,  evaluateRooks(ei, board, WHITE) );
+    temp =        evaluateRooks(ei, board, BLACK);
+    addTo(&eval, neg(&temp));
+    addTo(&eval, evaluateQueens(ei, board, WHITE) );
+    temp =       evaluateQueens(ei, board, BLACK);
+    addTo(&eval, neg(&temp));
+    addTo(&eval,  evaluateKings(ei, board, WHITE) );
+    temp =        evaluateKings(ei, board, BLACK);
+    addTo(&eval, neg(&temp));
+    addTo(&eval, evaluatePassed(ei, board, WHITE) );
+    temp =       evaluatePassed(ei, board, BLACK);
+    addTo(&eval, neg(&temp));
+    addTo(&eval,evaluateThreats(ei, board, WHITE) );
+    temp =      evaluateThreats(ei, board, BLACK);
+    addTo(&eval, neg(&temp));
 
     return eval;
 }
 
-int64_t evaluatePawns(EvalInfo *ei, Board *board, int colour) {
+EvalScore evaluatePawns(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
     const int Forward = (colour == WHITE) ? 8 : -8;
 
-    int64_t eval = SCORE_ZERO, pkeval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO, pkeval = SCORE_ZERO;
     int sq, flag;
     uint64_t pawns, myPawns, tempPawns, enemyPawns, attacks;
 
@@ -458,7 +474,7 @@ int64_t evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // square then exchanging our supporters with the remaining stoppers
         else if (!leftovers && popcount(pushSupport) >= popcount(pushThreats)) {
             flag = popcount(support) >= popcount(threats);
-            pkeval += PawnCandidatePasser[flag][relativeRankOf(US, sq)];
+            addTo(&pkeval, PawnCandidatePasser[flag][relativeRankOf(US, sq)]);
             if (TRACE) T.PawnCandidatePasser[flag][relativeRankOf(US, sq)][US]++;
         }
 
@@ -466,7 +482,7 @@ int64_t evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // are able to capture another pawn to not be isolated, as they may
         // have the potential to deisolate by capturing, or be traded away
         if (!threats && !neighbors) {
-            pkeval += PawnIsolated;
+            addTo(&pkeval, PawnIsolated);
             if (TRACE) T.PawnIsolated[US]++;
         }
 
@@ -477,7 +493,7 @@ int64_t evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         if (several(Files[fileOf(sq)] & myPawns)) {
             flag = (stoppers && (threats || neighbors))
                 || (stoppers & ~forwardFileMasks(US, sq));
-            pkeval += PawnStacked[flag];
+            addTo(&pkeval, PawnStacked[flag]);
             if (TRACE) T.PawnStacked[flag][US]++;
         }
 
@@ -486,28 +502,28 @@ int64_t evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // backwards at the same time. We don't give backward pawns a connected bonus
         if (neighbors && pushThreats && !backup) {
             flag = !(Files[fileOf(sq)] & enemyPawns);
-            pkeval += PawnBackwards[flag];
+            addTo(&pkeval, PawnBackwards[flag]);
             if (TRACE) T.PawnBackwards[flag][US]++;
         }
 
         // Apply a bonus if the pawn is connected and not backwards. We consider a
         // pawn to be connected when there is a pawn lever or the pawn is supported
         else if (pawnConnectedMasks(US, sq) & myPawns) {
-            pkeval += PawnConnected32[relativeSquare32(US, sq)];
+            addTo(&pkeval, PawnConnected32[relativeSquare32(US, sq)]);
             if (TRACE) T.PawnConnected32[relativeSquare32(US, sq)][US]++;
         }
     }
 
     ei->pkeval[US] = pkeval; // Save eval for the Pawn Hash
 
-    return eval;
+    return eval; //FIXME eval is always zero, why even bother returning it ?
 }
 
-int64_t evaluateKnights(EvalInfo *ei, Board *board, int colour) {
+EvalScore evaluateKnights(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
     int sq, outside, defended, count;
     uint64_t attacks;
 
@@ -536,19 +552,19 @@ int64_t evaluateKnights(EvalInfo *ei, Board *board, int colour) {
             && !(outpostSquareMasks(US, sq) & enemyPawns)) {
             outside  = testBit(FILE_A | FILE_H, sq);
             defended = testBit(ei->pawnAttacks[US], sq);
-            eval += KnightOutpost[outside][defended];
+            addTo(&eval, KnightOutpost[outside][defended]);
             if (TRACE) T.KnightOutpost[outside][defended][US]++;
         }
 
         // Apply a bonus if the knight is behind a pawn
         if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
-            eval += KnightBehindPawn;
+            addTo(&eval, KnightBehindPawn);
             if (TRACE) T.KnightBehindPawn[US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the knight
         count = popcount(ei->mobilityAreas[US] & attacks);
-        eval += KnightMobility[count];
+        addTo(&eval, KnightMobility[count]);
         if (TRACE) T.KnightMobility[count][US]++;
 
         // Update King Safety calculations
@@ -562,11 +578,11 @@ int64_t evaluateKnights(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int64_t evaluateBishops(EvalInfo *ei, Board *board, int colour) {
+EvalScore evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
     int sq, outside, defended, count;
     uint64_t attacks;
 
@@ -577,7 +593,7 @@ int64_t evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
     // Apply a bonus for having a pair of bishops
     if ((tempBishops & WHITE_SQUARES) && (tempBishops & BLACK_SQUARES)) {
-        eval += BishopPair;
+        addTo(&eval, BishopPair);
         if (TRACE) T.BishopPair[US]++;
     }
 
@@ -598,7 +614,7 @@ int64_t evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         // Apply a penalty for the bishop based on number of rammed pawns
         // of our own colour, which reside on the same shade of square as the bishop
         count = popcount(ei->rammedPawns[US] & squaresOfMatchingColour(sq));
-        eval += count * BishopRammedPawns;
+        addTo(&eval, intMult(&BishopRammedPawns, count));
         if (TRACE) T.BishopRammedPawns[US] += count;
 
         // Apply a bonus if the bishop is on an outpost square, and cannot be attacked
@@ -607,19 +623,19 @@ int64_t evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             && !(outpostSquareMasks(US, sq) & enemyPawns)) {
             outside  = testBit(FILE_A | FILE_H, sq);
             defended = testBit(ei->pawnAttacks[US], sq);
-            eval += BishopOutpost[outside][defended];
+            addTo(&eval, BishopOutpost[outside][defended]);
             if (TRACE) T.BishopOutpost[outside][defended][US]++;
         }
 
         // Apply a bonus if the bishop is behind a pawn
         if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
-            eval += BishopBehindPawn;
+            addTo(&eval, BishopBehindPawn);
             if (TRACE) T.BishopBehindPawn[US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
         count = popcount(ei->mobilityAreas[US] & attacks);
-        eval += BishopMobility[count];
+        addTo(&eval, BishopMobility[count]);
         if (TRACE) T.BishopMobility[count][US]++;
 
         // Update King Safety calculations
@@ -633,11 +649,11 @@ int64_t evaluateBishops(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int64_t evaluateRooks(EvalInfo *ei, Board *board, int colour) {
+EvalScore evaluateRooks(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
     int sq, open, count;
     uint64_t attacks;
 
@@ -646,10 +662,6 @@ int64_t evaluateRooks(EvalInfo *ei, Board *board, int colour) {
     uint64_t tempRooks  = board->pieces[ROOK] & board->colours[  US];
 
     ei->attackedBy[US][ROOK] = 0ull;
-
-
-    printf("STEP 1 - rook eval : %i %i %i\n", ScoreOG(eval), ScoreMG(eval), ScoreEG(eval));
-
 
     // Evaluate each rook
     while (tempRooks) {
@@ -669,7 +681,7 @@ int64_t evaluateRooks(EvalInfo *ei, Board *board, int colour) {
         // colour on the file. If there are no pawns at all, it is an open file
         if (!(myPawns & Files[fileOf(sq)])) {
             open = !(enemyPawns & Files[fileOf(sq)]);
-            eval += RookFile[open];
+            addTo(&eval, RookFile[open]);
             if (TRACE) T.RookFile[open][US]++;
         }
 
@@ -677,16 +689,13 @@ int64_t evaluateRooks(EvalInfo *ei, Board *board, int colour) {
         // colour so long as the enemy king is on the last two ranks of the board
         if (   relativeRankOf(US, sq) == 6
             && relativeRankOf(US, ei->kingSquare[THEM]) >= 6) {
-            eval += RookOnSeventh;
+            addTo(&eval, RookOnSeventh);
             if (TRACE) T.RookOnSeventh[US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the rook
         count = popcount(ei->mobilityAreas[US] & attacks);
-        eval += RookMobility[count];
-
-        printf("STEP 2 - rook eval : %i %i %i --- Last added term (mobility) : %i %i %i\n", ScoreOG(eval), ScoreMG(eval), ScoreEG(eval), ScoreOG(RookMobility[count]), ScoreMG(RookMobility[count]), ScoreEG(RookMobility[count]));
-
+        addTo(&eval, RookMobility[count]);
         if (TRACE) T.RookMobility[count][US]++;
 
         // Update King Safety calculations
@@ -700,11 +709,11 @@ int64_t evaluateRooks(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int64_t evaluateQueens(EvalInfo *ei, Board *board, int colour) {
+EvalScore evaluateQueens(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
     int sq, count;
     uint64_t tempQueens, attacks;
 
@@ -728,7 +737,7 @@ int64_t evaluateQueens(EvalInfo *ei, Board *board, int colour) {
 
         // Apply a bonus (or penalty) based on the mobility of the queen
         count = popcount(ei->mobilityAreas[US] & attacks);
-        eval += QueenMobility[count];
+        addTo(&eval, QueenMobility[count]);
         if (TRACE) T.QueenMobility[count][US]++;
 
         // Update King Safety calculations
@@ -742,11 +751,11 @@ int64_t evaluateQueens(EvalInfo *ei, Board *board, int colour) {
     return eval;
 }
 
-int64_t evaluateKings(EvalInfo *ei, Board *board, int colour) {
+EvalScore evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
     int count, dist, blocked;
 
     uint64_t myPawns     = board->pieces[PAWN ] & board->colours[  US];
@@ -763,7 +772,7 @@ int64_t evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
     // Bonus for our pawns and minors sitting within our king area
     count = popcount(defenders & ei->kingAreas[US]);
-    eval += KingDefenders[count];
+    addTo(&eval, KingDefenders[count]);
     if (TRACE) T.KingDefenders[count][US]++;
 
     // Perform King Safety when we have two attackers, or
@@ -812,7 +821,9 @@ int64_t evaluateKings(EvalInfo *ei, Board *board, int colour) {
                + KSAdjustment;
 
         // Convert safety to an MG and EG score, if we are unsafe
-        if (count > 0) eval -= OldMakeScore(count * count / 720, count / 20);
+        EvalScore KD = { -(count*count / 720), -((count*count / 720 + count / 20)/2), -(count / 20) };
+
+        if (count > 0) addTo(&eval, KD);
     }
 
     // Everything else is stored in the Pawn King Table
@@ -822,7 +833,7 @@ int64_t evaluateKings(EvalInfo *ei, Board *board, int colour) {
     // file-wise pawn. If there is no pawn, kingPawnFileDistance() returns the
     // same distance for both sides causing this evaluation term to be neutral
     dist = kingPawnFileDistance(board->pieces[PAWN], kingSq);
-    ei->pkeval[US] += KingPawnFileProximity[dist];
+    addTo(&ei->pkeval[US], KingPawnFileProximity[dist]);
     if (TRACE) T.KingPawnFileProximity[dist][US]++;
 
     // Evaluate King Shelter & King Storm threat by looking at the file of our King,
@@ -840,24 +851,24 @@ int64_t evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         // Evaluate King Shelter using pawn distance. Use separate evaluation
         // depending on the file, and if we are looking at the King's file
-        ei->pkeval[US] += KingShelter[file == fileOf(kingSq)][file][ourDist];
+        addTo(&ei->pkeval[US], KingShelter[file == fileOf(kingSq)][file][ourDist]);
         if (TRACE) T.KingShelter[file == fileOf(kingSq)][file][ourDist][US]++;
 
         // Evaluate King Storm using enemy pawn distance. Use a separate evaluation
         // depending on the file, and if the opponent's pawn is blocked by our own
         blocked = (ourDist != 7 && (ourDist == theirDist - 1));
-        ei->pkeval[US] += KingStorm[blocked][mirrorFile(file)][theirDist];
+        addTo(&ei->pkeval[US], KingStorm[blocked][mirrorFile(file)][theirDist]);
         if (TRACE) T.KingStorm[blocked][mirrorFile(file)][theirDist][US]++;
     }
 
     return eval;
 }
 
-int64_t evaluatePassed(EvalInfo *ei, Board *board, int colour) {
+EvalScore evaluatePassed(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
     int sq, rank, dist, flag, canAdvance, safeAdvance;
 
     uint64_t bitboard;
@@ -875,35 +886,35 @@ int64_t evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         // Evaluate based on rank, ability to advance, and safety
         canAdvance = !(bitboard & occupied);
         safeAdvance = !(bitboard & ei->attacked[THEM]);
-        eval += PassedPawn[canAdvance][safeAdvance][rank];
+        addTo(&eval, PassedPawn[canAdvance][safeAdvance][rank]);
         if (TRACE) T.PassedPawn[canAdvance][safeAdvance][rank][US]++;
 
         // Evaluate based on distance from our king
         dist = distanceBetween(sq, ei->kingSquare[US]);
-        eval += dist * PassedFriendlyDistance[rank];
+        addTo(&eval, intMult(&PassedFriendlyDistance[rank], dist));
         if (TRACE) T.PassedFriendlyDistance[rank][US] += dist;
 
         // Evaluate based on distance from their king
         dist = distanceBetween(sq, ei->kingSquare[THEM]);
-        eval += dist * PassedEnemyDistance[rank];
+        addTo(&eval, intMult(&PassedEnemyDistance[rank], dist));
         if (TRACE) T.PassedEnemyDistance[rank][US] += dist;
 
         // Apply a bonus when the path to promoting is uncontested
         bitboard = forwardRanksMasks(US, rankOf(sq)) & Files[fileOf(sq)];
         flag = !(bitboard & (board->colours[THEM] | ei->attacked[THEM]));
-        eval += flag * PassedSafePromotionPath;
+        addTo(&eval, intMult(&PassedSafePromotionPath, flag));
         if (TRACE) T.PassedSafePromotionPath[US] += flag;
     }
 
     return eval;
 }
 
-int64_t evaluateThreats(EvalInfo *ei, Board *board, int colour) {
+EvalScore evaluateThreats(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
     const uint64_t Rank3Rel = US == WHITE ? RANK_3 : RANK_6;
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
     int count;
 
     uint64_t friendly = board->colours[  US];
@@ -942,60 +953,60 @@ int64_t evaluateThreats(EvalInfo *ei, Board *board, int colour) {
 
     // Penalty for each of our poorly supported pawns
     count = popcount(pawns & ~attacksByPawns & poorlyDefended);
-    eval += count * ThreatWeakPawn;
+    addTo(&eval, intMult(&ThreatWeakPawn, count));
     if (TRACE) T.ThreatWeakPawn[US] += count;
 
     // Penalty for pawn threats against our minors
     count = popcount((knights | bishops) & attacksByPawns);
-    eval += count * ThreatMinorAttackedByPawn;
+    addTo(&eval, intMult(&ThreatMinorAttackedByPawn, count));
     if (TRACE) T.ThreatMinorAttackedByPawn[US] += count;
 
     // Penalty for any minor threat against minor pieces
     count = popcount((knights | bishops) & attacksByMinors);
-    eval += count * ThreatMinorAttackedByMinor;
+    addTo(&eval, intMult(&ThreatMinorAttackedByMinor, count));
     if (TRACE) T.ThreatMinorAttackedByMinor[US] += count;
 
     // Penalty for all major threats against poorly supported minors
     count = popcount(weakMinors & attacksByMajors);
-    eval += count * ThreatMinorAttackedByMajor;
+    addTo(&eval, intMult(&ThreatMinorAttackedByMajor, count));
     if (TRACE) T.ThreatMinorAttackedByMajor[US] += count;
 
     // Penalty for pawn and minor threats against our rooks
     count = popcount(rooks & (attacksByPawns | attacksByMinors));
-    eval += count * ThreatRookAttackedByLesser;
+    addTo(&eval, intMult(&ThreatRookAttackedByLesser, count));
     if (TRACE) T.ThreatRookAttackedByLesser[US] += count;
 
     // Penalty for king threats against our poorly defended minors
     count = popcount(weakMinors & ei->attackedBy[THEM][KING]);
-    eval += count * ThreatMinorAttackedByKing;
+    addTo(&eval, intMult(&ThreatMinorAttackedByKing, count));
     if (TRACE) T.ThreatMinorAttackedByKing[US] += count;
 
     // Penalty for king threats against our poorly defended rooks
     count = popcount(rooks & poorlyDefended & ei->attackedBy[THEM][KING]);
-    eval += count * ThreatRookAttackedByKing;
+    addTo(&eval, intMult(&ThreatRookAttackedByKing, count));
     if (TRACE) T.ThreatRookAttackedByKing[US] += count;
 
     // Penalty for any threat against our queens
     count = popcount(queens & ei->attacked[THEM]);
-    eval += count * ThreatQueenAttackedByOne;
+    addTo(&eval, intMult(&ThreatQueenAttackedByOne, count));
     if (TRACE) T.ThreatQueenAttackedByOne[US] += count;
 
     // Penalty for any overloaded minors or majors
     count = popcount(overloaded);
-    eval += count * ThreatOverloadedPieces;
+    addTo(&eval, intMult(&ThreatOverloadedPieces, count));
     if (TRACE) T.ThreatOverloadedPieces[US] += count;
 
     // Bonus for giving threats by safe pawn pushes
     count = popcount(pushThreat);
-    eval += count * ThreatByPawnPush;
+    addTo(&eval, intMult(&ThreatByPawnPush, count));
     if (TRACE) T.ThreatByPawnPush[colour] += count;
 
     return eval;
 }
 
-int64_t evaluateClosedness(EvalInfo *ei, Board *board) {
+EvalScore evaluateClosedness(EvalInfo *ei, Board *board) {
 
-    int64_t eval = SCORE_ZERO;
+    EvalScore eval = SCORE_ZERO;
     int closedness, count;
 
     uint64_t white = board->colours[WHITE];
@@ -1012,18 +1023,18 @@ int64_t evaluateClosedness(EvalInfo *ei, Board *board) {
 
     // Evaluate Knights based on how Closed the position is
     count = popcount(white & knights) - popcount(black & knights);
-    eval += count * ClosednessKnightAdjustment[closedness];
+    addTo(&eval, intMult(&ClosednessKnightAdjustment[closedness], count));
     if (TRACE) T.ClosednessKnightAdjustment[closedness][WHITE] += count;
 
     // Evaluate Rooks based on how Closed the position is
     count = popcount(white & rooks) - popcount(black & rooks);
-    eval += count * ClosednessRookAdjustment[closedness];
+    addTo(&eval, intMult(&ClosednessRookAdjustment[closedness], count));
     if (TRACE) T.ClosednessRookAdjustment[closedness][WHITE] += count;
 
     return eval;
 }
 
-int64_t evaluateComplexity(EvalInfo *ei, Board *board, int64_t eval) {
+EvalScore evaluateComplexity(EvalInfo *ei, Board *board, EvalScore eval) {
 
     // Adjust endgame evaluation based on features related to how
     // likely the stronger side is to convert the position.
@@ -1031,9 +1042,8 @@ int64_t evaluateComplexity(EvalInfo *ei, Board *board, int64_t eval) {
 
     (void) ei; // Silence compiler warning
 
-    int complexity;
-    int eg = ScoreEG(eval);
-    int sign = (eg > 0) - (eg < 0);
+    EvalScore complexity = SCORE_ZERO;
+    int sign = (eval.eg > 0) - (eval.eg < 0);
 
     int pawnsOnBothFlanks = (board->pieces[PAWN] & LEFT_FLANK )
                          && (board->pieces[PAWN] & RIGHT_FLANK);
@@ -1044,10 +1054,11 @@ int64_t evaluateComplexity(EvalInfo *ei, Board *board, int64_t eval) {
     uint64_t queens  = board->pieces[QUEEN ];
 
     // Compute the initiative bonus or malus for the attacking side
-    complexity =  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
-               +  ComplexityPawnFlanks  * pawnsOnBothFlanks
-               +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
-               +  ComplexityAdjustment;
+    addTo(&complexity, intMult(&ComplexityTotalPawns, popcount(board->pieces[PAWN])));
+    addTo(&complexity, intMult(&ComplexityPawnFlanks, pawnsOnBothFlanks));
+    if(!(knights | bishops | rooks | queens))
+        addTo(&complexity, ComplexityPawnEndgame); 
+    addTo(&complexity, ComplexityAdjustment);
 
     if (TRACE) T.ComplexityTotalPawns[WHITE]  += sign * popcount(board->pieces[PAWN]);
     if (TRACE) T.ComplexityPawnFlanks[WHITE]  += sign * pawnsOnBothFlanks;
@@ -1055,12 +1066,13 @@ int64_t evaluateComplexity(EvalInfo *ei, Board *board, int64_t eval) {
     if (TRACE) T.ComplexityAdjustment[WHITE]  += sign;
 
     // Avoid changing which side has the advantage
-    int v = sign * MAX(ScoreEG(complexity), -abs(eg));
+    int v = sign * MAX(complexity.eg, -abs(eval.eg));
 
-    return OldMakeScore(0, v);
+    EvalScore result = { 0, 0, v };
+    return result;
 }
 
-int64_t evaluateScaleFactor(Board *board, int64_t eval) {
+int evaluateScaleFactor(Board *board, EvalScore eval) {
 
     // Scale endgames based on remaining material. Currently, we only
     // look for OCB endgames that include only one Knight or one Rook
@@ -1090,7 +1102,7 @@ int64_t evaluateScaleFactor(Board *board, int64_t eval) {
             return SCALE_OCB_ONE_ROOK;
     }
 
-    int eg = ScoreEG(eval);
+    int eg = eval.eg;
 
     // Lone minor vs king and pawns, never give the advantage to the side with the minor
     if ( (eg > 0) && popcount(white) == 2 && (white & (knights | bishops)))
@@ -1165,20 +1177,32 @@ void initEval() {
         const int w32 = relativeSquare32(WHITE, sq);
         const int b32 = relativeSquare32(BLACK, sq);
 
-        PSQT[WHITE_PAWN  ][sq] = + PawnValue   +   PawnPSQT32[w32];
-        printf("RAW | PawnValue : %" PRId64 " --- PawnPSQT32 for this square : %" PRId64 " --- Sum : %" PRId64 "\n", PawnValue, PawnPSQT32[w32], PSQT[WHITE_PAWN  ][sq]);
-        printf("PawnValue : %i %i %i --- PawnPSQT32 for this square : %i %i %i --- Sum : %i %i %i\n", ScoreOG(PawnValue), ScoreMG(PawnValue), ScoreEG(PawnValue), ScoreOG(PawnPSQT32[w32]), ScoreMG(PawnPSQT32[w32]), ScoreEG(PawnPSQT32[w32]), ScoreOG(PSQT[WHITE_PAWN  ][sq]), ScoreMG(PSQT[WHITE_PAWN  ][sq]), ScoreEG(PSQT[WHITE_PAWN  ][sq]));
-        PSQT[WHITE_KNIGHT][sq] = + KnightValue + KnightPSQT32[w32];
-        PSQT[WHITE_BISHOP][sq] = + BishopValue + BishopPSQT32[w32];
-        PSQT[WHITE_ROOK  ][sq] = + RookValue   +   RookPSQT32[w32];
-        PSQT[WHITE_QUEEN ][sq] = + QueenValue  +  QueenPSQT32[w32];
-        PSQT[WHITE_KING  ][sq] = + KingValue   +   KingPSQT32[w32];
+        PSQT[WHITE_PAWN  ][sq] = PawnValue;
+        PSQT[WHITE_KNIGHT][sq] = KnightValue;
+        PSQT[WHITE_BISHOP][sq] = BishopValue;
+        PSQT[WHITE_ROOK  ][sq] = RookValue;
+        PSQT[WHITE_QUEEN ][sq] = QueenValue;
+        PSQT[WHITE_KING  ][sq] = KingValue;
 
-        PSQT[BLACK_PAWN  ][sq] = - PawnValue   -   PawnPSQT32[b32];
-        PSQT[BLACK_KNIGHT][sq] = - KnightValue - KnightPSQT32[b32];
-        PSQT[BLACK_BISHOP][sq] = - BishopValue - BishopPSQT32[b32];
-        PSQT[BLACK_ROOK  ][sq] = - RookValue   -   RookPSQT32[b32];
-        PSQT[BLACK_QUEEN ][sq] = - QueenValue  -  QueenPSQT32[b32];
-        PSQT[BLACK_KING  ][sq] = - KingValue   -   KingPSQT32[b32];
+        PSQT[BLACK_PAWN  ][sq] = neg(&PawnValue);
+        PSQT[BLACK_KNIGHT][sq] = neg(&KnightValue);
+        PSQT[BLACK_BISHOP][sq] = neg(&BishopValue);
+        PSQT[BLACK_ROOK  ][sq] = neg(&RookValue);
+        PSQT[BLACK_QUEEN ][sq] = neg(&QueenValue);
+        PSQT[BLACK_KING  ][sq] = neg(&KingValue);
+
+        addTo(&PSQT[WHITE_PAWN  ][sq],   PawnPSQT32[w32]);
+        addTo(&PSQT[WHITE_KNIGHT][sq], KnightPSQT32[w32]);
+        addTo(&PSQT[WHITE_BISHOP][sq], BishopPSQT32[w32]);
+        addTo(&PSQT[WHITE_ROOK  ][sq],   RookPSQT32[w32]);
+        addTo(&PSQT[WHITE_QUEEN ][sq],  QueenPSQT32[w32]);
+        addTo(&PSQT[WHITE_KING  ][sq],   KingPSQT32[w32]);
+
+        addTo(&PSQT[BLACK_PAWN  ][sq],   neg(&PawnPSQT32[b32]));
+        addTo(&PSQT[BLACK_KNIGHT][sq], neg(&KnightPSQT32[b32]));
+        addTo(&PSQT[BLACK_BISHOP][sq], neg(&BishopPSQT32[b32]));
+        addTo(&PSQT[BLACK_ROOK  ][sq],   neg(&RookPSQT32[b32]));
+        addTo(&PSQT[BLACK_QUEEN ][sq],  neg(&QueenPSQT32[b32]));
+        addTo(&PSQT[BLACK_KING  ][sq],   neg(&KingPSQT32[b32]));
     }
 }

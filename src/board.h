@@ -28,14 +28,14 @@ struct Board {
     uint64_t hash, pkhash, kingAttackers;
     uint64_t castleRooks, castleMasks[SQUARE_NB];
     int turn, epSquare, halfMoveCounter, fullMoveCounter;
-    int64_t psqtmat;
+    EvalScore psqtmat;
     int numMoves, chess960;
     uint64_t history[512];
 };
 
 struct Undo {
     uint64_t hash, pkhash, kingAttackers, castleRooks;
-    int64_t psqtmat;
+    EvalScore psqtmat;
     int epSquare, halfMoveCounter, capturePiece;
 };
 

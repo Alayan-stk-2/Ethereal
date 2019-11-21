@@ -53,6 +53,7 @@ static void clearBoard(Board *board) {
 
     memset(board, 0, sizeof(Board));
     memset(&board->squares, EMPTY, sizeof(board->squares));
+    board->psqtmat = SCORE_ZERO;
 }
 
 static void setSquare(Board *board, int colour, int piece, int sq) {
@@ -69,7 +70,7 @@ static void setSquare(Board *board, int colour, int piece, int sq) {
     setBit(&board->colours[colour], sq);
     setBit(&board->pieces[piece], sq);
 
-    board->psqtmat += PSQT[board->squares[sq]][sq];
+    addTo(&board->psqtmat, PSQT[board->squares[sq]][sq]);
     board->hash ^= ZobristKeys[board->squares[sq]][sq];
     if (piece == PAWN || piece == KING)
         board->pkhash ^= ZobristKeys[board->squares[sq]][sq];

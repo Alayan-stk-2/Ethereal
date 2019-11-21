@@ -71,6 +71,42 @@ static inline int makePiece(int type, int colour) {
     return type * 4 + colour;
 }
 
+// EvalScore related definitions and functions
+
+typedef struct EvalScore {
+    int16_t og;
+    int16_t mg;
+    int16_t eg;
+} EvalScore;
+
+inline void setEval(EvalScore *eval, int16_t og, int16_t mg, int16_t eg) {
+    eval->og = og;
+    eval->mg = mg;
+    eval->eg = eg;
+}
+
+inline void addTo(EvalScore *eval, EvalScore supplement) {
+    eval->og += supplement.og;
+    eval->mg += supplement.mg;
+    eval->eg += supplement.eg;
+}
+
+inline void substractFrom(EvalScore *eval, EvalScore supplement) {
+    eval->og -= supplement.og;
+    eval->mg -= supplement.mg;
+    eval->eg -= supplement.eg;
+}
+
+inline EvalScore intMult(EvalScore *score, int integer) {
+    EvalScore result = { score->og * integer, score->mg * integer, score->eg * integer };
+    return result;
+}
+
+inline EvalScore neg(EvalScore *score) {
+    EvalScore result = { -score->og, -score->mg, -score->eg };
+    return result;
+}
+
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
 

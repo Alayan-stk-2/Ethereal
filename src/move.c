@@ -148,9 +148,9 @@ void applyNormalMove(Board *board, uint16_t move, Undo *undo) {
     board->castleRooks &= board->castleMasks[to];
     updateCastleZobrist(board, undo->castleRooks, board->castleRooks);
 
-    board->psqtmat += PSQT[fromPiece][to]
-                   -  PSQT[fromPiece][from]
-                   -  PSQT[toPiece][to];
+    addTo(&board->psqtmat, PSQT[fromPiece][to]);
+    substractFrom(&board->psqtmat, PSQT[fromPiece][from]);
+    substractFrom(&board->psqtmat, PSQT[toPiece][to]);
 
     board->hash    ^= ZobristKeys[fromPiece][from]
                    ^  ZobristKeys[fromPiece][to]
@@ -205,10 +205,10 @@ void applyCastleMove(Board *board, uint16_t move, Undo *undo) {
     board->castleRooks &= board->castleMasks[from];
     updateCastleZobrist(board, undo->castleRooks, board->castleRooks);
 
-    board->psqtmat += PSQT[fromPiece][to]
-                   -  PSQT[fromPiece][from]
-                   +  PSQT[rFromPiece][rTo]
-                   -  PSQT[rFromPiece][rFrom];
+    addTo(&board->psqtmat, PSQT[fromPiece][to]);
+    substractFrom(&board->psqtmat, PSQT[fromPiece][from]);
+    addTo(&board->psqtmat, PSQT[rFromPiece][rTo]);
+    substractFrom(&board->psqtmat, PSQT[rFromPiece][rFrom]);
 
     board->hash    ^= ZobristKeys[fromPiece][from]
                    ^  ZobristKeys[fromPiece][to]
@@ -246,9 +246,9 @@ void applyEnpassMove(Board *board, uint16_t move, Undo *undo) {
     board->squares[ep]   = EMPTY;
     undo->capturePiece   = enpassPiece;
 
-    board->psqtmat += PSQT[fromPiece][to]
-                   -  PSQT[fromPiece][from]
-                   -  PSQT[enpassPiece][ep];
+    addTo(&board->psqtmat, PSQT[fromPiece][to]);
+    substractFrom(&board->psqtmat, PSQT[fromPiece][from]);
+    substractFrom(&board->psqtmat, PSQT[enpassPiece][ep]);
 
     board->hash    ^= ZobristKeys[fromPiece][from]
                    ^  ZobristKeys[fromPiece][to]
@@ -292,9 +292,9 @@ void applyPromotionMove(Board *board, uint16_t move, Undo *undo) {
     board->castleRooks &= board->castleMasks[to];
     updateCastleZobrist(board, undo->castleRooks, board->castleRooks);
 
-    board->psqtmat += PSQT[promoPiece][to]
-                   -  PSQT[fromPiece][from]
-                   -  PSQT[toPiece][to];
+    addTo(&board->psqtmat, PSQT[promoPiece][to]);
+    substractFrom(&board->psqtmat, PSQT[fromPiece][from]);
+    substractFrom(&board->psqtmat, PSQT[toPiece][to]);
 
     board->hash    ^= ZobristKeys[fromPiece][from]
                    ^  ZobristKeys[promoPiece][to]
