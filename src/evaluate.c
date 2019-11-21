@@ -368,7 +368,6 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     earlyPhase = MAX(0, 384 - phase);
     latePhase = MAX(0, phase - 128);
 
-
     // Scale evaluation based on remaining material
     factor = evaluateScaleFactor(board, eval);
 
@@ -376,13 +375,14 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     interpolatedEval = eval.og * earlyPhase
                      + eval.mg * (384 - earlyPhase - latePhase)
                      + eval.eg * latePhase * factor / SCALE_NORMAL;
-
-    printf("Eval: --- OG: %i, MG: %i, EG: %i\n", eval.og, eval.mg, eval.eg);
+    interpolatedEval = interpolatedEval/384;
 
     // Factor in the Tempo after interpolation and scaling, so that
     // in the search we can assume that if a null move is made, then
     // then `eval = last_eval + 2 * Tempo`
     interpolatedEval += board->turn == WHITE ? Tempo : -Tempo;
+
+    //printf("Eval: Interpolated: %i (no tempo : %i) --- OG: %i, MG: %i, EG: %i\n", interpolatedEval, board->turn == WHITE ? (interpolatedEval - Tempo) : (interpolatedEval + Tempo), eval.og, eval.mg, eval.eg);
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
