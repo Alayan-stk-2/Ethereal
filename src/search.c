@@ -45,6 +45,7 @@
 #include "windows.h"
 
 int LMRTable[64][64];      // Late Move Reductions
+int SingularMargin[128];
 volatile int ABORT_SIGNAL; // Global ABORT flag for threads
 volatile int IS_PONDERING; // Global PONDER flag for threads
 
@@ -54,6 +55,9 @@ void initSearch() {
     for (int depth = 1; depth < 64; depth++)
         for (int played = 1; played < 64; played++)
             LMRTable[depth][played] = 0.75 + log(depth) * log(played) / 2.25;
+
+    for (int depth = 1; depth < 128; depth++)
+        SingularMargin[depth] = 6 + depth/2;
 }
 
 void getBestMove(Thread *threads, Board *board, Limits *limits, uint16_t *best, uint16_t *ponder) {
@@ -500,8 +504,9 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
                 extension = 1;
             }
         }
-        else if (   (inCheck)
-                 || (isQuiet && quietsSeen <= 4 && cmhist >= 10000 && fmhist >= 10000)) {
+        if (   /*!extension
+            &&*/ (   (inCheck)
+                || (isQuiet && quietsSeen <= 4 && cmhist >= 10000 && fmhist >= 10000))) {
             extension = 1;
         }
 
@@ -770,7 +775,7 @@ int moveIsSingular(Thread *thread, uint16_t ttMove, int ttValue, int depth, int 
 
     uint16_t move;
     int skipQuiets = 0, quiets = 0, tacticals = 0;
-    int value = -MATE, rBeta = MAX(ttValue - depth, -MATE);
+    int value = -MATE, rBeta = MAX(ttValue - SingularMargin[depth], -MATE);
     MovePicker movePicker;
     PVariation lpv; lpv.length = 0;
 
