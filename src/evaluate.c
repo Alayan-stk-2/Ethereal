@@ -364,18 +364,17 @@ int evaluateBoard(Board *board, PKTable *pktable) {
                - 2 * popcount(board->pieces[ROOK  ])
                - 1 * popcount(board->pieces[KNIGHT]
                              |board->pieces[BISHOP]);
-    phase = (phase * 512 + 12) / 24;
-    earlyPhase = MAX(0, 384 - phase);
-    latePhase = MAX(0, phase - 128);
+    phase = (phase * 256 + 12) / 24;
+    earlyPhase = MAX(0, 256 - phase);
+    latePhase = MAX(0, phase);
 
     // Scale evaluation based on remaining material
     factor = evaluateScaleFactor(board, eval);
 
     // Compute the interpolated and scaled evaluation
     interpolatedEval = eval.og * earlyPhase
-                     + eval.mg * (384 - earlyPhase - latePhase)
                      + eval.eg * latePhase * factor / SCALE_NORMAL;
-    interpolatedEval = interpolatedEval/384;
+    interpolatedEval = interpolatedEval/256;
 
     // Factor in the Tempo after interpolation and scaling, so that
     // in the search we can assume that if a null move is made, then
