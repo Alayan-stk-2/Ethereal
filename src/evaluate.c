@@ -306,10 +306,10 @@ EvalScore ClosednessRookAdjustment[9] = {
 
 /* Complexity Evaluation Terms */
 
-EvalScore ComplexityTotalPawns  = {   0,   0,   7};
-EvalScore ComplexityPawnFlanks  = {   0,   0,  49};
-EvalScore ComplexityPawnEndgame = {   0,   0,  34};
-EvalScore ComplexityAdjustment  = {   0,   0,-110};
+EvalScore ComplexityTotalPawns  = {   0,   0,   9};
+EvalScore ComplexityPawnFlanks  = {   0,   0,  78};
+EvalScore ComplexityPawnEndgame = {   0,   0,  58};
+EvalScore ComplexityAdjustment  = {   0,   0,-161};
 
 /* General Evaluation Terms */
 
