@@ -25,7 +25,7 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (      0) // Total terms in the Tuner (625)
+#define NTERMS       (      5) // Total terms in the Tuner (625)
 
 #define LEARNING     (    5.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
@@ -37,11 +37,11 @@
 
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 8))
 
-#define TunePawnValue                   (0)
-#define TuneKnightValue                 (0)
-#define TuneBishopValue                 (0)
-#define TuneRookValue                   (0)
-#define TuneQueenValue                  (0)
+#define TunePawnValue                   (1)
+#define TuneKnightValue                 (1)
+#define TuneBishopValue                 (1)
+#define TuneRookValue                   (1)
+#define TuneQueenValue                  (1)
 #define TuneKingValue                   (0)
 #define TunePawnPSQT32                  (0)
 #define TuneKnightPSQT32                (0)
@@ -91,7 +91,7 @@
 #define TuneComplexityPawnEndgame       (0)
 #define TuneComplexityAdjustment        (0)
 
-enum { NORMAL, MGONLY, EGONLY };
+enum { NORMAL, OGONLY, MGONLY, EGONLY };
 
 typedef struct TexelTuple {
     int index;
@@ -101,7 +101,7 @@ typedef struct TexelTuple {
 typedef struct TexelEntry {
     int ntuples;
     double result;
-    double eval, phase;
+    double eval, earlyPhase, latePhase;
     double factors[PHASE_NB];
     TexelTuple *tuples;
 } TexelEntry;
@@ -134,13 +134,15 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
 // Initalize the Phase Manger which tracks the Term type
 
 #define INIT_PHASE_0(term, P) do {                              \
+    phases[i  ][OG] = (P == NORMAL || P == OGONLY);             \
     phases[i  ][MG] = (P == NORMAL || P == MGONLY);             \
     phases[i++][EG] = (P == NORMAL || P == EGONLY);             \
 } while (0)
 
 #define INIT_PHASE_1(term, A, P) do {                           \
     for (int _a = 0; _a < A; _a++)                              \
-       {phases[i  ][MG] = (P == NORMAL || P == MGONLY);         \
+       {phases[i  ][OG] = (P == NORMAL || P == OGONLY);         \
+        phases[i  ][MG] = (P == NORMAL || P == MGONLY);         \
         phases[i++][EG] = (P == NORMAL || P == EGONLY);}        \
 } while (0)
 
@@ -157,14 +159,16 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
 // Initalize Parameters of an N dimensional array
 
 #define INIT_PARAM_0(term, P) do {                              \
-     cparams[i  ][MG] = ScoreMG(term);                          \
-     cparams[i++][EG] = ScoreEG(term);                          \
+     cparams[i  ][OG] = term.og;                                \
+     cparams[i  ][MG] = term.mg;                                \
+     cparams[i++][EG] = term.eg;                                \
 } while (0)
 
 #define INIT_PARAM_1(term, A, P) do {                           \
     for (int _a = 0; _a < A; _a++)                              \
-       {cparams[i  ][MG] = ScoreMG(term[_a]);                   \
-        cparams[i++][EG] = ScoreEG(term[_a]);}                  \
+       {cparams[i  ][OG] = term[_a].og;                         \
+        cparams[i  ][MG] = term[_a].mg;                         \
+        cparams[i++][EG] = term[_a].eg;}                        \
 } while (0)
 
 #define INIT_PARAM_2(term, A, B, P) do {                        \

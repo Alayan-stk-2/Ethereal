@@ -336,8 +336,6 @@ EvalScore ComplexityAdjustment  = {   0,   0,-110};
 
 /* General Evaluation Terms */
 
-//FIXME COUNT : 495/625
-
 const int Tempo = 20;
 
 #undef S
@@ -359,7 +357,6 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     addTo(&eval, evaluateComplexity(&ei, board, eval));
 
     // Calculate the game phase based on remaining material (Fruit Method)
-    // TODO : try out other combinations
     phase = 24 - 4 * popcount(board->pieces[QUEEN ])
                - 2 * popcount(board->pieces[ROOK  ])
                - 1 * popcount(board->pieces[KNIGHT]

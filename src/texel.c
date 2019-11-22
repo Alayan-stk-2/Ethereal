@@ -43,59 +43,59 @@ int TupleStackSize = STACKSIZE;
 // Tap into evaluate()
 extern EvalTrace T, EmptyTrace;
 
-extern const int PawnValue;
-extern const int KnightValue;
-extern const int BishopValue;
-extern const int RookValue;
-extern const int QueenValue;
-extern const int KingValue;
-extern const int PawnPSQT32[32];
-extern const int KnightPSQT32[32];
-extern const int BishopPSQT32[32];
-extern const int RookPSQT32[32];
-extern const int QueenPSQT32[32];
-extern const int KingPSQT32[32];
-extern const int PawnCandidatePasser[2][8];
-extern const int PawnIsolated;
-extern const int PawnStacked[2];
-extern const int PawnBackwards[2];
-extern const int PawnConnected32[32];
-extern const int KnightOutpost[2][2];
-extern const int KnightBehindPawn;
-extern const int ClosednessKnightAdjustment[9];
-extern const int KnightMobility[9];
-extern const int BishopPair;
-extern const int BishopRammedPawns;
-extern const int BishopOutpost[2][2];
-extern const int BishopBehindPawn;
-extern const int BishopMobility[14];
-extern const int RookFile[2];
-extern const int RookOnSeventh;
-extern const int ClosednessRookAdjustment[9];
-extern const int RookMobility[15];
-extern const int QueenMobility[28];
-extern const int KingDefenders[12];
-extern const int KingPawnFileProximity[8];
-extern const int KingShelter[2][8][8];
-extern const int KingStorm[2][4][8];
-extern const int PassedPawn[2][2][8];
-extern const int PassedFriendlyDistance[8];
-extern const int PassedEnemyDistance[8];
-extern const int PassedSafePromotionPath;
-extern const int ThreatWeakPawn;
-extern const int ThreatMinorAttackedByPawn;
-extern const int ThreatMinorAttackedByMinor;
-extern const int ThreatMinorAttackedByMajor;
-extern const int ThreatRookAttackedByLesser;
-extern const int ThreatMinorAttackedByKing;
-extern const int ThreatRookAttackedByKing;
-extern const int ThreatQueenAttackedByOne;
-extern const int ThreatOverloadedPieces;
-extern const int ThreatByPawnPush;
-extern const int ComplexityTotalPawns;
-extern const int ComplexityPawnFlanks;
-extern const int ComplexityPawnEndgame;
-extern const int ComplexityAdjustment;
+extern EvalScore PawnValue;
+extern EvalScore KnightValue;
+extern EvalScore BishopValue;
+extern EvalScore RookValue;
+extern EvalScore QueenValue;
+extern EvalScore KingValue;
+extern EvalScore PawnPSQT32[32];
+extern EvalScore KnightPSQT32[32];
+extern EvalScore BishopPSQT32[32];
+extern EvalScore RookPSQT32[32];
+extern EvalScore QueenPSQT32[32];
+extern EvalScore KingPSQT32[32];
+extern EvalScore PawnCandidatePasser[2][8];
+extern EvalScore PawnIsolated;
+extern EvalScore PawnStacked[2];
+extern EvalScore PawnBackwards[2];
+extern EvalScore PawnConnected32[32];
+extern EvalScore KnightOutpost[2][2];
+extern EvalScore KnightBehindPawn;
+extern EvalScore ClosednessKnightAdjustment[9];
+extern EvalScore KnightMobility[9];
+extern EvalScore BishopPair;
+extern EvalScore BishopRammedPawns;
+extern EvalScore BishopOutpost[2][2];
+extern EvalScore BishopBehindPawn;
+extern EvalScore BishopMobility[14];
+extern EvalScore RookFile[2];
+extern EvalScore RookOnSeventh;
+extern EvalScore ClosednessRookAdjustment[9];
+extern EvalScore RookMobility[15];
+extern EvalScore QueenMobility[28];
+extern EvalScore KingDefenders[12];
+extern EvalScore KingPawnFileProximity[8];
+extern EvalScore KingShelter[2][8][8];
+extern EvalScore KingStorm[2][4][8];
+extern EvalScore PassedPawn[2][2][8];
+extern EvalScore PassedFriendlyDistance[8];
+extern EvalScore PassedEnemyDistance[8];
+extern EvalScore PassedSafePromotionPath;
+extern EvalScore ThreatWeakPawn;
+extern EvalScore ThreatMinorAttackedByPawn;
+extern EvalScore ThreatMinorAttackedByMinor;
+extern EvalScore ThreatMinorAttackedByMajor;
+extern EvalScore ThreatRookAttackedByLesser;
+extern EvalScore ThreatMinorAttackedByKing;
+extern EvalScore ThreatRookAttackedByKing;
+extern EvalScore ThreatQueenAttackedByOne;
+extern EvalScore ThreatOverloadedPieces;
+extern EvalScore ThreatByPawnPush;
+extern EvalScore ComplexityTotalPawns;
+extern EvalScore ComplexityPawnFlanks;
+extern EvalScore ComplexityPawnEndgame;
+extern EvalScore ComplexityAdjustment;
 
 void runTexelTuning(Thread *thread) {
 
@@ -169,7 +169,7 @@ void initTexelEntries(TexelEntry *tes, Thread *thread) {
     Undo undo[1];
     Limits limits;
     char line[128];
-    int i, j, k, searchEval, coeffs[NTERMS];
+    int i, j, k, phase, searchEval, coeffs[NTERMS];
     FILE *fin = fopen("FENS", "r");
 
     // Initialize the thread for the search
@@ -205,17 +205,24 @@ void initTexelEntries(TexelEntry *tes, Thread *thread) {
             applyMove(&thread->board, thread->pv.line[j], undo);
 
         // Determine the game phase based on remaining material
-        tes[i].phase = 24 - 4 * popcount(thread->board.pieces[QUEEN ])
-                          - 2 * popcount(thread->board.pieces[ROOK  ])
-                          - 1 * popcount(thread->board.pieces[BISHOP])
-                          - 1 * popcount(thread->board.pieces[KNIGHT]);
+        phase = 24 - 4 * popcount(thread->board.pieces[QUEEN ])
+                   - 2 * popcount(thread->board.pieces[ROOK  ])
+                   - 1 * popcount(thread->board.pieces[BISHOP])
+                   - 1 * popcount(thread->board.pieces[KNIGHT]);
+
+        phase = (phase * 512 + 12) / 24;
+        tes[i].earlyPhase = MAX(0, 384 - phase);
+        tes[i].latePhase  = MAX(0, phase - 128);
+
+        //FIXME this ignores ScaleFactor
+        // Finish the phase calculation for the evaluation
+        tes[i].earlyPhase = tes[i].earlyPhase / 384.0;
+        tes[i].latePhase  = tes[i].latePhase  / 384.0;
 
         // Compute phase factors for updating the gradients and
-        tes[i].factors[MG] = 1 - tes[i].phase / 24.0;
-        tes[i].factors[EG] = 0 + tes[i].phase / 24.0;
-
-        // Finish the phase calculation for the evaluation
-        tes[i].phase = (tes[i].phase * 256 + 12) / 24.0;
+        tes[i].factors[OG] = tes[i].earlyPhase;
+        tes[i].factors[MG] = 1 - tes[i].earlyPhase - tes[i].latePhase;
+        tes[i].factors[EG] = tes[i].latePhase;
 
         // Vectorize the evaluation coefficients and save the eval
         // relative to WHITE. We must first clear the coeff vector.
@@ -313,12 +320,12 @@ void updateGradient(TexelEntry *tes, TexelVector gradient, TexelVector params, T
             double error = singleLinearError(&tes[i], params, K);
 
             for (int j = 0; j < tes[i].ntuples; j++)
-                for (int k = MG; k <= EG; k++)
+                for (int k = OG; k <= EG; k++)
                     local[tes[i].tuples[j].index][k] += error * tes[i].factors[k] * tes[i].tuples[j].coeff;
         }
 
         for (int i = 0; i < NTERMS; i++)
-            for (int j = MG; j <= EG; j++)
+            for (int j = OG; j <= EG; j++)
                 if (phases[i][j]) gradient[i][j] += local[i][j];
     }
 }
@@ -397,14 +404,15 @@ double singleLinearError(TexelEntry *te, TexelVector params, double K) {
 
 double linearEvaluation(TexelEntry *te, TexelVector params) {
 
-    double mg = 0, eg = 0;
+    double og = 0, mg = 0, eg = 0;
 
     for (int i = 0; i < te->ntuples; i++) {
+        og += te->tuples[i].coeff * params[te->tuples[i].index][OG];
         mg += te->tuples[i].coeff * params[te->tuples[i].index][MG];
         eg += te->tuples[i].coeff * params[te->tuples[i].index][EG];
     }
 
-    return te->eval + ((mg * (256 - te->phase) + eg * te->phase) / 256.0);
+    return te->eval + ((og * te->earlyPhase + mg * (1 - te->earlyPhase - te->latePhase) + eg * te->latePhase));
 }
 
 double sigmoid(double K, double S) {
@@ -417,6 +425,7 @@ void printParameters(TexelVector params, TexelVector cparams) {
 
     // Combine updated and current parameters
     for (int j = 0; j < NTERMS; j++) {
+        tparams[j][OG] = round(params[j][OG] + cparams[j][OG]);
         tparams[j][MG] = round(params[j][MG] + cparams[j][MG]);
         tparams[j][EG] = round(params[j][EG] + cparams[j][EG]);
     }
@@ -432,17 +441,17 @@ void printParameters(TexelVector params, TexelVector cparams) {
 }
 
 void printParameters_0(char *name, int params[NTERMS][PHASE_NB], int i) {
-    printf("const int %s = S(%4d,%4d);\n\n", name, params[i][MG], params[i][EG]);
+    printf("EvalScore %s = {%4d,%4d,%4d};\n\n", name, params[i][OG], params[i][MG], params[i][EG]);
     i++;
 }
 
 void printParameters_1(char *name, int params[NTERMS][PHASE_NB], int i, int A) {
 
-    printf("const int %s[%d] = {", name, A);
+    printf("EvalScore %s[%d] = {", name, A);
 
     for (int a = 0; a < A; a++, i++) {
         if (a % 4 == 0) printf("\n    ");
-        printf("S(%4d,%4d), ", params[i][MG], params[i][EG]);
+        printf("{%4d,%4d,%4d}", params[i][OG], params[i][MG], params[i][EG]);
     }
 
     printf("\n};\n\n");
@@ -450,14 +459,14 @@ void printParameters_1(char *name, int params[NTERMS][PHASE_NB], int i, int A) {
 
 void printParameters_2(char *name, int params[NTERMS][PHASE_NB], int i, int A, int B) {
 
-    printf("const int %s[%d][%d] = {\n", name, A, B);
+    printf("EvalScore %s[%d][%d] = {\n", name, A, B);
 
     for (int a = 0; a < A; a++) {
 
         printf("   {");
 
         for (int b = 0; b < B; b++, i++) {
-            printf("S(%4d,%4d)", params[i][MG], params[i][EG]);
+            printf("{%4d,%4d,%4d}", params[i][OG], params[i][MG], params[i][EG]);
             printf("%s", b == B - 1 ? "" : ", ");
         }
 
@@ -470,7 +479,7 @@ void printParameters_2(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
 
 void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, int B, int C) {
 
-    printf("const int %s[%d][%d][%d] = {\n", name, A, B, C);
+    printf("EvalScore %s[%d][%d][%d] = {\n", name, A, B, C);
 
     for (int a = 0; a < A; a++) {
 
@@ -479,7 +488,7 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
             printf("%s", b ? "   {" : "  {{");;
 
             for (int c = 0; c < C; c++, i++) {
-                printf("S(%4d,%4d)", params[i][MG], params[i][EG]);
+                printf("{%4d,%4d,%4d}", params[i][OG], params[i][MG], params[i][EG]);
                 printf("%s", c == C - 1 ? "" : ", ");
             }
 
