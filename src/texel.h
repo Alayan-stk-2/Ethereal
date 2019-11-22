@@ -25,15 +25,15 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (      5) // Total terms in the Tuner (625)
+#define NTERMS       (    208) // Total terms in the Tuner (625)
 
-#define LEARNING     (    5.0) // Learning rate
+#define LEARNING     (    6.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
-#define BATCHSIZE    (7400000) // FENs per mini-batch
+#define BATCHSIZE    (  16384) // FENs per mini-batch
 #define NPOSITIONS   (7400000) // Total FENS in the book
 
-#define STATICWEIGHT (   0.50) // Weight of the Static Evaluation
-#define SEARCHWEIGHT (   0.50) // Weight of the Depth 10 Search
+#define STATICWEIGHT (   0.65) // Weight of the Static Evaluation
+#define SEARCHWEIGHT (   0.35) // Weight of the Depth 10 Search
 
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 8))
 
@@ -43,25 +43,25 @@
 #define TuneRookValue                   (1)
 #define TuneQueenValue                  (1)
 #define TuneKingValue                   (0)
-#define TunePawnPSQT32                  (0)
-#define TuneKnightPSQT32                (0)
-#define TuneBishopPSQT32                (0)
-#define TuneRookPSQT32                  (0)
-#define TuneQueenPSQT32                 (0)
-#define TuneKingPSQT32                  (0)
+#define TunePawnPSQT32                  (1)
+#define TuneKnightPSQT32                (1)
+#define TuneBishopPSQT32                (1)
+#define TuneRookPSQT32                  (1)
+#define TuneQueenPSQT32                 (1)
+#define TuneKingPSQT32                  (1)
 #define TunePawnCandidatePasser         (0)
 #define TunePawnIsolated                (0)
 #define TunePawnStacked                 (0)
 #define TunePawnBackwards               (0)
 #define TunePawnConnected32             (0)
-#define TuneKnightOutpost               (0)
-#define TuneKnightBehindPawn            (0)
+#define TuneKnightOutpost               (1)
+#define TuneKnightBehindPawn            (1)
 #define TuneClosednessKnightAdjustment  (0)
 #define TuneKnightMobility              (0)
-#define TuneBishopPair                  (0)
+#define TuneBishopPair                  (1)
 #define TuneBishopRammedPawns           (0)
-#define TuneBishopOutpost               (0)
-#define TuneBishopBehindPawn            (0)
+#define TuneBishopOutpost               (1)
+#define TuneBishopBehindPawn            (1)
 #define TuneBishopMobility              (0)
 #define TuneRookFile                    (0)
 #define TuneRookOnSeventh               (0)

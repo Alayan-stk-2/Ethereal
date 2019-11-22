@@ -125,7 +125,7 @@ void runTexelTuning(Thread *thread) {
     printf("\n\nFETCHING CURRENT EVALUATION TERMS AS A STARTING POINT...");
     initCurrentParameters(cparams);
 
-    printf("\n\nSETTING TERM PHASES, MG, EG, OR BOTH...");
+    printf("\n\nSETTING TERM PHASES, OG, MG, EG, OR ALL...");
     initPhaseManager(phases);
 
     printf("\n\nCOMPUTING OPTIMAL K VALUE...\n");
@@ -158,7 +158,7 @@ void runTexelTuning(Thread *thread) {
             // Update Parameters. Note that in updateGradient() we skip the multiplcation by negative
             // two over BATCHSIZE. This is done only here, just once, for precision and a speed gain
             for (int i = 0; i < NTERMS; i++)
-                for (int j = MG; j <= EG; j++)
+                for (int j = OG; j <= EG; j++)
                     params[i][j] += (2.0 / BATCHSIZE) * rate * gradient[i][j];
         }
     }
@@ -451,7 +451,7 @@ void printParameters_1(char *name, int params[NTERMS][PHASE_NB], int i, int A) {
 
     for (int a = 0; a < A; a++, i++) {
         if (a % 4 == 0) printf("\n    ");
-        printf("{%4d,%4d,%4d}", params[i][OG], params[i][MG], params[i][EG]);
+        printf("{%4d,%4d,%4d}, ", params[i][OG], params[i][MG], params[i][EG]);
     }
 
     printf("\n};\n\n");
