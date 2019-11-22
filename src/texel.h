@@ -32,8 +32,8 @@
 #define BATCHSIZE    (  16384) // FENs per mini-batch
 #define NPOSITIONS   (7400000) // Total FENS in the book
 
-#define STATICWEIGHT (   0.70) // Weight of the Static Evaluation
-#define SEARCHWEIGHT (   0.30) // Weight of the Depth 10 Search
+#define STATICWEIGHT (   0.40) // Weight of the Static Evaluation
+#define SEARCHWEIGHT (   0.60) // Weight of the Depth 10 Search
 
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 8))
 
