@@ -823,7 +823,10 @@ EvalScore evaluateKings(EvalInfo *ei, Board *board, int colour) {
                + KSAdjustment;
 
         // Convert safety to an MG and EG score, if we are unsafe
-        EvalScore KD = { -(count*count / 720), -((count*count / 720 + count / 20)/2), -(count / 20) };
+        int KD_OG = (count*count)/720;
+        int KD_EG = count / 20;
+
+        EvalScore KD = { -KD_OG, -((KD_OG + KD_EG)/2), -KD_EG };
 
         if (count > 0) addTo(&eval, KD);
     }
@@ -1070,7 +1073,7 @@ EvalScore evaluateComplexity(EvalInfo *ei, Board *board, EvalScore eval) {
     // Avoid changing which side has the advantage
     int v = sign * MAX(complexity.eg, -abs(eval.eg));
 
-    EvalScore result = { 0, 0, v };
+    EvalScore result = { 0, v/2, v };
     return result;
 }
 
