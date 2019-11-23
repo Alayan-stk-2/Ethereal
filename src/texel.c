@@ -210,7 +210,7 @@ void initTexelEntries(TexelEntry *tes, Thread *thread) {
                    - 1 * popcount(thread->board.pieces[BISHOP])
                    - 1 * popcount(thread->board.pieces[KNIGHT]);
 
-        phase = (phase * 512 + 12) / 24;
+        phase = PhaseArray[MAX(0, MIN(24, phase))];
         tes[i].earlyPhase = MAX(0, 384 - phase);
         tes[i].latePhase  = MAX(0, phase - 128);
 
