@@ -210,14 +210,14 @@ void initTexelEntries(TexelEntry *tes, Thread *thread) {
                    - 1 * popcount(thread->board.pieces[BISHOP])
                    - 1 * popcount(thread->board.pieces[KNIGHT]);
 
-        phase = (phase * 512 + 12) / 24;
-        tes[i].earlyPhase = MAX(0, 384 - phase);
-        tes[i].latePhase  = MAX(0, phase - 128);
+        phase = PhaseArray[MIN(24, MAX(0, phase))];
+        tes[i].earlyPhase = MAX(0, 1664  - phase)/13 + MAX(0, 1280  - phase)/10;
+        tes[i].latePhase  = MAX(0, phase - 384  )/13 + MAX(0, phase - 768  )/10;
 
         //FIXME this ignores ScaleFactor
         // Finish the phase calculation for the evaluation
-        tes[i].earlyPhase = tes[i].earlyPhase / 384.0;
-        tes[i].latePhase  = tes[i].latePhase  / 384.0;
+        tes[i].earlyPhase = tes[i].earlyPhase / 256.0;
+        tes[i].latePhase  = tes[i].latePhase  / 256.0;
 
         // Compute phase factors for updating the gradients and
         tes[i].factors[OG] = tes[i].earlyPhase;
