@@ -32,9 +32,15 @@
 EvalTrace T, EmptyTrace;
 EvalScore PSQT[32][SQUARE_NB];
 
-const int PhaseArray[25] = {
-      0, 33, 63, 96,128,144,160,176,192,208,224,240,
-    256,272,288,304,320,336,352,368,384,416,449,479,512, 
+const int EarlyPhaseArray[25] = {
+    1000, 917, 833, 768, 709, 655, 602, 549,
+     495, 442, 389, 335, 282, 230, 188, 150,
+     114,  82,  52,  26,   6,   0,   0,   0,   0,
+};
+const int LatePhaseArray[25] = {
+       0,   0,   0,  18,  42,  72, 102, 132,
+     162, 192, 222, 252, 282, 313, 355, 400,
+     447, 499, 552, 609, 673, 750, 833, 917, 1000, 
 };
 
 /* Material Value Evaluation Terms */
@@ -342,25 +348,24 @@ int evaluateBoard(Board *board, PKTable *pktable) {
                - 2 * popcount(board->pieces[ROOK  ])
                - 1 * popcount(board->pieces[KNIGHT]
                              |board->pieces[BISHOP]);
-    phase = PhaseArray[MAX(0, MIN(24, phase))];
-    earlyPhase = MAX(0, 384 - phase);
-    latePhase  = MAX(0, phase - 128);
+
+    phase = MAX(0, MIN(24, phase));
+    earlyPhase = EarlyPhaseArray[phase];
+    latePhase  = LatePhaseArray[phase];
 
     // Scale evaluation based on remaining material
     factor = evaluateScaleFactor(board, eval);
 
     // Compute the interpolated and scaled evaluation
     interpolatedEval = eval.og * earlyPhase
-                     + eval.mg * (384 - earlyPhase - latePhase)
+                     + eval.mg * (1000 - earlyPhase - latePhase)
                      + eval.eg * latePhase * factor / SCALE_NORMAL;
-    interpolatedEval = interpolatedEval/384;
+    interpolatedEval = interpolatedEval/1000;
 
     // Factor in the Tempo after interpolation and scaling, so that
     // in the search we can assume that if a null move is made, then
     // then `eval = last_eval + 2 * Tempo`
     interpolatedEval += board->turn == WHITE ? Tempo : -Tempo;
-
-    //printf("Eval: Interpolated: %i (no tempo : %i) --- OG: %i, MG: %i, EG: %i\n", interpolatedEval, board->turn == WHITE ? (interpolatedEval - Tempo) : (interpolatedEval + Tempo), eval.og, eval.mg, eval.eg);
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
@@ -375,7 +380,7 @@ EvalScore evaluatePieces(EvalInfo *ei, Board *board) {
     EvalScore eval = SCORE_ZERO;
     EvalScore temp;
 
-    addTo(&eval,  evaluatePawns(ei, board, WHITE) );
+    addTo(&eval,  evaluatePawns(ei, board, WHITE) ); //FIXME : evaluatePawns always return 0, this is useless
     temp =        evaluatePawns(ei, board, BLACK);
     addTo(&eval, neg(&temp));
     addTo(&eval, evaluateKnights(ei, board, WHITE) );
