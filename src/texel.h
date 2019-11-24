@@ -25,9 +25,9 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (    242) // Total terms in the Tuner (625)
+#define NTERMS       (      0) // Total terms in the Tuner (625)
 
-#define LEARNING     (    5.0) // Learning rate
+#define LEARNING     (    6.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
 #define BATCHSIZE    (  16384) // FENs per mini-batch
 #define NPOSITIONS   (7400000) // Total FENS in the book
@@ -43,20 +43,19 @@
 #define TuneRookValue                   (0)
 #define TuneQueenValue                  (0)
 #define TuneKingValue                   (0)
-#define TunePawnPSQT32                  (1)
-#define TuneKnightPSQT32                (1)
-#define TuneBishopPSQT32                (1)
-#define TuneRookPSQT32                  (1)
-#define TuneQueenPSQT32                 (1)
-#define TuneKingPSQT32                  (1)
+#define TunePawnPSQT32                  (0)
+#define TuneKnightPSQT32                (0)
+#define TuneBishopPSQT32                (0)
+#define TuneRookPSQT32                  (0)
+#define TuneQueenPSQT32                 (0)
+#define TuneKingPSQT32                  (0)
 #define TunePawnCandidatePasser         (0)
 #define TunePawnIsolated                (0)
 #define TunePawnStacked                 (0)
 #define TunePawnBackwards               (0)
-#define TunePawnConnected32             (1)
+#define TunePawnConnected32             (0)
 #define TuneKnightOutpost               (0)
 #define TuneKnightBehindPawn            (0)
-#define TuneClosednessKnightAdjustment  (1)
 #define TuneKnightMobility              (0)
 #define TuneBishopPair                  (0)
 #define TuneBishopRammedPawns           (0)
@@ -65,7 +64,6 @@
 #define TuneBishopMobility              (0)
 #define TuneRookFile                    (0)
 #define TuneRookOnSeventh               (0)
-#define TuneClosednessRookAdjustment    (1)
 #define TuneRookMobility                (0)
 #define TuneQueenMobility               (0)
 #define TuneKingDefenders               (0)
@@ -86,6 +84,8 @@
 #define TuneThreatQueenAttackedByOne    (0)
 #define TuneThreatOverloadedPieces      (0)
 #define TuneThreatByPawnPush            (0)
+#define TuneClosednessKnightAdjustment  (0)
+#define TuneClosednessRookAdjustment    (0)
 #define TuneComplexityTotalPawns        (0)
 #define TuneComplexityPawnFlanks        (0)
 #define TuneComplexityPawnEndgame       (0)
@@ -252,7 +252,6 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_1(fname, PawnConnected32, 32, NORMAL);               \
     ENABLE_2(fname, KnightOutpost, 2, 2, NORMAL);               \
     ENABLE_0(fname, KnightBehindPawn, NORMAL);                  \
-    ENABLE_1(fname, ClosednessKnightAdjustment, 9, NORMAL);     \
     ENABLE_1(fname, KnightMobility, 9, NORMAL);                 \
     ENABLE_0(fname, BishopPair, NORMAL);                        \
     ENABLE_0(fname, BishopRammedPawns, NORMAL);                 \
@@ -261,7 +260,6 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_1(fname, BishopMobility, 14, NORMAL);                \
     ENABLE_1(fname, RookFile, 2, NORMAL);                       \
     ENABLE_0(fname, RookOnSeventh, NORMAL);                     \
-    ENABLE_1(fname, ClosednessRookAdjustment, 9, NORMAL);       \
     ENABLE_1(fname, RookMobility, 15, NORMAL);                  \
     ENABLE_1(fname, QueenMobility, 28, NORMAL);                 \
     ENABLE_1(fname, KingDefenders, 12, NORMAL);                 \
@@ -282,6 +280,8 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_0(fname, ThreatQueenAttackedByOne, NORMAL);          \
     ENABLE_0(fname, ThreatOverloadedPieces, NORMAL);            \
     ENABLE_0(fname, ThreatByPawnPush, NORMAL);                  \
+    ENABLE_1(fname, ClosednessKnightAdjustment, 9, NORMAL);     \
+    ENABLE_1(fname, ClosednessRookAdjustment, 9, NORMAL);       \
     ENABLE_0(fname, ComplexityTotalPawns, EGONLY);              \
     ENABLE_0(fname, ComplexityPawnFlanks, EGONLY);              \
     ENABLE_0(fname, ComplexityPawnEndgame, EGONLY);             \
