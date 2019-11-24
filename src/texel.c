@@ -205,19 +205,19 @@ void initTexelEntries(TexelEntry *tes, Thread *thread) {
             applyMove(&thread->board, thread->pv.line[j], undo);
 
         // Determine the game phase based on remaining material
-        phase = 24 - 4 * popcount(thread->board.pieces[QUEEN ])
-                   - 2 * popcount(thread->board.pieces[ROOK  ])
-                   - 1 * popcount(thread->board.pieces[BISHOP])
-                   - 1 * popcount(thread->board.pieces[KNIGHT]);
+        phase = 32 - 6 * popcount(thread->board.pieces[QUEEN ])
+                   - 3 * popcount(thread->board.pieces[ROOK  ])
+                   - 2 * popcount(thread->board.pieces[BISHOP])
+                   - 2 * popcount(thread->board.pieces[KNIGHT]);
 
-        phase = PhaseArray[MAX(0, MIN(24, phase))];
-        tes[i].earlyPhase = MAX(0, 384 - phase);
-        tes[i].latePhase  = MAX(0, phase - 128);
+        phase = MAX(0, MIN(32, phase));
+        tes[i].earlyPhase = EarlyPhaseArray[phase];
+        tes[i].latePhase  = LatePhaseArray[phase];
 
         //FIXME this ignores ScaleFactor
         // Finish the phase calculation for the evaluation
-        tes[i].earlyPhase = tes[i].earlyPhase / 384.0;
-        tes[i].latePhase  = tes[i].latePhase  / 384.0;
+        tes[i].earlyPhase = tes[i].earlyPhase / 1000.0;
+        tes[i].latePhase  = tes[i].latePhase  / 1000.0;
 
         // Compute phase factors for updating the gradients and
         tes[i].factors[OG] = tes[i].earlyPhase;

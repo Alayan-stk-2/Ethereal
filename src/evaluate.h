@@ -133,4 +133,6 @@ void initEval();
 
 extern EvalScore PSQT[32][SQUARE_NB];
 extern const int Tempo;
-extern const int PhaseArray[25];
+extern const int EarlyPhaseArray[33];
+extern const int MidPhaseArray[33];
+extern const int LatePhaseArray[33];
