@@ -71,6 +71,7 @@ struct EvalTrace {
     int KingShelter[2][8][8][COLOUR_NB];
     int KingStorm[2][4][8][COLOUR_NB];
     int PassedPawn[2][2][8][COLOUR_NB];
+    int PassedNoEnemyPasser[8][COLOUR_NB];
     int PassedFriendlyDistance[8][COLOUR_NB];
     int PassedEnemyDistance[8][COLOUR_NB];
     int PassedSafePromotionPath[COLOUR_NB];

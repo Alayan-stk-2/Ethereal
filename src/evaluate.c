@@ -278,14 +278,19 @@ const int KSAdjustment      =  -18;
 /* Passed Pawn Evaluation Terms */
 
 const int PassedPawn[2][2][RANK_NB] = {
-  {{S(   0,   0), S( -38,   3), S( -55,  21), S( -82,  27),
-    S(  -6,  12), S(  70,  -5), S( 157,  56), S(   0,   0)},
-   {S(   0,   0), S( -29,   7), S( -51,  24), S( -73,  30),
-    S( -13,  31), S(  89,  32), S( 182, 101), S(   0,   0)}},
-  {{S(   0,   0), S( -24,  16), S( -50,  19), S( -73,  33),
-    S(  -3,  36), S(  89,  40), S( 263, 114), S(   0,   0)},
-   {S(   0,   0), S( -29,  12), S( -45,  17), S( -67,  38),
-    S(  -1,  52), S(  92, 117), S( 161, 275), S(   0,   0)}},
+  {{S(   0,   0), S( -38,   3), S( -55,  20), S( -82,  27),
+    S(  -6,  12), S(  70,  -6), S( 157,  55), S(   0,   0)},
+   {S(   0,   0), S( -31,   5), S( -53,  21), S( -75,  30),
+    S( -13,  32), S(  89,  31), S( 181,  96), S(   0,   0)}},
+  {{S(   0,   0), S( -25,  14), S( -51,  16), S( -74,  32),
+    S(  -4,  36), S(  86,  37), S( 260, 106), S(   0,   0)},
+   {S(   0,   0), S( -33,   9), S( -48,  14), S( -69,  36),
+    S(  -2,  49), S(  91, 106), S( 160, 265), S(   0,   0)}},
+};
+
+const int PassedNoEnemyPasser[8] = {
+    S(   0,   0), S(  -1,  12), S(   2,   9), S(   2,  -2), 
+    S(  -1,  -9), S( -10, -16), S(  -7, -18), S(   0,   0), 
 };
 
 const int PassedFriendlyDistance[8] = {
@@ -850,6 +855,12 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         safeAdvance = !(bitboard & ei->attacked[THEM]);
         eval += PassedPawn[canAdvance][safeAdvance][rank];
         if (TRACE) T.PassedPawn[canAdvance][safeAdvance][rank][US]++;
+
+        // Rank-based bonus if there is no enemy passed pawn
+        if(!(board->colours[THEM] & ei->passedPawns)) {
+            eval += PassedNoEnemyPasser[rank];
+            if (TRACE) T.PassedNoEnemyPasser[rank][US]++;
+        }
 
         // Evaluate based on distance from our king
         dist = distanceBetween(sq, ei->kingSquare[US]);
