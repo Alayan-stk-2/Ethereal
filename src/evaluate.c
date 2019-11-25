@@ -142,7 +142,15 @@ const int KnightOutpost[2][2] = {
     { S(   4, -26), S(  15,  -4) },
 };
 
-const int KnightBehindPawn = S(   4,  19);
+const int KnightBehindFriendlyPawn[6] = {
+    S(   3,  23), S(   2,  22), S(   4,  13), S(   5,  16), 
+    S(   3,  17), S(   4,  19), 
+};
+
+const int KnightBehindEnemyPawn[6] = {
+    S(   4,  18), S(  10,  22), S(   6,  19), S(   4,  18), 
+    S(   3,  14), S(   1,  15), 
+};
 
 const int KnightMobility[9] = {
     S( -74,-104), S( -31, -96), S( -16, -41), S(  -5, -16),
@@ -161,7 +169,15 @@ const int BishopOutpost[2][2] = {
     { S(   5, -12), S(  20,   0) },
 };
 
-const int BishopBehindPawn = S(   3,  18);
+const int BishopBehindFriendlyPawn[6] = {
+    S(   2,  12), S(   4,  16), S(   4,   9), S(   2,  15), 
+    S(   3,  17), S(   3,  18), 
+};
+
+const int BishopBehindEnemyPawn[6] = {
+    S(   5,  32), S(  14,  31), S(   4,  26), S(   2,  24), 
+    S(  -1,  19), S(   1,  17), 
+};
 
 const int BishopMobility[14] = {
     S( -65,-147), S( -30, -95), S( -11, -56), S(  -1, -30),
@@ -525,10 +541,16 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
             if (TRACE) T.KnightOutpost[outside][defended][US]++;
         }
 
-        // Apply a bonus if the knight is behind a pawn
-        if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
-            eval += KnightBehindPawn;
-            if (TRACE) T.KnightBehindPawn[US]++;
+        // Apply a bonus if the knight is behind a friendly pawn
+        if (testBit(pawnAdvance(board->pieces[PAWN] & ~enemyPawns, 0ull, THEM), sq)) {
+            eval += KnightBehindFriendlyPawn[relativeRankOf(US, sq)];
+            if (TRACE) T.KnightBehindFriendlyPawn[relativeRankOf(US, sq)][US]++;
+        }
+
+        // Apply a bonus if the knight is behind an enemy pawn
+        else if (testBit(pawnAdvance(enemyPawns, 0ull, THEM), sq)) {
+            eval += KnightBehindEnemyPawn[relativeRankOf(US, sq)];
+            if (TRACE) T.KnightBehindEnemyPawn[relativeRankOf(US, sq)][US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the knight
@@ -595,10 +617,16 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             if (TRACE) T.BishopOutpost[outside][defended][US]++;
         }
 
-        // Apply a bonus if the bishop is behind a pawn
-        if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
-            eval += BishopBehindPawn;
-            if (TRACE) T.BishopBehindPawn[US]++;
+        // Apply a bonus if the bishop is behind a friendly pawn
+        if (testBit(pawnAdvance(board->pieces[PAWN] & ~enemyPawns, 0ull, THEM), sq)) {
+            eval += BishopBehindFriendlyPawn[relativeRankOf(US, sq)];
+            if (TRACE) T.BishopBehindFriendlyPawn[relativeRankOf(US, sq)][US]++;
+        }
+
+        // Apply a bonus if the bishop is behind an enemy pawn
+        else if (testBit(pawnAdvance(enemyPawns, 0ull, THEM), sq)) {
+            eval += BishopBehindEnemyPawn[relativeRankOf(US, sq)];
+            if (TRACE) T.BishopBehindEnemyPawn[relativeRankOf(US, sq)][US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
