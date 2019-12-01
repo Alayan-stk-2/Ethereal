@@ -44,14 +44,14 @@ const int KingValue   = S(   0,   0);
 /* Piece Square Evaluation Terms */
 
 const int PawnPSQT32[32] = {
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
-    S( -19,   9), S(   6,   4), S( -11,   7), S(  -6,  -1),
-    S( -21,   4), S( -11,   3), S(  -8,  -5), S(  -2, -13),
-    S( -16,  12), S( -10,  11), S(  14, -13), S(  12, -24),
-    S(  -4,  16), S(   4,  11), S(   0,  -2), S(  14, -21),
-    S(  -4,  32), S(   1,  30), S(  10,  19), S(  38,  -8),
-    S( -17, -40), S( -65,  -9), S(   3, -23), S(  40, -37),
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
+    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0), 
+    S( -23,   2), S(  -2,  -2), S( -15,   1), S(  -9,  -5), 
+    S( -25,   0), S( -20,  -1), S( -12,  -9), S(  -6, -17), 
+    S( -20,   5), S( -18,   5), S(   8, -17), S(   4, -28), 
+    S(  -9,   8), S(  -6,   4), S(  -8,  -9), S(   4, -26), 
+    S(  -9,  24), S(  -6,  21), S(   2,  12), S(  31, -13), 
+    S( -18, -47), S( -66, -14), S(   2, -28), S(  39, -42), 
+    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0), 
 };
 
 const int KnightPSQT32[32] = {
@@ -278,19 +278,19 @@ const int KSAdjustment      =  -18;
 /* Passed Pawn Evaluation Terms */
 
 const int PassedPawn[2][2][RANK_NB] = {
-  {{S(   0,   0), S( -38,   3), S( -55,  20), S( -82,  27),
-    S(  -6,  12), S(  70,  -6), S( 157,  55), S(   0,   0)},
-   {S(   0,   0), S( -31,   5), S( -53,  21), S( -75,  30),
-    S( -13,  32), S(  89,  31), S( 181,  96), S(   0,   0)}},
-  {{S(   0,   0), S( -25,  14), S( -51,  16), S( -74,  32),
-    S(  -4,  36), S(  86,  37), S( 260, 106), S(   0,   0)},
-   {S(   0,   0), S( -33,   9), S( -48,  14), S( -69,  36),
-    S(  -2,  49), S(  91, 106), S( 160, 265), S(   0,   0)}},
+  {{S(   0,   0), S( -38,   3), S( -55,  19), S( -82,  27),
+    S(  -6,  12), S(  69,  -7), S( 157,  54), S(   0,   0)},
+   {S(   0,   0), S( -32,   5), S( -54,  20), S( -75,  31),
+    S( -13,  33), S(  88,  29), S( 180,  91), S(   0,   0)}},
+  {{S(   0,   0), S( -25,  14), S( -51,  15), S( -74,  32),
+    S(  -5,  37), S(  83,  33), S( 258, 100), S(   0,   0)},
+   {S(   0,   0), S( -34,   8), S( -50,  12), S( -70,  35),
+    S(  -2,  47), S(  90,  97), S( 159, 257), S(   0,   0)}},
 };
 
 const int PassedNoEnemyPasser[8] = {
-    S(   0,   0), S(   0,  23), S(   4,  18), S(   7,   0), 
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0), 
+    S(   0,   0), S(  10,  25), S(   8,  21), S(   8,   0), 
+    S(   0,  -2), S(  -2,  -4), S(  -1,  -2), S(   0,   0), 
 };
 
 const int PassedFriendlyDistance[8] = {
@@ -379,7 +379,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
-        storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
+        storePKEntry(pktable, board->pkhash, ei.passedPawns, ei.candidatePassedPawns, pkeval);
 
     // Return the evaluation relative to the side to move
     return board->turn == WHITE ? eval : -eval;
@@ -448,6 +448,7 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // Apply a bonus for pawns which will become passers by advancing a
         // square then exchanging our supporters with the remaining stoppers
         else if (!leftovers && popcount(pushSupport) >= popcount(pushThreats)) {
+            setBit(&ei->candidatePassedPawns, sq);
             flag = popcount(support) >= popcount(threats);
             pkeval += PawnCandidatePasser[flag][relativeRankOf(US, sq)];
             if (TRACE) T.PawnCandidatePasser[flag][relativeRankOf(US, sq)][US]++;
@@ -857,7 +858,7 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         if (TRACE) T.PassedPawn[canAdvance][safeAdvance][rank][US]++;
 
         // Rank-based bonus if there is no enemy passed pawn
-        if(!(board->colours[THEM] & ei->passedPawns)) {
+        if(!(board->colours[THEM] & (ei->passedPawns | ei->candidatePassedPawns))) {
             eval += PassedNoEnemyPasser[rank];
             if (TRACE) T.PassedNoEnemyPasser[rank][US]++;
         }
@@ -1133,6 +1134,7 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     // Try to read a hashed Pawn King Eval. Otherwise, start from scratch
     ei->pkentry       =     pktable == NULL ? NULL : getPKEntry(pktable, board->pkhash);
     ei->passedPawns   = ei->pkentry == NULL ? 0ull : ei->pkentry->passed;
+    ei->candidatePassedPawns   = ei->pkentry == NULL ? 0ull : ei->pkentry->candidatePassed;
     ei->pkeval[WHITE] = ei->pkentry == NULL ? 0    : ei->pkentry->eval;
     ei->pkeval[BLACK] = ei->pkentry == NULL ? 0    : 0;
 }

@@ -25,7 +25,7 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (     40) // Total terms in the Tuner (633)
+#define NTERMS       (     64) // Total terms in the Tuner (633)
 
 #define LEARNING     (    4.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
@@ -43,7 +43,7 @@
 #define TuneRookValue                   (0)
 #define TuneQueenValue                  (0)
 #define TuneKingValue                   (0)
-#define TunePawnPSQT32                  (0)
+#define TunePawnPSQT32                  (1)
 #define TuneKnightPSQT32                (0)
 #define TuneBishopPSQT32                (0)
 #define TuneRookPSQT32                  (0)
@@ -73,7 +73,7 @@
 #define TuneKingShelter                 (0)
 #define TuneKingStorm                   (0)
 #define TunePassedPawn                  (1)
-#define TunePassedNoEnemyPasser         (1)
+#define TunePassedNoEnemyPasser         (0)
 #define TunePassedFriendlyDistance      (0)
 #define TunePassedEnemyDistance         (0)
 #define TunePassedSafePromotionPath     (0)
