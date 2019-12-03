@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "attacks.h"
 #include "bitboards.h"
@@ -370,7 +371,9 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     // Factor in the Tempo after interpolation and scaling, so that
     // in the search we can assume that if a null move is made, then
     // then `eval = last_eval + 2 * Tempo`
-    eval += board->turn == WHITE ? Tempo : -Tempo;
+    int adj_tempo = MIN(23, MAX(17, Tempo - 3 + (ei.sharpness/2)));
+
+    eval += board->turn == WHITE ? adj_tempo : -adj_tempo;
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
@@ -787,6 +790,8 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         // Convert safety to an MG and EG score, if we are unsafe
         if (count > 0) eval -= MakeScore(count * count / 720, count / 20);
+
+        ei->sharpness += 2 * popcount(queenChecks | rookChecks | bishopChecks | knightChecks);
     }
 
     // Everything else is stored in the Pawn King Table
@@ -916,51 +921,61 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     count = popcount(pawns & ~attacksByPawns & poorlyDefended);
     eval += count * ThreatWeakPawn;
     if (TRACE) T.ThreatWeakPawn[US] += count;
+    ei->sharpness += count;
 
     // Penalty for pawn threats against our minors
     count = popcount((knights | bishops) & attacksByPawns);
     eval += count * ThreatMinorAttackedByPawn;
     if (TRACE) T.ThreatMinorAttackedByPawn[US] += count;
+    ei->sharpness += count;
 
     // Penalty for any minor threat against minor pieces
     count = popcount((knights | bishops) & attacksByMinors);
     eval += count * ThreatMinorAttackedByMinor;
     if (TRACE) T.ThreatMinorAttackedByMinor[US] += count;
+    ei->sharpness += count;
 
     // Penalty for all major threats against poorly supported minors
     count = popcount(weakMinors & attacksByMajors);
     eval += count * ThreatMinorAttackedByMajor;
     if (TRACE) T.ThreatMinorAttackedByMajor[US] += count;
+    ei->sharpness += count;
 
     // Penalty for pawn and minor threats against our rooks
     count = popcount(rooks & (attacksByPawns | attacksByMinors));
     eval += count * ThreatRookAttackedByLesser;
     if (TRACE) T.ThreatRookAttackedByLesser[US] += count;
+    ei->sharpness += 2 * count;
 
     // Penalty for king threats against our poorly defended minors
     count = popcount(weakMinors & ei->attackedBy[THEM][KING]);
     eval += count * ThreatMinorAttackedByKing;
     if (TRACE) T.ThreatMinorAttackedByKing[US] += count;
+    ei->sharpness += 2 * count;
 
     // Penalty for king threats against our poorly defended rooks
     count = popcount(rooks & poorlyDefended & ei->attackedBy[THEM][KING]);
     eval += count * ThreatRookAttackedByKing;
     if (TRACE) T.ThreatRookAttackedByKing[US] += count;
+    ei->sharpness += 2 * count;
 
     // Penalty for any threat against our queens
     count = popcount(queens & ei->attacked[THEM]);
     eval += count * ThreatQueenAttackedByOne;
     if (TRACE) T.ThreatQueenAttackedByOne[US] += count;
+    ei->sharpness += 3 * count;
 
     // Penalty for any overloaded minors or majors
     count = popcount(overloaded);
     eval += count * ThreatOverloadedPieces;
     if (TRACE) T.ThreatOverloadedPieces[US] += count;
+    ei->sharpness += count;
 
     // Bonus for giving threats by safe pawn pushes
     count = popcount(pushThreat);
     eval += count * ThreatByPawnPush;
     if (TRACE) T.ThreatByPawnPush[colour] += count;
+    ei->sharpness += count;
 
     return eval;
 }
@@ -1081,6 +1096,8 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     uint64_t bishops = board->pieces[BISHOP] | board->pieces[QUEEN];
     uint64_t rooks   = board->pieces[ROOK  ] | board->pieces[QUEEN];
     uint64_t kings   = board->pieces[KING  ];
+
+    ei->sharpness = (bishops | rooks | board->pieces[KNIGHT]) ? 0 : 9;
 
     // Save some general information about the pawn structure for later
     ei->pawnAttacks[WHITE]  = pawnAttackSpan(white & pawns, ~0ull, WHITE);

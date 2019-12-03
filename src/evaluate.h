@@ -110,6 +110,7 @@ struct EvalInfo {
     int kingAttackersCount[COLOUR_NB];
     int kingAttackersWeight[COLOUR_NB];
     int pkeval[COLOUR_NB];
+    int sharpness;
     PKEntry *pkentry;
 };
 
