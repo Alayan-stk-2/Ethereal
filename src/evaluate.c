@@ -154,7 +154,7 @@ const int KnightMobility[9] = {
 
 const int BishopPair = S(  22,  69);
 
-const int BishopRammedPawns = S( -10, -15);
+const int BishopRammedPawns[2] = { S( -13, -14), S(  -5, -11), };
 
 const int BishopOutpost[2][2] = {
     { S(  10, -12), S(  40,   0) },
@@ -582,8 +582,9 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         // Apply a penalty for the bishop based on number of rammed pawns
         // of our own colour, which reside on the same shade of square as the bishop
         count = popcount(ei->rammedPawns[US] & squaresOfMatchingColour(sq));
-        eval += count * BishopRammedPawns;
-        if (TRACE) T.BishopRammedPawns[US] += count;
+        bool openCenter = !(ei->rammedPawns[US] & squaresOfMatchingColour(sq) & CENTER_SQUARES);
+        eval += count * BishopRammedPawns[openCenter];
+        if (TRACE) T.BishopRammedPawns[openCenter][US] += count;
 
         // Apply a bonus if the bishop is on an outpost square, and cannot be attacked
         // by an enemy pawn. Increase the bonus if one of our pawns supports the bishop.
