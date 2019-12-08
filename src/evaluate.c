@@ -269,7 +269,7 @@ const int KSAttackValue     =   44;
 const int KSWeakSquares     =   38;
 const int KSFriendlyPawns   =  -22;
 const int KSNoEnemyQueens   = -276;
-const int KSUnsafeCheck     =    6;
+const int KSUnsafeCheck     =    8;
 const int KSSafeQueenCheck  =   95;
 const int KSSafeRookCheck   =   94;
 const int KSSafeBishopCheck =   51;
@@ -780,6 +780,9 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         rookChecks   &= safe;
         queenChecks  &= safe;
         bishopChecks &= safe;
+
+        if (knightChecks | rookChecks | queenChecks | bishopChecks)
+            unsafeChecks = 0ull;
 
         count  = ei->kingAttackersCount[THEM] * ei->kingAttackersWeight[THEM];
 
