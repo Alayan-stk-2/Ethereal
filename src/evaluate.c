@@ -269,9 +269,10 @@ const int KSAttackValue     =   44;
 const int KSWeakSquares     =   38;
 const int KSFriendlyPawns   =  -22;
 const int KSNoEnemyQueens   = -276;
-const int KSSafeQueenCheck  =  109;
-const int KSSafeRookCheck   =  135;
-const int KSSafeBishopCheck =   72;
+const int KSUnsafeCheck     =   15;
+const int KSSafeQueenCheck  =  101;
+const int KSSafeRookCheck   =  121;
+const int KSSafeBishopCheck =   56;
 const int KSSafeKnightCheck =  123;
 const int KSAdjustment      =  -18;
 
@@ -768,10 +769,16 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         // Identify if there are pieces which can move to the checking squares safely.
         // We consider forking a Queen to be a safe check, even with our own Queen.
-        uint64_t knightChecks = knightThreats & safe & ei->attackedBy[THEM][KNIGHT];
-        uint64_t rookChecks   = rookThreats   & safe & ei->attackedBy[THEM][ROOK  ];
-        uint64_t queenChecks  = queenThreats  & safe & ei->attackedBy[THEM][QUEEN ] & ~rookChecks;
-        uint64_t bishopChecks = bishopThreats & safe & ei->attackedBy[THEM][BISHOP] & ~queenChecks;
+        uint64_t knightChecks = knightThreats & ei->attackedBy[THEM][KNIGHT];
+        uint64_t rookChecks   = rookThreats   & ei->attackedBy[THEM][ROOK  ];
+        uint64_t queenChecks  = queenThreats  & ei->attackedBy[THEM][QUEEN ] & ~rookChecks;
+        uint64_t bishopChecks = bishopThreats & ei->attackedBy[THEM][BISHOP] & ~queenChecks;
+        uint64_t unsafeChecks = (knightChecks | rookChecks | queenChecks | bishopChecks) & ~safe;
+
+        knightChecks &= safe;
+        rookChecks   &= safe;
+        queenChecks  &= safe;
+        bishopChecks &= safe;
 
         count  = ei->kingAttackersCount[THEM] * ei->kingAttackersWeight[THEM];
 
@@ -779,6 +786,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
                + KSWeakSquares     * popcount(weak & ei->kingAreas[US])
                + KSFriendlyPawns   * popcount(myPawns & ei->kingAreas[US] & ~weak)
                + KSNoEnemyQueens   * !enemyQueens
+               + KSUnsafeCheck     * popcount(unsafeChecks)
                + KSSafeQueenCheck  * popcount(queenChecks)
                + KSSafeRookCheck   * popcount(rookChecks)
                + KSSafeBishopCheck * popcount(bishopChecks)
