@@ -269,9 +269,9 @@ const int KSAttackValue     =   44;
 const int KSWeakSquares     =   38;
 const int KSFriendlyPawns   =  -22;
 const int KSNoEnemyQueens   = -276;
-const int KSSafeQueenCheck  =  103;
-const int KSSafeRookCheck   =  124;
-const int KSSafeBishopCheck =   63;
+const int KSSafeQueenCheck  =  109;
+const int KSSafeRookCheck   =  135;
+const int KSSafeBishopCheck =   72;
 const int KSSafeKnightCheck =  123;
 const int KSAdjustment      =  -18;
 
