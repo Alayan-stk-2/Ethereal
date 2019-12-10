@@ -277,20 +277,21 @@ const int KSAdjustment      =  -18;
 
 /* Passed Pawn Evaluation Terms */
 
-const int PassedPawn[2][2][RANK_NB] = {
-  {{S(   0,   0), S( -38,   3), S( -55,  20), S( -82,  27),
-    S(  -6,  12), S(  70,  -6), S( 157,  55), S(   0,   0)},
-   {S(   0,   0), S( -31,   5), S( -53,  21), S( -75,  30),
-    S( -13,  32), S(  89,  31), S( 181,  96), S(   0,   0)}},
-  {{S(   0,   0), S( -25,  14), S( -51,  16), S( -74,  32),
-    S(  -4,  36), S(  86,  37), S( 260, 106), S(   0,   0)},
-   {S(   0,   0), S( -33,   9), S( -48,  14), S( -69,  36),
-    S(  -2,  49), S(  91, 106), S( 160, 265), S(   0,   0)}},
+const int PassedPawn[2][2][8] = {
+  {{S(   0,   0), S( -38,   3), S( -55,  20), S( -83,  26), S(  -8,  10), S(  68,  -8), S( 157,  54), S(   0,   0)},
+   {S(   0,   0), S( -32,   5), S( -54,  20), S( -76,  28), S( -15,  29), S(  87,  27), S( 180,  93), S(   0,   0)}},
+  {{S(   0,   0), S( -25,  14), S( -52,  15), S( -75,  30), S(  -7,  32), S(  82,  31), S( 259, 102), S(   0,   0)},
+   {S(   0,   0), S( -34,   8), S( -49,  12), S( -71,  33), S(  -4,  43), S(  89,  98), S( 159, 261), S(   0,   0)}},
 };
 
 const int PassedNoEnemyPasser[8] = {
-    S(   0,   0), S(   0,  23), S(   4,  18), S(   7,   0), 
+    S(   0,   0), S(   0,  16), S(   3,  14), S(   5,   0), 
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0), 
+};
+
+const int PassedConnected[2][8] = {
+   {S(   0,   0), S(  -1,  -5), S(  -1,  -5), S(   1,   4), S(   3,   8), S(   1,   1), S(   0,   0), S(   0,   0)},
+   {S(   0,   0), S(   3,   5), S(   3,   6), S(   3,   9), S(   2,   5), S(   0,   0), S(   0,   0), S(   0,   0)},
 };
 
 const int PassedFriendlyDistance[8] = {
@@ -836,7 +837,7 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, rank, dist, flag, canAdvance, safeAdvance, eval = 0;
+    int sq, rank, dist, flag, canAdvance, safeAdvance, NEP = 0, eval = 0;
 
     uint64_t bitboard;
     uint64_t tempPawns = board->colours[US] & ei->passedPawns;
@@ -858,8 +859,15 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
 
         // Rank-based bonus if there is no enemy passed pawn
         if(!(board->colours[THEM] & ei->passedPawns)) {
+            NEP = 1;
             eval += PassedNoEnemyPasser[rank];
             if (TRACE) T.PassedNoEnemyPasser[rank][US]++;
+        }
+
+        // Rank-based bonus for connected passers
+        if (board->colours[US] & ei->passedPawns & kingAttacks(sq)) {
+            eval += PassedConnected[NEP][rank];
+            if (TRACE) T.PassedConnected[NEP][rank][US]++;
         }
 
         // Evaluate based on distance from our king

@@ -80,6 +80,7 @@ extern const int KingShelter[2][8][8];
 extern const int KingStorm[2][4][8];
 extern const int PassedPawn[2][2][8];
 extern const int PassedNoEnemyPasser[8];
+extern const int PassedConnected[2][8];
 extern const int PassedFriendlyDistance[8];
 extern const int PassedEnemyDistance[8];
 extern const int PassedSafePromotionPath;
