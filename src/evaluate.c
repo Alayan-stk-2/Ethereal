@@ -36,7 +36,7 @@ int PSQT[32][SQUARE_NB];
 
 const int PawnValue   = S( 105, 118);
 const int KnightValue = S( 449, 410);
-const int BishopValue = S( 473, 423);
+const int BishopValue = S( 481, 428);
 const int RookValue   = S( 654, 684);
 const int QueenValue  = S(1295,1380);
 const int KingValue   = S(   0,   0);
@@ -154,9 +154,9 @@ const int KnightMobility[9] = {
 
 const int BishopPair = S(  22,  69);
 
-const int BishopRammedPawns = S( -10, -15);
+const int BishopRammedPawns = S( -6,  -9);
 
-const int BishopPawns = S( 0, 0);
+const int BishopPawns = S( -3, -4);
 
 const int BishopOutpost[2][2] = {
     { S(  10, -12), S(  40,   0) },
