@@ -37,21 +37,21 @@ int PSQT[32][SQUARE_NB];
 const int PawnValue   = S( 105, 118);
 const int KnightValue = S( 449, 410);
 const int BishopValue = S( 473, 423);
-const int RookValue   = S( 654, 684);
+const int RookValue   = S( 648, 676);
 const int QueenValue  = S(1295,1380);
 const int KingValue   = S(   0,   0);
 
 /* Piece Square Evaluation Terms */
 
 const int PawnPSQT32[32] = {
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
-    S( -19,   9), S(   6,   4), S( -11,   7), S(  -6,  -1),
-    S( -21,   4), S( -11,   3), S(  -8,  -5), S(  -2, -13),
-    S( -16,  12), S( -10,  11), S(  14, -13), S(  12, -24),
-    S(  -4,  16), S(   4,  11), S(   0,  -2), S(  14, -21),
-    S(  -4,  32), S(   1,  30), S(  10,  19), S(  38,  -8),
-    S( -17, -40), S( -65,  -9), S(   3, -23), S(  40, -37),
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
+    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0), 
+    S( -22,   6), S(   1,   0), S( -14,   3), S(  -8,  -3), 
+    S( -24,   2), S( -16,   1), S( -11,  -7), S(  -5, -15), 
+    S( -18,   7), S( -15,   8), S(  10, -15), S(   7, -27), 
+    S(  -7,  10), S(  -3,   6), S(  -6,  -7), S(   7, -24), 
+    S(  -8,  24), S(  -4,  21), S(   3,  11), S(  30, -16), 
+    S( -19, -46), S( -66, -14), S(   2, -28), S(  39, -41), 
+    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0), 
 };
 
 const int KnightPSQT32[32] = {
@@ -77,14 +77,14 @@ const int BishopPSQT32[32] = {
 };
 
 const int RookPSQT32[32] = {
-    S( -10, -28), S( -14, -19), S(  -2, -23), S(   7, -29),
-    S( -53, -13), S( -13, -30), S(  -9, -30), S(   1, -33),
-    S( -28, -13), S(  -7, -11), S( -16, -15), S(  -1, -23),
-    S( -16,  -1), S(  -7,   6), S(  -6,   2), S(   6,  -4),
-    S(  -1,   8), S(  14,   5), S(  24,   1), S(  38,  -3),
-    S( -11,  18), S(  27,   5), S(   3,  17), S(  35,   1),
-    S(   2,   7), S( -17,  16), S(   8,   6), S(  22,   7),
-    S(  35,  22), S(  25,  24), S(   6,  29), S(  16,  25),
+    S( -11, -24), S( -12, -17), S(  -2, -21), S(   5, -25), 
+    S( -49, -11), S( -10, -29), S(  -6, -28), S(   4, -31), 
+    S( -25, -12), S(  -4, -10), S( -14, -14), S(   1, -22), 
+    S( -16,  -1), S(  -7,   6), S(  -6,   2), S(   6,  -4), 
+    S(  -4,   6), S(  13,   4), S(  22,   0), S(  37,  -4), 
+    S( -14,  16), S(  25,   2), S(   1,  16), S(  32,  -2), 
+    S(  -1,   4), S( -19,  15), S(   7,   3), S(  21,   5), 
+    S(  34,  20), S(  24,  23), S(   6,  28), S(  16,  24), 
 };
 
 const int QueenPSQT32[32] = {
@@ -99,14 +99,14 @@ const int QueenPSQT32[32] = {
 };
 
 const int KingPSQT32[32] = {
-    S(  41, -80), S(  41, -51), S( -11, -13), S( -26, -22),
-    S(  30, -30), S(  -3, -20), S( -36,   6), S( -50,   8),
-    S(   8, -31), S(  17, -27), S(  17,  -3), S(  -9,  12),
-    S(   2, -36), S(  83, -37), S(  41,   2), S(  -6,  22),
-    S(   4, -20), S(  95, -31), S(  46,  10), S(   2,  19),
-    S(  46, -22), S( 120, -19), S(  94,   6), S(  38,   5),
-    S(   6, -42), S(  47,  -5), S(  32,  10), S(   9,   2),
-    S(   9, -98), S(  75, -51), S( -19, -11), S( -18, -10),
+    S(  44, -78), S(  41, -49), S(  -9, -11), S( -33, -15), 
+    S(  31, -28), S(  -3, -18), S( -34,   7), S( -48,  10), 
+    S(   8, -30), S(  17, -25), S(  17,  -2), S(  -9,  14), 
+    S(   2, -37), S(  83, -38), S(  41,   2), S(  -6,  23), 
+    S(   4, -21), S(  95, -33), S(  46,   8), S(   2,  18), 
+    S(  46, -24), S( 120, -21), S(  94,   3), S(  38,   2), 
+    S(   6, -44), S(  47,  -7), S(  32,   8), S(   9,   0), 
+    S(   9, -99), S(  75, -52), S( -19, -12), S( -18, -11), 
 };
 
 /* Pawn Evaluation Terms */
@@ -175,6 +175,8 @@ const int BishopMobility[14] = {
 const int RookFile[2] = { S(  15,   4), S(  35,   3) };
 
 const int RookOnSeventh = S(  -2,  26);
+
+const int TrappedRook[2] = { S(   8,   0), S(  -12,   0), };
 
 const int RookMobility[15] = {
     S(-148,-113), S( -52,-113), S( -15, -61), S(  -7, -21),
@@ -627,6 +629,7 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
     uint64_t myPawns    = board->pieces[PAWN] & board->colours[  US];
     uint64_t enemyPawns = board->pieces[PAWN] & board->colours[THEM];
     uint64_t tempRooks  = board->pieces[ROOK] & board->colours[  US];
+    uint64_t homeRanks  = (US == WHITE) ? (RANK_1 | RANK_2 | RANK_3) : (RANK_6 | RANK_7 | RANK_8);
 
     ei->attackedBy[US][ROOK] = 0ull;
 
@@ -664,6 +667,14 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
         count = popcount(ei->mobilityAreas[US] & attacks);
         eval += RookMobility[count];
         if (TRACE) T.RookMobility[count][US]++;
+
+        // Apply a penalty for being trapped in home corners
+        if (   count <= 3
+            && testBit(EXTERIOR_FILES & homeRanks, sq)) {
+            int noCastling = !(board->colours[US] & board->castleRooks);
+            eval += TrappedRook[noCastling];
+            if (TRACE) T.TrappedRook[noCastling][US]++;
+        }
 
         // Update King Safety calculations
         if ((attacks &= ei->kingAreas[THEM])) {
