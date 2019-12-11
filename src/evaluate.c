@@ -332,6 +332,7 @@ const int ClosednessRookAdjustment[9] = {
 const int ComplexityTotalPawns  = S(   0,   7);
 const int ComplexityPawnFlanks  = S(   0,  49);
 const int ComplexityPawnEndgame = S(   0,  34);
+const int ComplexityOutflanking = S(   0,   6);
 const int ComplexityAdjustment  = S(   0,-110);
 
 /* General Evaluation Terms */
@@ -1014,10 +1015,18 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     uint64_t rooks   = board->pieces[ROOK  ];
     uint64_t queens  = board->pieces[QUEEN ];
 
+    int outflanking = 0;
+    if (board->pieces[PAWN]) {
+        outflanking =   abs(fileOf(ei->kingSquare[WHITE]) - fileOf(ei->kingSquare[BLACK]))
+                      - abs(rankOf(ei->kingSquare[WHITE]) - rankOf(ei->kingSquare[BLACK]));
+        outflanking = MAX(-2, outflanking);
+    }
+
     // Compute the initiative bonus or malus for the attacking side
     complexity =  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
                +  ComplexityPawnFlanks  * pawnsOnBothFlanks
                +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
+               +  ComplexityOutflanking * outflanking
                +  ComplexityAdjustment;
 
     if (TRACE) T.ComplexityTotalPawns[WHITE]  += sign * popcount(board->pieces[PAWN]);
