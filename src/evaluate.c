@@ -288,6 +288,11 @@ const int PassedPawn[2][2][RANK_NB] = {
     S(  -1,  52), S(  92, 117), S( 161, 275), S(   0,   0)}},
 };
 
+const int PassedOCB[8] = {
+    S(   0,   0), S(  -1,  -2), S(  -3,  -8), S(  -1, -13), 
+    S(   1, -26), S(   0, -39), S(  -3, -47), S(   0,   0), 
+};
+
 const int PassedFriendlyDistance[8] = {
     S(   0,   0), S(   0,   0), S(   3,  -4), S(   7, -10),
     S(   6, -14), S(  -8, -13), S( -15,  -9), S(   0,   0),
@@ -837,6 +842,10 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
     uint64_t tempPawns = board->colours[US] & ei->passedPawns;
     uint64_t occupied  = board->colours[WHITE] | board->colours[BLACK];
 
+    uint64_t white   = board->colours[WHITE];
+    uint64_t black   = board->colours[BLACK];
+    uint64_t bishops = board->pieces[BISHOP];
+
     // Evaluate each passed pawn
     while (tempPawns) {
 
@@ -850,6 +859,16 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         safeAdvance = !(bitboard & ei->attacked[THEM]);
         eval += PassedPawn[canAdvance][safeAdvance][rank];
         if (TRACE) T.PassedPawn[canAdvance][safeAdvance][rank][US]++;
+
+        // If OCB 
+        if (   !board->pieces[QUEEN ]
+            && !board->pieces[KNIGHT]
+            && onlyOne(white & bishops)
+            && onlyOne(black & bishops)
+            && onlyOne(bishops & WHITE_SQUARES)) {
+            eval += PassedOCB[rank];
+            if (TRACE) T.PassedOCB[rank][US]++;
+        }
 
         // Evaluate based on distance from our king
         dist = distanceBetween(sq, ei->kingSquare[US]);
