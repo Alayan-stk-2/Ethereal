@@ -289,8 +289,8 @@ const int PassedPawn[2][2][RANK_NB] = {
 };
 
 const int PassedOCB[8] = {
-    S(   0,   0), S(  -1,  -2), S(  -3,  -8), S(  -1, -13), 
-    S(   1, -26), S(   0, -39), S(  -3, -47), S(   0,   0), 
+    S(   0,   0), S(   0,   0), S(  -1,  -5), S(  -1, -10), 
+    S(  -1, -20), S(  -2, -27), S(  -2, -25), S(   0,   0), 
 };
 
 const int PassedFriendlyDistance[8] = {
