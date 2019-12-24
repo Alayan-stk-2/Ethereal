@@ -90,6 +90,7 @@ extern const int ThreatRookAttackedByLesser;
 extern const int ThreatMinorAttackedByKing;
 extern const int ThreatRookAttackedByKing;
 extern const int ThreatQueenAttackedByOne;
+extern const int ThreatSliderOnQueen;
 extern const int ThreatOverloadedPieces;
 extern const int ThreatByPawnPush;
 extern const int ComplexityTotalPawns;

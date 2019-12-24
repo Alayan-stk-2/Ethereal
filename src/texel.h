@@ -25,11 +25,11 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (      0) // Total terms in the Tuner (625)
+#define NTERMS       (      1) // Total terms in the Tuner (626)
 
-#define LEARNING     (    5.0) // Learning rate
+#define LEARNING     (    4.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
-#define BATCHSIZE    (7400000) // FENs per mini-batch
+#define BATCHSIZE    (  16384) // FENs per mini-batch
 #define NPOSITIONS   (7400000) // Total FENS in the book
 
 #define STATICWEIGHT (   0.50) // Weight of the Static Evaluation
@@ -84,6 +84,7 @@
 #define TuneThreatMinorAttackedByKing   (0)
 #define TuneThreatRookAttackedByKing    (0)
 #define TuneThreatQueenAttackedByOne    (0)
+#define TuneThreatSliderOnQueen         (1)
 #define TuneThreatOverloadedPieces      (0)
 #define TuneThreatByPawnPush            (0)
 #define TuneComplexityTotalPawns        (0)
@@ -276,6 +277,7 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_0(fname, ThreatMinorAttackedByKing, NORMAL);         \
     ENABLE_0(fname, ThreatRookAttackedByKing, NORMAL);          \
     ENABLE_0(fname, ThreatQueenAttackedByOne, NORMAL);          \
+    ENABLE_0(fname, ThreatSliderOnQueen, NORMAL);               \
     ENABLE_0(fname, ThreatOverloadedPieces, NORMAL);            \
     ENABLE_0(fname, ThreatByPawnPush, NORMAL);                  \
     ENABLE_0(fname, ComplexityTotalPawns, EGONLY);              \

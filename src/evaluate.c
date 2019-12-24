@@ -38,7 +38,7 @@ const int PawnValue   = S( 105, 118);
 const int KnightValue = S( 449, 410);
 const int BishopValue = S( 473, 423);
 const int RookValue   = S( 654, 684);
-const int QueenValue  = S(1295,1380);
+const int QueenValue  = S(1294,1376);
 const int KingValue   = S(   0,   0);
 
 /* Piece Square Evaluation Terms */
@@ -310,6 +310,7 @@ const int ThreatRookAttackedByLesser = S( -49, -19);
 const int ThreatMinorAttackedByKing  = S( -16, -15);
 const int ThreatRookAttackedByKing   = S( -13, -18);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
+const int ThreatSliderOnQueen        = S(  -8, -12);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
 
@@ -951,6 +952,18 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     count = popcount(queens & ei->attacked[THEM]);
     eval += count * ThreatQueenAttackedByOne;
     if (TRACE) T.ThreatQueenAttackedByOne[US] += count;
+
+    // Penalty for next move threats against our queens
+    uint64_t tempQueens = board->pieces[QUEEN] & board->colours[US];
+
+    while (tempQueens) {
+        int sq = poplsb(&tempQueens);
+        uint64_t commonTargetSquares =   (ei->attackedBy[THEM][BISHOP] & bishopAttacks(sq, friendly & enemy))
+                                       | (ei->attackedBy[THEM][ROOK  ] & rookAttacks(  sq, friendly & enemy));
+        count = popcount(commonTargetSquares & ei->mobilityAreas[THEM] & ei->attackedBy2[THEM]);
+        eval += count * ThreatSliderOnQueen;
+        if (TRACE) T.ThreatSliderOnQueen[US] += count;
+    }
 
     // Penalty for any overloaded minors or majors
     count = popcount(overloaded);
