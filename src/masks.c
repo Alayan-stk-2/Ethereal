@@ -29,6 +29,7 @@ int DistanceBetween[SQUARE_NB][SQUARE_NB];
 int KingPawnFileDistance[FILE_NB][1 << FILE_NB];
 uint64_t BitsBetweenMasks[SQUARE_NB][SQUARE_NB];
 uint64_t KingAreaMasks[COLOUR_NB][SQUARE_NB];
+uint64_t CloseRanksMasks[RANK_NB][RANK_NB];
 uint64_t ForwardRanksMasks[COLOUR_NB][RANK_NB];
 uint64_t ForwardFileMasks[COLOUR_NB][SQUARE_NB];
 uint64_t AdjacentFilesMasks[FILE_NB];
@@ -92,6 +93,14 @@ void initMasks() {
 
         KingAreaMasks[WHITE][sq] |= fileOf(sq) != 7 ? 0ull : KingAreaMasks[WHITE][sq] >> 1;
         KingAreaMasks[BLACK][sq] |= fileOf(sq) != 7 ? 0ull : KingAreaMasks[BLACK][sq] >> 1;
+    }
+
+    // Init a table of bitmasks for the ranks close to a given rank
+    for (int baseRank = 0; baseRank < RANK_NB; baseRank++) {
+        for (int i = 0; i < RANK_NB; i++) {
+            for (int rank = MAX(0, baseRank - i); rank < MIN(7, baseRank + i); rank++)
+                CloseRanksMasks[baseRank][i] |= Ranks[rank];
+        }
     }
 
     // Init a table of bitmasks for the ranks at or above a given rank, by colour
@@ -165,6 +174,12 @@ uint64_t kingAreaMasks(int colour, int sq) {
     assert(0 <= colour && colour < COLOUR_NB);
     assert(0 <= sq && sq < SQUARE_NB);
     return KingAreaMasks[colour][sq];
+}
+
+uint64_t closeRanksMasks(int rank, int distance) {
+    assert(0 <= distance && distance < RANK_NB);
+    assert(0 <= rank && rank < RANK_NB);
+    return CloseRanksMasks[rank][distance];
 }
 
 uint64_t forwardRanksMasks(int colour, int rank) {
