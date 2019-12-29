@@ -120,7 +120,7 @@ const int PawnCandidatePasser[2][RANK_NB] = {
 
 const int PawnIsolated = S(  -7, -11);
 
-const int PawnPseudoIsolated = S(  -2,  -1);
+const int PawnPseudoIsolated = S(  -6,  -2);
 
 const int PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
 
@@ -459,7 +459,7 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         }
 
         // Apply a penalty to pseudo-isolated pawns (big rank distance with neighbors)
-        if (neighbors && !(neighbors & closeRanksMasks(rankOf(sq), 2))) {
+        if (neighbors && !(neighbors & closeRanksMasks(rankOf(sq), 3))) {
             pkeval += PawnPseudoIsolated;
             if (TRACE) T.PawnPseudoIsolated[US]++;
         }
