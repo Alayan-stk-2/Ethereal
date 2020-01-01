@@ -176,9 +176,9 @@ const int RookFile[2] = { S(  15,   4), S(  35,   3) };
 
 const int RookOnSeventh = S(  -2,  26);
 
-const int RookOnEnemyQueen = S(  -5,   7);
+const int RookOnEnemyQueen = S(   4,   5);
 
-const int RookOnEnemyKing = S(  -1,   3);
+const int RookOnEnemyKing = S(   3,   4);
 
 const int RookMobility[15] = {
     S(-148,-113), S( -52,-113), S( -15, -61), S(  -7, -21),
@@ -656,7 +656,7 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
             if (TRACE) T.RookFile[open][US]++;
         }
 
-        enemyOnFile = fileOf(sq) & board->colours[THEM];
+        enemyOnFile = Files[fileOf(sq)] & board->colours[THEM];
 
         // Rook gains a bonus for being located on the same file as the enemy queen
         if(enemyOnFile & board->pieces[QUEEN]) {
