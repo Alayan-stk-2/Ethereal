@@ -176,6 +176,10 @@ const int RookFile[2] = { S(  15,   4), S(  35,   3) };
 
 const int RookOnSeventh = S(  -2,  26);
 
+const int RookOnEnemyQueen = S(  -5,   7);
+
+const int RookOnEnemyKing = S(  -1,   3);
+
 const int RookMobility[15] = {
     S(-148,-113), S( -52,-113), S( -15, -61), S(  -7, -21),
     S(  -7,  -1), S(  -8,  14), S(  -7,  24), S(  -1,  27),
@@ -622,7 +626,7 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
 
     int sq, open, count, eval = 0;
-    uint64_t attacks;
+    uint64_t attacks, enemyOnFile;
 
     uint64_t myPawns    = board->pieces[PAWN] & board->colours[  US];
     uint64_t enemyPawns = board->pieces[PAWN] & board->colours[THEM];
@@ -650,6 +654,20 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
             open = !(enemyPawns & Files[fileOf(sq)]);
             eval += RookFile[open];
             if (TRACE) T.RookFile[open][US]++;
+        }
+
+        enemyOnFile = fileOf(sq) & board->colours[THEM];
+
+        // Rook gains a bonus for being located on the same file as the enemy queen
+        if(enemyOnFile & board->pieces[QUEEN]) {
+            eval += RookOnEnemyQueen;
+            if (TRACE) T.RookOnEnemyQueen[US]++;
+        }
+
+        // Rook gains a bonus for being located on the same file as the enemy king
+        if(enemyOnFile & board->pieces[KING]) {
+            eval += RookOnEnemyKing;
+            if (TRACE) T.RookOnEnemyKing[US]++;
         }
 
         // Rook gains a bonus for being located on seventh rank relative to its
