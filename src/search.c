@@ -202,7 +202,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
     int ttHit, ttValue = 0, ttEval = 0, ttDepth = 0, ttBound = 0;
     int R, newDepth, rAlpha, rBeta, oldAlpha = alpha;
     int inCheck, isQuiet, improving, extension, singular, skipQuiets = 0;
-    int eval, value = -MATE, best = -MATE, futilityMargin, seeMargin[2];
+    int eval, value = -MATE, best = -MATE, futilityMargin[2], seeMargin[2];
     uint16_t move, ttMove = NONE_MOVE, bestMove = NONE_MOVE, quietsTried[MAX_MOVES];
     MovePicker movePicker;
     PVariation lpv;
@@ -307,7 +307,8 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
                                                     : -thread->evalStack[height-1] + 2 * Tempo;
 
     // Futility Pruning Margin
-    futilityMargin = FutilityMargin * depth;
+    futilityMargin[0] = FutilityMargin[0][MIN(8, depth)];
+    futilityMargin[1] = FutilityMargin[1][MIN(8, depth)];
 
     // Static Exchange Evaluation Pruning Margins
     seeMargin[0] = SEENoisyMargin * depth * depth;
@@ -405,7 +406,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             // Step 12A. Futility Pruning. If our score is far below alpha, and we
             // don't expect anything from this move, we can skip all other quiets
             if (   depth <= FutilityPruningDepth
-                && eval + futilityMargin <= alpha
+                && eval + futilityMargin[improving] <= alpha
                 && hist + cmhist + fmhist < FutilityPruningHistoryLimit[improving])
                 skipQuiets = 1;
 
@@ -413,7 +414,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             // alpha but still far below alpha after adding the FutilityMargin,
             // we can somewhat safely skip all quiet moves after this one
             if (   depth <= FutilityPruningDepth
-                && eval + futilityMargin + FutilityMarginNoHistory <= alpha)
+                && eval + futilityMargin[improving] + FutilityMarginNoHistory <= alpha)
                 skipQuiets = 1;
 
             // Step 12C. Late Move Pruning / Move Count Pruning. If we have
