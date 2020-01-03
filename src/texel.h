@@ -25,7 +25,7 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (      2) // Total terms in the Tuner (627)
+#define NTERMS       (      1) // Total terms in the Tuner (626)
 
 #define LEARNING     (    5.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
@@ -65,7 +65,6 @@
 #define TuneBishopMobility              (0)
 #define TuneRookFile                    (0)
 #define TuneRookOnEnemyQueen            (1)
-#define TuneRookOnEnemyKing             (1)
 #define TuneRookOnSeventh               (0)
 #define TuneClosednessRookAdjustment    (0)
 #define TuneRookMobility                (0)
@@ -259,7 +258,6 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_1(fname, BishopMobility, 14, NORMAL);                \
     ENABLE_1(fname, RookFile, 2, NORMAL);                       \
     ENABLE_0(fname, RookOnEnemyQueen, NORMAL);                  \
-    ENABLE_0(fname, RookOnEnemyKing, NORMAL);                   \
     ENABLE_0(fname, RookOnSeventh, NORMAL);                     \
     ENABLE_1(fname, ClosednessRookAdjustment, 9, NORMAL);       \
     ENABLE_1(fname, RookMobility, 15, NORMAL);                  \

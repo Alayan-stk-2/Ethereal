@@ -71,7 +71,6 @@ extern const int BishopBehindPawn;
 extern const int BishopMobility[14];
 extern const int RookFile[2];
 extern const int RookOnEnemyQueen;
-extern const int RookOnEnemyKing;
 extern const int RookOnSeventh;
 extern const int ClosednessRookAdjustment[9];
 extern const int RookMobility[15];
