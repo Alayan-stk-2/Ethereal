@@ -122,7 +122,10 @@ const int PawnIsolated = S(  -7, -11);
 
 const int PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
 
-const int PawnBackwards[2] = { S(   7,   0), S(  -7, -19) };
+const int PawnBackwards[2][FILE_NB/2] = {
+   {S(   5,  -4), S(   7,  -2), S(   9,  -4), S(   9,   1)},
+   {S(  -3, -23), S(  -8, -26), S(  -4, -24), S(  -5, -21)},
+};
 
 const int PawnConnected32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
@@ -472,8 +475,8 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // backwards at the same time. We don't give backward pawns a connected bonus
         if (neighbors && pushThreats && !backup) {
             flag = !(Files[fileOf(sq)] & enemyPawns);
-            pkeval += PawnBackwards[flag];
-            if (TRACE) T.PawnBackwards[flag][US]++;
+            pkeval += PawnBackwards[flag][mirrorFile(fileOf(sq))];
+            if (TRACE) T.PawnBackwards[flag][mirrorFile(fileOf(sq))][US]++;
         }
 
         // Apply a bonus if the pawn is connected and not backwards. We consider a
