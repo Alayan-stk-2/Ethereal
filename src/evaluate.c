@@ -118,7 +118,9 @@ const int PawnCandidatePasser[2][RANK_NB] = {
     S(  17,  82), S(  32,  54), S(   0,   0), S(   0,   0)},
 };
 
-const int PawnIsolated = S(  -7, -11);
+const int PawnIsolated[4] = {
+    S(  -3, -13), S(  -3, -12), S(  -3, -11), S( -12,  -9), 
+};
 
 const int PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
 
@@ -452,8 +454,8 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // are able to capture another pawn to not be isolated, as they may
         // have the potential to deisolate by capturing, or be traded away
         if (!threats && !neighbors) {
-            pkeval += PawnIsolated;
-            if (TRACE) T.PawnIsolated[US]++;
+            pkeval += PawnIsolated[mirrorFile(fileOf(sq))];
+            if (TRACE) T.PawnIsolated[mirrorFile(fileOf(sq))][US]++;
         }
 
         // Apply a penalty if the pawn is stacked. We adjust the bonus for when

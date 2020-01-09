@@ -25,11 +25,11 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (      0) // Total terms in the Tuner (625)
+#define NTERMS       (      4) // Total terms in the Tuner (628)
 
-#define LEARNING     (    5.0) // Learning rate
+#define LEARNING     (    4.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
-#define BATCHSIZE    (7400000) // FENs per mini-batch
+#define BATCHSIZE    (  16384) // FENs per mini-batch
 #define NPOSITIONS   (7400000) // Total FENS in the book
 
 #define STATICWEIGHT (   0.50) // Weight of the Static Evaluation
@@ -50,7 +50,7 @@
 #define TuneQueenPSQT32                 (0)
 #define TuneKingPSQT32                  (0)
 #define TunePawnCandidatePasser         (0)
-#define TunePawnIsolated                (0)
+#define TunePawnIsolated                (1)
 #define TunePawnStacked                 (0)
 #define TunePawnBackwards               (0)
 #define TunePawnConnected32             (0)
@@ -242,7 +242,7 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_1(fname, QueenPSQT32, 32, NORMAL);                   \
     ENABLE_1(fname, KingPSQT32, 32, NORMAL);                    \
     ENABLE_2(fname, PawnCandidatePasser, 2, 8, NORMAL);         \
-    ENABLE_0(fname, PawnIsolated, NORMAL);                      \
+    ENABLE_1(fname, PawnIsolated, 4, NORMAL);                   \
     ENABLE_1(fname, PawnStacked, 2, NORMAL);                    \
     ENABLE_1(fname, PawnBackwards, 2, NORMAL);                  \
     ENABLE_1(fname, PawnConnected32, 32, NORMAL);               \
