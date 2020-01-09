@@ -65,8 +65,8 @@ static const int ProbCutDepth = 5;
 static const int ProbCutMargin = 100;
 
 static const int FutilityMargin[2][9] = {
-    {  0,  42,  94, 213, 257, 368, 516, 480, 760 },
-    { 63, 114, 177, 265, 396, 509, 574, 654, 520 },
+    {  2,  41,  82, 233, 230, 356, 526, 461, 772 },
+    { 57, 111, 151, 259, 389, 517, 580, 678, 525 },
 };
 
 static const int FutilityMarginNoHistory = 256;
