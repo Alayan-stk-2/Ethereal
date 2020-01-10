@@ -375,7 +375,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
 
             // Perform a reduced depth verification search
             if (!apply(thread, board, move, height)) continue;
-            value = -search(thread, &lpv, -rBeta, -rBeta+1, depth-4, height+1);
+            value = -search(thread, &lpv, -rBeta, -rBeta+1, depth - (2 + (depth+3)/4), height+1);
             revert(thread, board, move, height);
 
             // Probcut failed high
