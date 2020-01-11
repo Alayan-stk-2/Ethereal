@@ -1007,7 +1007,8 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     int sign = (eg > 0) - (eg < 0);
 
     int pawnsOnBothFlanks = (board->pieces[PAWN] & LEFT_FLANK )
-                         && (board->pieces[PAWN] & RIGHT_FLANK);
+                         && (board->pieces[PAWN] & RIGHT_FLANK)
+                         && (board->pieces[PAWN] & ~CENTER_FILES);
 
     uint64_t knights = board->pieces[KNIGHT];
     uint64_t bishops = board->pieces[BISHOP];
