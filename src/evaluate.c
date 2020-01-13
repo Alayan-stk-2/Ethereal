@@ -330,8 +330,8 @@ const int ClosednessRookAdjustment[9] = {
 /* Imbalance Evaluation Terms */
 
 const int ImbalanceMinorForPawns[2][2] = {
-    { S(  0,  0), S(  0,  0) },
-    { S(  0,  0), S(  0,  0) }
+   {S(  -4, -29), S( -16, -82)},
+   {S(   1,   8), S( -48,  42)},
 };
 
 /* Complexity Evaluation Terms */
