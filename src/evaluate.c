@@ -327,6 +327,13 @@ const int ClosednessRookAdjustment[9] = {
     S( -26, -16),
 };
 
+/* Imbalance Evaluation Terms */
+
+const int ImbalanceMinorForPawns[2][2] = {
+    { S(  0,  0), S(  0,  0) },
+    { S(  0,  0), S(  0,  0) }
+};
+
 /* Complexity Evaluation Terms */
 
 const int ComplexityTotalPawns  = S(   0,   7);
@@ -351,6 +358,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
     pkeval = ei.pkeval[WHITE] - ei.pkeval[BLACK];
     eval  += pkeval + board->psqtmat;
     eval  += evaluateClosedness(&ei, board);
+    eval  += evaluateImbalance(&ei, board);
     eval  += evaluateComplexity(&ei, board, eval);
 
     // Calculate the game phase based on remaining material (Fruit Method)
@@ -990,6 +998,39 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
     count = popcount(white & rooks) - popcount(black & rooks);
     eval += count * ClosednessRookAdjustment[closedness];
     if (TRACE) T.ClosednessRookAdjustment[closedness][WHITE] += count;
+
+    return eval;
+}
+
+int evaluateImbalance(EvalInfo *ei, Board *board) {
+
+    int count, passers, pawns, eval = 0;
+
+    uint64_t white = board->colours[WHITE];
+    uint64_t black = board->colours[BLACK];
+
+    uint64_t knights = board->pieces[KNIGHT];
+    uint64_t bishops = board->pieces[BISHOP];
+    uint64_t minors  = knights | bishops;
+    uint64_t majors  = board->pieces[ROOK  ] | board->pieces[QUEEN ];
+
+    count = popcount(white & minors) - popcount(black & minors);
+
+    if (   count != 0
+        && popcount(white & majors) == popcount(black & majors)) {
+        count = MIN(1, MAX(-1, count));
+        if (count == 1) {
+            passers = !(ei->passedPawns & black & (RANK_2 | RANK_3));
+            pawns = (popcount(white & board->pieces[PAWN]) >= 2);
+        }
+        else {
+            passers = !(ei->passedPawns & white & (RANK_6 | RANK_7));
+            pawns = (popcount(black & board->pieces[PAWN]) >= 2);
+        }
+
+        eval += count * ImbalanceMinorForPawns[pawns][passers];
+        if (TRACE) T.ImbalanceMinorForPawns[pawns][passers][WHITE] += count;
+    }
 
     return eval;
 }
