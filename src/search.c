@@ -354,7 +354,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         R = 4 + depth / 6 + MIN(3, (eval - beta) / 200);
 
         apply(thread, board, NULL_MOVE, height);
-        value = -search(thread, &lpv, -beta, -beta+1, depth-R, height+1, !cutNode);
+        value = -search(thread, &lpv, -beta, -beta+1, depth-R, height+1, 0 /* cutNode */);
         revert(thread, board, NULL_MOVE, height);
 
         if (value >= beta) return beta;
