@@ -336,7 +336,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         &&  depth <= BetaPruningDepth
         &&  eval - BetaMargin * depth > beta)
         return eval;
-
+/*
     // Step 9. Null Move Pruning. If our position is so good that giving
     // our opponent back-to-back moves is still not enough for them to
     // gain control of the game, we can be somewhat safe in saying that
@@ -359,7 +359,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
 
         if (value >= beta) return beta;
     }
-
+*/
     // Step 10. Probcut Pruning. If we have a good capture that causes a cutoff
     // with an adjusted beta value at a reduced search depth, we expect that it
     // will cause a similar cutoff at this search depth, with a normal beta value
