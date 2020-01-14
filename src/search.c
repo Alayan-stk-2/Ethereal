@@ -319,7 +319,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
     // Reset Killer moves for our children
     thread->killers[height+1][0] = NONE_MOVE;
     thread->killers[height+1][1] = NONE_MOVE;
-
+/*
     // Step 7. Razoring. Allow depth one nodes to jump directly into a
     // Quiescence Search when the eval plus a margin cannot beat alpha
     if (   !PvNode
@@ -327,7 +327,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         &&  depth <= RazorDepth
         &&  eval + RazorMargin < alpha)
         return qsearch(thread, pv, alpha, beta, height);
-/*
+*/
     // Step 8. Beta Pruning / Reverse Futility Pruning / Static Null
     // Move Pruning. If the eval is well above beta, defined by a depth
     // dependent margin, then we assume the eval will hold above beta
@@ -336,7 +336,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         &&  depth <= BetaPruningDepth
         &&  eval - BetaMargin * depth > beta)
         return eval;
-*/
+
     // Step 9. Null Move Pruning. If our position is so good that giving
     // our opponent back-to-back moves is still not enough for them to
     // gain control of the game, we can be somewhat safe in saying that
