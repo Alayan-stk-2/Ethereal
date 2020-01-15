@@ -408,14 +408,14 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
                 && eval + futilityMargin <= alpha
                 && hist + cmhist + fmhist < FutilityPruningHistoryLimit[improving])
                 skipQuiets = 1;
-/*
+
             // Step 12B. Futility Pruning. If our score is not only far below
             // alpha but still far below alpha after adding the FutilityMargin,
             // we can somewhat safely skip all quiet moves after this one
             if (   depth <= FutilityPruningDepth
                 && eval + futilityMargin + FutilityMarginNoHistory <= alpha)
                 skipQuiets = 1;
-*/
+
             // Step 12C. Late Move Pruning / Move Count Pruning. If we have
             // tried many quiets in this position already, and we don't expect
             // anything from this move, we can skip all the remaining quiets
@@ -435,7 +435,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
                 && fmhist < FollowUpMoveHistoryLimit[improving])
                 continue;
         }
-
+/*
         // Step 13. Static Exchange Evaluation Pruning. Prune moves which fail
         // to beat a depth dependent SEE threshold. The use of movePicker.stage
         // is a speedup, which assumes that good noisy moves have a positive SEE
@@ -444,7 +444,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             &&  movePicker.stage > STAGE_GOOD_NOISY
             && !staticExchangeEvaluation(board, move, seeMargin[isQuiet]))
             continue;
-
+*/
         // Apply move, skip if move is illegal
         if (!apply(thread, board, move, height))
             continue;
