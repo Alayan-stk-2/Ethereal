@@ -319,7 +319,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
     // Reset Killer moves for our children
     thread->killers[height+1][0] = NONE_MOVE;
     thread->killers[height+1][1] = NONE_MOVE;
-/*
+
     // Step 7. Razoring. Allow depth one nodes to jump directly into a
     // Quiescence Search when the eval plus a margin cannot beat alpha
     if (   !PvNode
@@ -327,7 +327,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         &&  depth <= RazorDepth
         &&  eval + RazorMargin < alpha)
         return qsearch(thread, pv, alpha, beta, height);
-*/
+
     // Step 8. Beta Pruning / Reverse Futility Pruning / Static Null
     // Move Pruning. If the eval is well above beta, defined by a depth
     // dependent margin, then we assume the eval will hold above beta
@@ -397,7 +397,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             getHistory(thread, move, height, &hist, &cmhist, &fmhist);
             quietsSeen++;
         }
-
+/*
         // Step 12. Quiet Move Pruning. Prune any quiet move that meets one
         // of the criteria below, only after proving a non mated line exists
         if (isQuiet && best > MATED_IN_MAX) {
@@ -435,7 +435,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
                 && fmhist < FollowUpMoveHistoryLimit[improving])
                 continue;
         }
-
+*/
         // Step 13. Static Exchange Evaluation Pruning. Prune moves which fail
         // to beat a depth dependent SEE threshold. The use of movePicker.stage
         // is a speedup, which assumes that good noisy moves have a positive SEE
