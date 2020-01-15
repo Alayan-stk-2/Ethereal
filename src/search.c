@@ -397,7 +397,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             getHistory(thread, move, height, &hist, &cmhist, &fmhist);
             quietsSeen++;
         }
-/*
+
         // Step 12. Quiet Move Pruning. Prune any quiet move that meets one
         // of the criteria below, only after proving a non mated line exists
         if (isQuiet && best > MATED_IN_MAX) {
@@ -428,14 +428,15 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             if (   depth <= CounterMovePruningDepth[improving]
                 && cmhist < CounterMoveHistoryLimit[improving])
                 continue;
-
+/*
             // Step 12E. Follow Up Move Pruning. Moves with poor follow up
             // move history are pruned at near leaf nodes of the search.
             if (   depth <= FollowUpMovePruningDepth[improving]
                 && fmhist < FollowUpMoveHistoryLimit[improving])
                 continue;
-        }
 */
+        }
+
         // Step 13. Static Exchange Evaluation Pruning. Prune moves which fail
         // to beat a depth dependent SEE threshold. The use of movePicker.stage
         // is a speedup, which assumes that good noisy moves have a positive SEE
