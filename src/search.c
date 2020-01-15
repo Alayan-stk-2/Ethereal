@@ -415,20 +415,20 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             if (   depth <= FutilityPruningDepth
                 && eval + futilityMargin + FutilityMarginNoHistory <= alpha)
                 skipQuiets = 1;
-
+/*
             // Step 12C. Late Move Pruning / Move Count Pruning. If we have
             // tried many quiets in this position already, and we don't expect
             // anything from this move, we can skip all the remaining quiets
             if (   depth <= LateMovePruningDepth
                 && quietsSeen >= LateMovePruningCounts[improving][depth])
                 skipQuiets = 1;
-/*
+*/
             // Step 12D. Counter Move Pruning. Moves with poor counter
             // move history are pruned at near leaf nodes of the search.
             if (   depth <= CounterMovePruningDepth[improving]
                 && cmhist < CounterMoveHistoryLimit[improving])
                 continue;
-*/
+
             // Step 12E. Follow Up Move Pruning. Moves with poor follow up
             // move history are pruned at near leaf nodes of the search.
             if (   depth <= FollowUpMovePruningDepth[improving]
