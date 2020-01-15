@@ -401,21 +401,21 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         // Step 12. Quiet Move Pruning. Prune any quiet move that meets one
         // of the criteria below, only after proving a non mated line exists
         if (isQuiet && best > MATED_IN_MAX) {
-/*
+
             // Step 12A. Futility Pruning. If our score is far below alpha, and we
             // don't expect anything from this move, we can skip all other quiets
             if (   depth <= FutilityPruningDepth
                 && eval + futilityMargin <= alpha
                 && hist + cmhist + fmhist < FutilityPruningHistoryLimit[improving])
                 skipQuiets = 1;
-*/
+/*
             // Step 12B. Futility Pruning. If our score is not only far below
             // alpha but still far below alpha after adding the FutilityMargin,
             // we can somewhat safely skip all quiet moves after this one
             if (   depth <= FutilityPruningDepth
                 && eval + futilityMargin + FutilityMarginNoHistory <= alpha)
                 skipQuiets = 1;
-
+*/
             // Step 12C. Late Move Pruning / Move Count Pruning. If we have
             // tried many quiets in this position already, and we don't expect
             // anything from this move, we can skip all the remaining quiets
