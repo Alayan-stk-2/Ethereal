@@ -458,7 +458,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         // and we wait a few seconds in order to avoid floiding the output
         if (RootNode && !thread->index && elapsedTime(thread->info) > CurrmoveTimerMS)
             uciReportCurrentMove(board, move, played + thread->multiPV, depth);
-/*
+
         // Step 14. Late Move Reductions. Compute the reduction,
         // allow the later steps to perform the reduced searches
         if (isQuiet && depth > 2 && played > 1) {
@@ -481,7 +481,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             // Don't extend or drop into QS
             R  = MIN(depth - 1, MAX(R, 1));
 
-        } else */R = 1;
+        } else R = 1;
 
         // Identify moves which are candidate singular moves
         singular =  !RootNode
@@ -495,7 +495,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         // from the transposition table which appears to beat all other moves by a
         // relativly large margin,
         int multiCut = 0;
-        extension =  (inCheck)
+        extension =  0;/*(inCheck)
                   || (isQuiet && quietsSeen <= 4 && cmhist >= 10000 && fmhist >= 10000)
                   || (singular && moveIsSingular(thread, ttMove, ttValue, depth, height, beta, &multiCut));
 
@@ -503,7 +503,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             revert(thread, board, move, height);
             return MAX(ttValue - depth, -MATE);
         }
-
+*/
         // Factor the extension into the new depth. Do not extend at the root
         newDepth = depth + (extension && !RootNode);
 
