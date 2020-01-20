@@ -495,7 +495,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         // from the transposition table which appears to beat all other moves by a
         // relativly large margin,
         int multiCut = 0;
-        extension =  0;/*(inCheck)
+        extension =  (inCheck)
                   || (isQuiet && quietsSeen <= 4 && cmhist >= 10000 && fmhist >= 10000)
                   || (singular && moveIsSingular(thread, ttMove, ttValue, depth, height, beta, &multiCut));
 
@@ -503,7 +503,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             revert(thread, board, move, height);
             return MAX(ttValue - depth, -MATE);
         }
-*/
+
         // Factor the extension into the new depth. Do not extend at the root
         newDepth = depth + (extension && !RootNode);
 
@@ -556,11 +556,11 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
     // flag. For mates, return a score based on the distance from root, so we
     // can differentiate between close mates and far away mates from the root
     if (played == 0) return inCheck ? -MATE + height : 0;
-
+/*
     // Step 19. Update History counters on a fail high for a quiet move
     if (best >= beta && !moveIsTactical(board, bestMove))
         updateHistoryHeuristics(thread, quietsTried, quietsPlayed, height, depth*depth);
-
+*/
     // Step 20. Store results of search into the Transposition Table. We do
     // not overwrite the Root entry from the first line of play we examined
     if (!RootNode || !thread->multiPV) {
