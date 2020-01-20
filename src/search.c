@@ -435,7 +435,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
                 && fmhist < FollowUpMoveHistoryLimit[improving])
                 continue;
         }
-/*
+
         // Step 13. Static Exchange Evaluation Pruning. Prune moves which fail
         // to beat a depth dependent SEE threshold. The use of movePicker.stage
         // is a speedup, which assumes that good noisy moves have a positive SEE
@@ -444,7 +444,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             &&  movePicker.stage > STAGE_GOOD_NOISY
             && !staticExchangeEvaluation(board, move, seeMargin[isQuiet]))
             continue;
-*/
+
         // Apply move, skip if move is illegal
         if (!apply(thread, board, move, height))
             continue;
@@ -458,7 +458,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         // and we wait a few seconds in order to avoid floiding the output
         if (RootNode && !thread->index && elapsedTime(thread->info) > CurrmoveTimerMS)
             uciReportCurrentMove(board, move, played + thread->multiPV, depth);
-
+/*
         // Step 14. Late Move Reductions. Compute the reduction,
         // allow the later steps to perform the reduced searches
         if (isQuiet && depth > 2 && played > 1) {
@@ -481,7 +481,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             // Don't extend or drop into QS
             R  = MIN(depth - 1, MAX(R, 1));
 
-        } else R = 1;
+        } else */R = 1;
 
         // Identify moves which are candidate singular moves
         singular =  !RootNode
