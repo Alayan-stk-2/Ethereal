@@ -300,7 +300,10 @@ const int PassedEnemyDistance[8] = {
 
 const int PassedSafePromotionPath = S( -29, 37);
 
-const int PassedRedundancy = S(  -12,  -7);
+const int PassedRedundancy[6] = {
+    S(   0,   0), S(   0,   0), S(  -3,  -2), S( -12,  -8),
+    S( -25, -25), S( -40, -40),
+};
 
 /* Threat Evaluation Terms */
 
@@ -870,13 +873,10 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         flag = !(bitboard & (board->colours[THEM] | ei->attacked[THEM]));
         eval += flag * PassedSafePromotionPath;
         if (TRACE) T.PassedSafePromotionPath[US] += flag;
-
-        // Apply a redundancy penalty if there is 3 or more passers
-        if (passedCount >= 3) {
-            eval += PassedRedundancy;
-            if (TRACE) T.PassedRedundancy[US]++;
-        }
     }
+    // Apply a redundancy penalty for multiple passers
+    eval += PassedRedundancy[passedCount];
+    if (TRACE) T.PassedRedundancy[passedCount][US]++;
 
     return eval;
 }
