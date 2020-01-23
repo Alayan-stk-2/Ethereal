@@ -301,8 +301,8 @@ const int PassedEnemyDistance[8] = {
 const int PassedSafePromotionPath = S( -29,  37);
 
 const int PassedStacked[8] = {
-    S(   0,   0), S(   0,  -3), S(   0, -10), S(   0, -14),
-    S(  -6, -18), S( -12, -25), S(   0,   0), S(   0,   0),
+    S(   0,   0), S(   0,  -3), S(   0,  -6), S(   0, -10),
+    S(  -4, -12), S(  -8, -16), S(   0,   0), S(   0,   0),
 };
 
 /* Threat Evaluation Terms */
