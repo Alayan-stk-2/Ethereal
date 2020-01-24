@@ -838,9 +838,10 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
 
     int sq, rank, dist, flag, canAdvance, safeAdvance, eval = 0;
 
-    uint64_t bitboard;
-    uint64_t tempPawns = board->colours[US] & ei->passedPawns;
+    uint64_t myPassers = board->colours[US] & ei->passedPawns;
     uint64_t occupied  = board->colours[WHITE] | board->colours[BLACK];
+    uint64_t tempPawns = myPassers;
+    uint64_t bitboard;
 
     // Evaluate each passed pawn
     while (tempPawns) {
@@ -873,7 +874,7 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         if (TRACE) T.PassedSafePromotionPath[US] += flag;
 
         // Apply an extra penalty for stacked passers
-        if(forwardFileMasks(US, sq) & tempPawns) {
+        if(several(forwardFileMasks(THEM, sq) & myPassers)) {
             eval += PassedStacked[rank];
             if (TRACE) T.PassedStacked[rank][US]++;
         }
