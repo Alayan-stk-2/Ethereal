@@ -307,6 +307,8 @@ const int PassedStacked[8] = {
 
 /* Threat Evaluation Terms */
 
+const int ThreatRestrictionPiece     = S(  -1,  -1);
+const int ThreatRestrictionEmpty     = S(  -3,  -1);
 const int ThreatWeakPawn             = S( -13, -26);
 const int ThreatMinorAttackedByPawn  = S( -51, -53);
 const int ThreatMinorAttackedByMinor = S( -26, -36);
@@ -923,6 +925,19 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     pushThreat |= pawnAdvance(pushThreat & ~attacksByPawns & Rank3Rel, occupied, US);
     pushThreat &= ~attacksByPawns & (ei->attacked[US] | ~ei->attacked[THEM]);
     pushThreat  = pawnAttackSpan(pushThreat, enemy & ~ei->attackedBy[US][PAWN], US);
+
+    // Penlaty for restricted piece moves
+    uint64_t control =  ei->attacked[THEM]
+                      & poorlyDefended
+                      & ei->attacked[US];
+
+    count = popcount(control & (friendly | enemy));
+    eval += count * ThreatRestrictionPiece;
+    if (TRACE) T.ThreatRestrictionPiece[US] += count;
+
+    count = popcount(control & ~friendly & ~enemy);
+    eval += count * ThreatRestrictionEmpty;
+    if (TRACE) T.ThreatRestrictionEmpty[US] += count;
 
     // Penalty for each of our poorly supported pawns
     count = popcount(pawns & ~attacksByPawns & poorlyDefended);

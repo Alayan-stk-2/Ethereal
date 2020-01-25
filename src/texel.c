@@ -81,6 +81,8 @@ extern const int PassedFriendlyDistance[8];
 extern const int PassedEnemyDistance[8];
 extern const int PassedSafePromotionPath;
 extern const int PassedStacked[8];
+extern const int ThreatRestrictionPiece;
+extern const int ThreatRestrictionEmpty;
 extern const int ThreatWeakPawn;
 extern const int ThreatMinorAttackedByPawn;
 extern const int ThreatMinorAttackedByMinor;
