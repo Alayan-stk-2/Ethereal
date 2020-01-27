@@ -174,7 +174,7 @@ const int BishopMobility[14] = {
 
 const int RookFile[2] = { S(  15,   4), S(  35,   3) };
 
-const int RookFilePotential[2] = { S(   0,   0), S(   0,   0) };
+const int RookFilePotential[2] = { S(   1,  -1), S(   5,  -2) };
 
 const int RookOnSeventh = S(  -2,  26);
 
