@@ -302,7 +302,7 @@ const int PassedSafePromotionPath = S( -29,  37);
 
 const int PassedStacked[RANK_NB] = {
     S(   0,   0), S(   0,   0), S(   0,  -6), S(   0, -10),
-    S(  -4, -12), S(  -8, -16), S(   0,   0), S(   0,   0),
+    S(  -4, -12), S(  -8, -16), S( -20, -16), S(   0,   0),
 };
 
 /* Threat Evaluation Terms */
