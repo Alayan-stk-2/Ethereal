@@ -319,7 +319,7 @@ const int ThreatRookAttackedByKing   = S( -13, -18);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
-const int ThreatKnightOnQueen        = S(  10,   8);
+const int ThreatKnightOnQueen        = S(   7,   8);
 
 /* Closedness Evaluation Terms */
 
