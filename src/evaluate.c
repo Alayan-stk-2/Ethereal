@@ -66,14 +66,14 @@ const int KnightPSQT32[32] = {
 };
 
 const int BishopPSQT32[32] = {
-    S(  18, -18), S(  15, -20), S( -10,  -9), S(   9, -13),
-    S(  31, -34), S(  24, -32), S(  23, -22), S(  11, -12),
-    S(  16, -14), S(  29, -16), S(  17,  -7), S(  21,  -6),
+    S(  11, -23), S(  15, -20), S( -10,  -9), S(   9, -13),
+    S(  31, -34), S(  17, -37), S(  23, -22), S(  11, -12),
+    S(  16, -14), S(  29, -16), S(  10, -12), S(  21,  -6),
     S(  16, -10), S(  18,  -3), S(  16,   4), S(  21,   8),
     S( -11,  10), S(  18,   4), S(   6,  12), S(  11,  19),
-    S(   1,   6), S(   0,  15), S(  16,  12), S(  20,  10),
-    S( -45,  15), S( -36,  12), S(  -4,   5), S( -20,   8),
-    S( -40,   2), S( -48,   8), S( -87,  16), S( -91,  24),
+    S(   1,   6), S(   0,  15), S(   9,   7), S(  20,  10),
+    S( -45,  15), S( -43,   7), S(  -4,   5), S( -20,   8),
+    S( -47,  -3), S( -48,   8), S( -87,  16), S( -91,  24),
 };
 
 const int RookPSQT32[32] = {
@@ -162,6 +162,8 @@ const int BishopOutpost[2][2] = {
 };
 
 const int BishopBehindPawn = S(   3,  18);
+
+const int BishopLongDiagonal = S(  16,   6);
 
 const int BishopMobility[14] = {
     S( -65,-147), S( -30, -95), S( -11, -56), S(  -1, -30),
@@ -606,6 +608,14 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
             eval += BishopBehindPawn;
             if (TRACE) T.BishopBehindPawn[US]++;
+        }
+
+        // Apply a bonus if the bishop is on a long diagonal
+        // and if it controls both central squares
+        if (   testBit(LONG_DIAGONALS & ~CENTER_SQUARES, sq)
+            && popcount(bishopAttacks(sq, board->pieces[PAWN]) & CENTER_SQUARES) == 2) {
+            eval += BishopLongDiagonal;
+            if (TRACE) T.BishopLongDiagonal[US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
