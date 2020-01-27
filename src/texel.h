@@ -25,11 +25,11 @@
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
 #define REPORTING    (     25) // How often to report progress
-#define NTERMS       (      0) // Total terms in the Tuner (635)
+#define NTERMS       (      2) // Total terms in the Tuner (637)
 
 #define LEARNING     (    5.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
-#define BATCHSIZE    (7400000) // FENs per mini-batch
+#define BATCHSIZE    (  16384) // FENs per mini-batch
 #define NPOSITIONS   (7400000) // Total FENS in the book
 
 #define STATICWEIGHT (   0.50) // Weight of the Static Evaluation
@@ -63,6 +63,7 @@
 #define TuneBishopBehindPawn            (0)
 #define TuneBishopMobility              (0)
 #define TuneRookFile                    (0)
+#define TuneRookFilePotential           (1)
 #define TuneRookOnSeventh               (0)
 #define TuneRookMobility                (0)
 #define TuneQueenMobility               (0)
@@ -258,6 +259,7 @@ void printParameters_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, i
     ENABLE_0(fname, BishopBehindPawn, NORMAL);                  \
     ENABLE_1(fname, BishopMobility, 14, NORMAL);                \
     ENABLE_1(fname, RookFile, 2, NORMAL);                       \
+    ENABLE_1(fname, RookFilePotential, 2, NORMAL);              \
     ENABLE_0(fname, RookOnSeventh, NORMAL);                     \
     ENABLE_1(fname, RookMobility, 15, NORMAL);                  \
     ENABLE_1(fname, QueenMobility, 28, NORMAL);                 \

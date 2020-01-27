@@ -69,6 +69,7 @@ extern const int BishopOutpost[2][2];
 extern const int BishopBehindPawn;
 extern const int BishopMobility[14];
 extern const int RookFile[2];
+extern const int RookFilePotential[2];
 extern const int RookOnSeventh;
 extern const int RookMobility[15];
 extern const int QueenMobility[28];

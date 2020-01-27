@@ -174,6 +174,8 @@ const int BishopMobility[14] = {
 
 const int RookFile[2] = { S(  15,   4), S(  35,   3) };
 
+const int RookFilePotential[2] = { S(   0,   0), S(   0,   0) };
+
 const int RookOnSeventh = S(  -2,  26);
 
 const int RookMobility[15] = {
@@ -381,7 +383,7 @@ int evaluateBoard(Board *board, PKTable *pktable) {
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
-        storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
+        storePKEntry(pktable, board->pkhash, ei.passedPawns, ei.semiOpenFiles[WHITE], ei.semiOpenFiles[BLACK], pkeval);
 
     // Return the evaluation relative to the side to move
     return board->turn == WHITE ? eval : -eval;
@@ -443,6 +445,9 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         uint64_t pushThreats = enemyPawns & pawnAttacks(US, sq + Forward);
         uint64_t pushSupport = myPawns    & pawnAttacks(THEM, sq + Forward);
         uint64_t leftovers   = stoppers ^ threats ^ pushThreats;
+
+        // Save open file information for later evaluation
+        ei->semiOpenFiles[US] &= ~Files[fileOf(sq)];
 
         // Save passed pawn information for later evaluation
         if (!stoppers) setBit(&ei->passedPawns, sq);
@@ -631,8 +636,6 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
     int sq, open, count, eval = 0;
     uint64_t attacks;
 
-    uint64_t myPawns    = board->pieces[PAWN] & board->colours[  US];
-    uint64_t enemyPawns = board->pieces[PAWN] & board->colours[THEM];
     uint64_t tempRooks  = board->pieces[ROOK] & board->colours[  US];
 
     ei->attackedBy[US][ROOK] = 0ull;
@@ -653,8 +656,8 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
 
         // Rook is on a semi-open file if there are no pawns of the rook's
         // colour on the file. If there are no pawns at all, it is an open file
-        if (!(myPawns & Files[fileOf(sq)])) {
-            open = !(enemyPawns & Files[fileOf(sq)]);
+        if (testBit(ei->semiOpenFiles[US], sq)) {
+            open = testBit(ei->semiOpenFiles[THEM], sq);
             eval += RookFile[open];
             if (TRACE) T.RookFile[open][US]++;
         }
@@ -987,6 +990,29 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     eval += count * ThreatByPawnPush;
     if (TRACE) T.ThreatByPawnPush[colour] += count;
 
+
+    // Not really a threat, but we need attack bitboards
+    // Bonus for rook that can access a safe square on a semi-open file in one move
+    uint64_t tempRooks  = board->pieces[ROOK] & board->colours[  US];
+
+    // Evaluate each rook
+    while (tempRooks) {
+        // Pop off the next rook
+        int sq = poplsb(&tempRooks);
+        if (!testBit(ei->semiOpenFiles[US], sq)) {
+            uint64_t targetSquares =    rookAttacks(sq, occupied)
+                                     &  ei->semiOpenFiles[US]
+                                     & ~friendly
+                                     & ~attacksByMinors
+                                     & ~attacksByPawns;
+            if (targetSquares) {
+                int open = !(!(targetSquares & ei->semiOpenFiles[THEM]));
+                eval += RookFilePotential[open];
+                if (TRACE) T.RookFilePotential[open][US]++;
+            }
+        }
+    }
+
     return eval;
 }
 
@@ -1147,6 +1173,8 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     // Try to read a hashed Pawn King Eval. Otherwise, start from scratch
     ei->pkentry       =     pktable == NULL ? NULL : getPKEntry(pktable, board->pkhash);
     ei->passedPawns   = ei->pkentry == NULL ? 0ull : ei->pkentry->passed;
+    ei->semiOpenFiles[WHITE]   = ei->pkentry == NULL ? 0xFFFFFFFFFFFFFFFFull : ei->pkentry->semiOpen[WHITE];
+    ei->semiOpenFiles[BLACK]   = ei->pkentry == NULL ? 0xFFFFFFFFFFFFFFFFull : ei->pkentry->semiOpen[BLACK];
     ei->pkeval[WHITE] = ei->pkentry == NULL ? 0    : ei->pkentry->eval;
     ei->pkeval[BLACK] = ei->pkentry == NULL ? 0    : 0;
 }
