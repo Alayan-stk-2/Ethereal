@@ -87,6 +87,7 @@ struct EvalTrace {
     int ThreatQueenAttackedByOne[COLOUR_NB];
     int ThreatOverloadedPieces[COLOUR_NB];
     int ThreatByPawnPush[COLOUR_NB];
+    int ThreatKnightOnQueen[COLOUR_NB];
     int ClosednessKnightAdjustment[9][COLOUR_NB];
     int ClosednessRookAdjustment[9][COLOUR_NB];
     int ComplexityTotalPawns[COLOUR_NB];

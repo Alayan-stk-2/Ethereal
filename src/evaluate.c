@@ -319,6 +319,7 @@ const int ThreatRookAttackedByKing   = S( -13, -18);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
 const int ThreatOverloadedPieces     = S(  -8, -13);
 const int ThreatByPawnPush           = S(  15,  21);
+const int ThreatKnightOnQueen        = S(  10,   8);
 
 /* Closedness Evaluation Terms */
 
@@ -890,7 +891,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
     const uint64_t Rank3Rel = US == WHITE ? RANK_3 : RANK_6;
 
-    int count, eval = 0;
+    int sq, count, eval = 0;
 
     uint64_t friendly = board->colours[  US];
     uint64_t enemy    = board->colours[THEM];
@@ -985,7 +986,21 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     // Bonus for giving threats by safe pawn pushes
     count = popcount(pushThreat);
     eval += count * ThreatByPawnPush;
-    if (TRACE) T.ThreatByPawnPush[colour] += count;
+    if (TRACE) T.ThreatByPawnPush[US] += count;
+
+    // Bonus for knight threats against enemy queens
+    uint64_t tempQueens = board->pieces[QUEEN] & board->colours[THEM];
+
+    while (tempQueens) {
+        // Pop off the next queen
+        sq = poplsb(&tempQueens);
+
+        if(    ei->attackedBy[US][KNIGHT] & knightAttacks(sq)
+           & ~(ei->attackedBy[THEM][PAWN] | (ei->attackedBy2[THEM] & ~ei->attackedBy2[US]))) {
+            eval += ThreatKnightOnQueen;
+            if (TRACE) T.ThreatKnightOnQueen[US]++;
+        }
+    }
 
     return eval;
 }
