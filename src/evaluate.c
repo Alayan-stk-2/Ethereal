@@ -307,7 +307,7 @@ const int PassedStacked[RANK_NB] = {
 
 /* Threat Evaluation Terms */
 
-const int ThreatRestrictPiece        = S(  -3,  -1);
+const int ThreatRestrictPiece        = S(  -5,  -4);
 const int ThreatRestrictEmpty        = S(  -4,  -2);
 const int ThreatWeakPawn             = S( -13, -26);
 const int ThreatMinorAttackedByPawn  = S( -51, -53);
