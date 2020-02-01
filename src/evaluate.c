@@ -143,8 +143,8 @@ const int PawnConnected32[32] = {
 /* Knight Evaluation Terms */
 
 const int KnightOutpost[2][2] = {
-    { S(   7, -26), S(  31,  -4) },
-    { S(   4, -26), S(  15,  -4) },
+    { S(   7, -26), S(  32,  -6) },
+    { S(   1, -23), S(  14,  -6) },
 };
 
 const int KnightBehindPawn = S(   4,  19);
@@ -183,9 +183,9 @@ const int BishopMobility[14] = {
 
 /* Rook Evaluation Terms */
 
-const int RookFile[2] = { S(  15,   4), S(  35,   3) };
+const int RookFile[2] = { S(  13,   6), S(  35,   3) };
 
-const int RookOnSeventh = S(  -2,  26);
+const int RookOnSeventh = S(  -4,  26);
 
 const int RookMobility[15] = {
     S(-148,-113), S( -52,-113), S( -15, -61), S(  -7, -21),
@@ -209,9 +209,9 @@ const int QueenMobility[28] = {
 /* King Evaluation Terms */
 
 const int KingDefenders[12] = {
-    S( -26,   0), S(  -7,  -3), S(   1,   2), S(   8,   5),
-    S(  17,   6), S(  27,   4), S(  31,  -2), S(  13,   0),
-    S(  12,   6), S(  12,   6), S(  12,   6), S(  12,   6),
+    S( -26,   5), S(  -5,  -2), S(   2,   2), S(   9,   4), 
+    S(  16,   4), S(  26,   2), S(  30,  -2), S(  13,   0), 
+    S(  12,   6), S(  12,   6), S(  12,   6), S(  12,   6), 
 };
 
 const int KingPawnFileProximity[FILE_NB]  = {
@@ -328,21 +328,21 @@ const int ThreatRookAttackedByLesser = S( -49, -19);
 const int ThreatMinorAttackedByKing  = S( -16, -15);
 const int ThreatRookAttackedByKing   = S( -13, -18);
 const int ThreatQueenAttackedByOne   = S( -39, -29);
-const int ThreatOverloadedPieces     = S(  -8, -13);
-const int ThreatByPawnPush           = S(  15,  21);
+const int ThreatOverloadedPieces     = S(  -6, -13);
+const int ThreatByPawnPush           = S(  14,  20);
 
 /* Closedness Evaluation Terms */
 
 const int ClosednessKnightAdjustment[9] = {
-    S( -11, -11), S(  -9,   3), S(  -8,  11), S(  -3,  13),
-    S(  -1,  18), S(   2,  16), S(   5,  13), S(  -6,  28),
-    S(  -7,  16),
+    S( -10, -15), S( -10,   4), S(  -9,  12), S(  -4,  14), 
+    S(  -1,  19), S(   3,  16), S(   5,  13), S(  -7,  29), 
+    S(  -9,  16), 
 };
 
 const int ClosednessRookAdjustment[9] = {
-    S(  47,  -9), S(   7,  23), S(   3,  13), S(  -3,   4),
-    S(  -7,   3), S(  -9,  -8), S( -13, -11), S( -21, -15),
-    S( -26, -16),
+    S(  56, -19), S(   7,  25), S(   0,  12), S(  -8,   1), 
+    S( -14,   0), S( -15, -12), S( -17, -13), S( -24, -17), 
+    S( -28, -17), 
 };
 
 /* Complexity Evaluation Terms */
