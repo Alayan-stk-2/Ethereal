@@ -39,6 +39,31 @@ static void updateCastleZobrist(Board *board, uint64_t oldRooks, uint64_t newRoo
         board->hash ^= ZobristCastleKeys[poplsb(&diff)];
 }
 
+static void updateCheckSquares(Board *board, Undo *undo) {
+
+    int color = !board->turn;
+    int kingsq = getlsb(board->colours[color] & board->pieces[KING]);
+    uint64_t occupied = board->colours[WHITE] | board->colours[BLACK];
+
+    undo->checkSquares[PAWN]   = pawnAttacks(color, kingsq);
+    undo->checkSquares[KNIGHT] = knightAttacks(kingsq);
+    undo->checkSquares[BISHOP] = bishopAttacks(kingsq, occupied);
+    undo->checkSquares[ROOK]   = rookAttacks(kingsq, occupied);
+    undo->checkSquares[QUEEN]  = undo->checkSquares[BISHOP] | undo->checkSquares[ROOK];
+    undo->checkSquares[KING]   = 0;
+}
+
+int moveGivesCheck(Thread *thread, uint16_t move, int height) {
+
+    int from = MoveFrom(move);
+    int to = MoveTo(move);
+
+    if (thread->undoStack[height].checkSquares[thread->pieceStack[height]] & 1ull << to)
+        return true;
+
+    return false;
+}
+
 int castleKingTo(int king, int rook) {
     return square(rankOf(king), (rook > king) ? 6 : 2);
 }

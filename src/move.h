@@ -53,6 +53,8 @@ void revert(Thread *thread, Board *board, uint16_t move, int height);
 void revertMove(Board *board, uint16_t move, Undo *undo);
 void revertNullMove(Board *board, Undo *undo);
 
+int moveGivesCheck(Thread *thread, uint16_t move, int height);
+
 int legalMoveCount(Board * board);
 int moveExaminedByMultiPV(Thread *thread, uint16_t move);
 int moveIsTactical(Board *board, uint16_t move);
