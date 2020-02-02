@@ -55,7 +55,6 @@ static void updateCheckSquares(Board *board, Undo *undo) {
 
 int moveGivesCheck(Thread *thread, uint16_t move, int height) {
 
-    int from = MoveFrom(move);
     int to = MoveTo(move);
 
     if (thread->undoStack[height].checkSquares[thread->pieceStack[height]] & 1ull << to)
@@ -78,6 +77,7 @@ int apply(Thread *thread, Board *board, uint16_t move, int height) {
     if (move == NULL_MOVE) {
         thread->moveStack[height] = NULL_MOVE;
         applyNullMove(board, &thread->undoStack[height]);
+        updateCheckSquares(board, &thread->undoStack[height]);
         return 1;
     }
 
@@ -90,6 +90,7 @@ int apply(Thread *thread, Board *board, uint16_t move, int height) {
     if (!moveWasLegal(board))
         return revertMove(board, move, &thread->undoStack[height]), 0;
 
+    updateCheckSquares(board, &thread->undoStack[height]);
     return 1;
 }
 

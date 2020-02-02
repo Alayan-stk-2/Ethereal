@@ -394,9 +394,11 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             quietsSeen++;
         }
 
+        int givesCheck = moveGivesCheck(thread, move, height);
+
         // Step 11 (~175 elo). Quiet Move Pruning. Prune any quiet move that meets one
         // of the criteria below, only after proving a non mated line exists
-        if (isQuiet && best > MATED_IN_MAX) {
+        if (isQuiet && !givesCheck && best > MATED_IN_MAX) {
 
             // Step 11A (~3 elo). Futility Pruning. If our score is far below alpha,
             // and we don't expect anything from this move, we can skip all other quiets
