@@ -320,7 +320,7 @@ const int PassedStacked[RANK_NB] = {
 
 const int ThreatRestrictPiece        = S(  -3,  -1);
 const int ThreatRestrictEmpty        = S(  -4,  -2);
-const int ThreatCenterControl        = S(   4,   0);
+const int ThreatCenterControl        = S(   5,  -5);
 const int ThreatWeakPawn             = S( -13, -26);
 const int ThreatMinorAttackedByPawn  = S( -51, -53);
 const int ThreatMinorAttackedByMinor = S( -26, -36);
@@ -964,9 +964,12 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     if (TRACE) T.ThreatRestrictEmpty[US] += count;
 
     // Bonus for uncontested central squares
-    count = popcount(~ei->attacked[THEM] & (ei->attacked[US] | friendly) & CENTER_BIG);
-    eval += count * ThreatCenterControl;
-    if (TRACE) T.ThreatCenterControl[US] += count;
+    if (popcount(board->pieces[KNIGHT] | board->pieces[BISHOP]) + 2 * popcount(board->pieces[ROOK] | board->pieces[QUEEN]) > 12)
+    {
+        count = popcount(~ei->attacked[THEM] & (ei->attacked[US] | friendly) & CENTER_BIG);
+        eval += count * ThreatCenterControl;
+        if (TRACE) T.ThreatCenterControl[US] += count;
+    }
 
     // Penalty for each of our poorly supported pawns
     count = popcount(pawns & ~attacksByPawns & poorlyDefended);
