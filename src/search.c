@@ -473,9 +473,6 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             // Reduce for Killers and Counters
             R -= movePicker.stage < STAGE_QUIET;
 
-            // Reduce for move that give check
-            R -= givesCheck;
-
             // Adjust based on history scores
             R -= MAX(-2, MIN(2, (hist + cmhist + fmhist) / 5000));
 
