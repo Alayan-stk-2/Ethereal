@@ -683,16 +683,18 @@ int staticExchangeEvaluation(Board *board, uint16_t move, int threshold) {
                : MovePromoPiece(move);
 
     // Balance is the value of the move minus threshold. Function
-    // call takes care for Enpass and Promotion moves. Castling is
-    // handled as a result of a King's value being zero, by trichotomy
-    // either the best case or the worst case condition will be hit
+    // call takes care for Enpass, Promotion and Castling moves.
     balance = moveEstimatedValue(board, move) - threshold;
 
-    // Best case is we lose nothing for the move
+    // If the move doesn't gain enough to beat the threshold, don't look any
+    // further. This is only relevant for movepicker SEE calls.
     if (balance < 0) return 0;
 
     // Worst case is losing the moved piece
     balance -= SEEPieceValues[nextVictim];
+
+    // If the balance is positive even if losing the moved piece,
+    // the exchange is guaranteed to beat the threshold.
     if (balance >= 0) return 1;
 
     // Grab sliders for updating revealed attackers
