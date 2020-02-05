@@ -969,7 +969,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     // Thus we don't apply this term when below a threshold of minors/majors count.
     if (      popcount(board->pieces[KNIGHT] | board->pieces[BISHOP])
         + 2 * popcount(board->pieces[ROOK  ] | board->pieces[QUEEN ]) > 12) {
-        count = popcount(~ei->attacked[THEM] & (ei->attacked[US] | friendly) & CENTER_BIG);
+        count = popcount((~ei->attacked[THEM] | (ei->attackedBy[US][PAWN] & ~attacksByPawns)) & (ei->attacked[US] | friendly) & CENTER_BIG);
         eval += count * ThreatCenterControl;
         if (TRACE) T.ThreatCenterControl[US] += count;
     }
