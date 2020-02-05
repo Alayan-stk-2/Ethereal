@@ -163,7 +163,7 @@ const int KnightMobility[9] = {
 
 const int BishopPair = S(  22,  69);
 
-const int BishopRammedPawns = S( -10, -15);
+const int BishopRammedPawns = S(  -9, -14);
 
 const int BishopOutpost[2][2] = {
     { S(  10, -12), S(  40,   0) },
@@ -591,6 +591,8 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         if (TRACE) T.BishopPair[US]++;
     }
 
+    uint64_t blockedPawns = pawnAdvance(board->pieces[PAWN], ~(board->pieces[PAWN] & board->colours[US]), THEM);
+
     // Evaluate each bishop
     while (tempBishops) {
 
@@ -607,7 +609,7 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
         // Apply a penalty for the bishop based on number of rammed pawns
         // of our own colour, which reside on the same shade of square as the bishop
-        count = popcount(ei->rammedPawns[US] & squaresOfMatchingColour(sq));
+        count = popcount(blockedPawns & squaresOfMatchingColour(sq));
         eval += count * BishopRammedPawns;
         if (TRACE) T.BishopRammedPawns[US] += count;
 
