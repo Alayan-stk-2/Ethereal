@@ -780,7 +780,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         // Weak squares are attacked by the enemy, defended no more
         // than once and only defended by our Queens or our King
         uint64_t weak =   ei->attacked[THEM]
-                      &  ~ei->attackedBy2[US]
+                      & (~ei->attackedBy2[US] | ei->attackedBy[THEM][PAWN])
                       & (~ei->attacked[US] | ei->attackedBy[US][QUEEN] | ei->attackedBy[US][KING]);
 
         // Usually the King Area is 9 squares. Scale are attack counts to account for
