@@ -99,14 +99,14 @@ const int QueenPSQT32[32] = {
 };
 
 const int KingPSQT32[32] = {
-    S(  41, -80), S(  41, -51), S( -11, -13), S( -26, -22),
-    S(  30, -30), S(  -3, -20), S( -36,   6), S( -50,   8),
-    S(   8, -31), S(  17, -27), S(  17,  -3), S(  -9,  12),
-    S(   2, -36), S(  83, -37), S(  41,   2), S(  -6,  22),
-    S(   4, -20), S(  95, -31), S(  46,  10), S(   2,  19),
-    S(  46, -22), S( 120, -19), S(  94,   6), S(  38,   5),
-    S(   6, -42), S(  47,  -5), S(  32,  10), S(   9,   2),
-    S(   9, -98), S(  75, -51), S( -19, -11), S( -18, -10),
+    S(  44, -80), S(  42, -52), S( -12, -12), S( -28, -19), 
+    S(  28, -30), S(  -6, -18), S( -38,   8), S( -51,  10), 
+    S(   8, -31), S(  17, -25), S(  19,  -1), S(  -7,  15), 
+    S(   2, -36), S(  84, -37), S(  42,   3), S(  -5,  25), 
+    S(   4, -20), S(  95, -32), S(  46,  10), S(   3,  19), 
+    S(  46, -24), S( 120, -21), S(  94,   4), S(  38,   3), 
+    S(   6, -44), S(  47,  -6), S(  32,   8), S(   9,   0), 
+    S(   9, -99), S(  75, -52), S( -19, -12), S( -18, -11), 
 };
 
 /* Pawn Evaluation Terms */
@@ -276,8 +276,9 @@ const int KingStorm[2][FILE_NB/2][RANK_NB] = {
 /* King Safety Evaluation Terms */
 
 const int KSAttackWeight[]  = { 0, 16, 6, 10, 8, 0 };
-const int KSAttackValue     =   44;
-const int KSWeakSquares     =   38;
+const int KSAttackValue     =   36;
+const int KSWeakSquares     =   32;
+const int KSWeakSquares2    =   24;
 const int KSFriendlyPawns   =  -22;
 const int KSNoEnemyQueens   = -276;
 const int KSSafeQueenCheck  =   95;
@@ -763,6 +764,8 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
     uint64_t defenders  = (board->pieces[PAWN  ] & board->colours[US])
                         | (board->pieces[KNIGHT] & board->colours[US])
                         | (board->pieces[BISHOP] & board->colours[US]);
+    uint64_t kingSmallArea = kingAttacks(ei->kingSquare[US]);
+
 
     int kingSq = ei->kingSquare[US];
     if (TRACE) T.KingValue[US]++;
@@ -780,12 +783,8 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         // Weak squares are attacked by the enemy, defended no more
         // than once and only defended by our Queens or our King
         uint64_t weak =   ei->attacked[THEM]
-                      &  ~ei->attackedBy2[US]
+                      & (~ei->attackedBy2[US] | ei->attackedBy[THEM][PAWN])
                       & (~ei->attacked[US] | ei->attackedBy[US][QUEEN] | ei->attackedBy[US][KING]);
-
-        // Usually the King Area is 9 squares. Scale are attack counts to account for
-        // when the king is in an open area and expects more attacks, or the opposite
-        float scaledAttackCounts = 9.0 * ei->kingAttacksCount[THEM] / popcount(ei->kingAreas[US]);
 
         // Safe target squares are defended or are weak and attacked by two.
         // We exclude squares containing pieces which we cannot capture.
@@ -808,8 +807,9 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         count  = ei->kingAttackersCount[THEM] * ei->kingAttackersWeight[THEM];
 
-        count += KSAttackValue     * scaledAttackCounts
+        count += KSAttackValue     * ei->kingAttacksCount[THEM]
                + KSWeakSquares     * popcount(weak & ei->kingAreas[US])
+               + KSWeakSquares2    * popcount(weak & kingSmallArea)
                + KSFriendlyPawns   * popcount(myPawns & ei->kingAreas[US] & ~weak)
                + KSNoEnemyQueens   * !enemyQueens
                + KSSafeQueenCheck  * popcount(queenChecks)

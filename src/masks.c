@@ -82,6 +82,7 @@ void initMasks() {
     // Init a table for the King Areas. Use the King's square, the King's target
     // squares, and the squares within the pawn shield. When on the A/H files, extend
     // the King Area to include an additional file, namely the C and F file respectively
+    // When the king is on its home rank, extend the king area up to the 4th rank.
     for (int sq = 0; sq < SQUARE_NB; sq++) {
 
         KingAreaMasks[WHITE][sq] = kingAttacks(sq) | (1ull << sq) | (kingAttacks(sq) << 8);
@@ -92,6 +93,9 @@ void initMasks() {
 
         KingAreaMasks[WHITE][sq] |= fileOf(sq) != 7 ? 0ull : KingAreaMasks[WHITE][sq] >> 1;
         KingAreaMasks[BLACK][sq] |= fileOf(sq) != 7 ? 0ull : KingAreaMasks[BLACK][sq] >> 1;
+
+        KingAreaMasks[WHITE][sq] |= rankOf(sq) != 0 ? 0ull : KingAreaMasks[WHITE][sq] << 8;
+        KingAreaMasks[BLACK][sq] |= rankOf(sq) != 0 ? 0ull : KingAreaMasks[BLACK][sq] >> 8;
     }
 
     // Init a table of bitmasks for the ranks at or above a given rank, by colour
