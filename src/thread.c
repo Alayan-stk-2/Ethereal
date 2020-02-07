@@ -28,7 +28,7 @@
 #include "types.h"
 
 int ContemptDrawPenalty = 8; // Set by UCI Options
-int ContemptComplexity  = 3; // Set by UCI Options
+int ContemptComplexity  = -3; // Set by UCI Options
 
 Thread* createThreadPool(int nthreads) {
 
