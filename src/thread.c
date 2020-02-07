@@ -27,8 +27,8 @@
 #include "transposition.h"
 #include "types.h"
 
-int ContemptDrawPenalty = 0; // Set by UCI Options
-int ContemptComplexity  = 12; // Set by UCI Options
+int ContemptDrawPenalty = 12; // Set by UCI Options
+int ContemptComplexity  = 0; // Set by UCI Options
 
 Thread* createThreadPool(int nthreads) {
 
