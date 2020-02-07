@@ -54,7 +54,7 @@ static const int WindowTimerMS = 2500;
 static const int CurrmoveTimerMS = 2500;
 
 static const int BetaPruningDepth = 8;
-static const int BetaMargin = 75;
+static const int BetaMargin = 81;
 
 static const int NullMovePruningDepth = 2;
 
