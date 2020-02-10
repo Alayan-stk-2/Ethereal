@@ -24,7 +24,6 @@
 #include "board.h"
 #include "evaluate.h"
 #include "masks.h"
-#include "thread.h"
 #include "transposition.h"
 #include "types.h"
 
@@ -360,17 +359,17 @@ const int Tempo = 20;
 
 #undef S
 
-int evaluateBoard(Thread *thread, Board *board) {
+int evaluateBoard(Board *board, PKTable *pktable, int contempt) {
 
     EvalInfo ei;
     int phase, factor, eval, pkeval;
 
     // Setup and perform all evaluations
-    initEvalInfo(&ei, board, &thread->pktable);
+    initEvalInfo(&ei, board, pktable);
     eval   = evaluatePieces(&ei, board);
     pkeval = ei.pkeval[WHITE] - ei.pkeval[BLACK];
     eval  += pkeval + board->psqtmat;
-    eval  += thread->contempt;
+    eval  += contempt;
     eval  += evaluateClosedness(&ei, board);
     eval  += evaluateComplexity(&ei, board, eval);
 
@@ -394,8 +393,8 @@ int evaluateBoard(Thread *thread, Board *board) {
     eval += board->turn == WHITE ? Tempo : -Tempo;
 
     // Store a new Pawn King Entry if we did not have one
-    if (ei.pkentry == NULL && &thread->pktable != NULL)
-        storePKEntry(&thread->pktable, board->pkhash, ei.passedPawns, pkeval);
+    if (ei.pkentry == NULL && pktable != NULL)
+        storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
 
     // Return the evaluation relative to the side to move
     return board->turn == WHITE ? eval : -eval;
