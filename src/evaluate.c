@@ -1129,14 +1129,8 @@ int evaluateScaleFactor(Board *board, int eval) {
 
     if (   onlyOne(queens)
         && several(pieces)) {
-        if ( (eg < 0)
-            && ((white & pieces) == pieces
-                && !(white & queens))) {
-            return SCALE_LONE_QUEEN;
-        }
-        if ( (eg > 0)
-            && ((black & pieces) == pieces
-                && !(black & queens))) {
+        uint64_t weakside = eg < 0 ? white : black;
+        if ( (weakside & pieces) == pieces) {
             return SCALE_LONE_QUEEN;
         }
     }
