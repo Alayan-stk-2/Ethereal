@@ -1124,7 +1124,22 @@ int evaluateScaleFactor(Board *board, int eval) {
             return SCALE_OCB_ONE_ROOK;
     }
 
+    uint64_t pieces = knights | bishops | rooks;
     int eg = ScoreEG(eval);
+
+    if (   onlyOne(queens)
+        && several(pieces)) {
+        if ( (eg < 0)
+            && ((white & pieces) == pieces
+                && !(white & queens))) {
+            return SCALE_LONE_QUEEN;
+        }
+        if ( (eg > 0)
+            && ((black & pieces) == pieces
+                && !(black & queens))) {
+            return SCALE_LONE_QUEEN;
+        }
+    }
 
     // Lone minor vs king and pawns, never give the advantage to the side with the minor
     if ( (eg > 0) && popcount(white) == 2 && (white & (knights | bishops)))
