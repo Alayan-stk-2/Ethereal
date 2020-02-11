@@ -28,8 +28,8 @@
 #include "types.h"
 
 // Default contempt values, UCI options can set them to other values
-int ContemptDrawPenalty = 12;
-int ContemptComplexity  = 12;
+int ContemptDrawPenalty = 0;
+int ContemptComplexity  = 0;
 
 Thread* createThreadPool(int nthreads) {
 
