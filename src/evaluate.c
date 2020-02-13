@@ -348,10 +348,16 @@ const int ClosednessRookAdjustment[9] = {
 
 /* Complexity Evaluation Terms */
 
-const int ComplexityTotalPawns  = S(   0,   7);
+const int ComplexityTotalPawns  = S(   0,   9);
 const int ComplexityPawnFlanks  = S(   0,  49);
 const int ComplexityPawnEndgame = S(   0,  34);
 const int ComplexityAdjustment  = S(   0,-110);
+
+const int ComplexityRammedPawns[9] = {
+    S(   0,   0), S(   0,  -3), S(   0, -12), S(   0, -27),
+    S(   0, -48), S(   0, -75), S(   0, -96), S(   0,-117),
+    S(   0,-138),
+};
 
 /* General Evaluation Terms */
 
@@ -1072,6 +1078,8 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     int pawnsOnBothFlanks = (board->pieces[PAWN] & LEFT_FLANK )
                          && (board->pieces[PAWN] & RIGHT_FLANK);
 
+    int rammedPawns = popcount(ei->rammedPawns[WHITE]);
+
     uint64_t knights = board->pieces[KNIGHT];
     uint64_t bishops = board->pieces[BISHOP];
     uint64_t rooks   = board->pieces[ROOK  ];
@@ -1080,6 +1088,7 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     // Compute the initiative bonus or malus for the attacking side
     complexity =  ComplexityTotalPawns  * popcount(board->pieces[PAWN])
                +  ComplexityPawnFlanks  * pawnsOnBothFlanks
+               +  ComplexityRammedPawns[rammedPawns]
                +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
                +  ComplexityAdjustment;
 
