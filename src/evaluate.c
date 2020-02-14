@@ -564,6 +564,10 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
         if (TRACE) T.KnightMobility[count][US]++;
 
         // Update King Safety calculations
+        if (several(attacks & ei->kingAreas[US])) {
+            ei->kingDefendersCount[US] += 1;
+        }
+
         if ((attacks &= ei->kingAreas[THEM])) {
             ei->kingAttacksCount[US] += popcount(attacks);
             ei->kingAttackersCount[US] += 1;
@@ -641,6 +645,10 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         if (TRACE) T.BishopMobility[count][US]++;
 
         // Update King Safety calculations
+        if (several(attacks & ei->kingAreas[US])) {
+            ei->kingDefendersCount[US] += 1;
+        }
+
         if ((attacks &= ei->kingAreas[THEM])) {
             ei->kingAttacksCount[US] += popcount(attacks);
             ei->kingAttackersCount[US] += 1;
@@ -741,6 +749,10 @@ int evaluateQueens(EvalInfo *ei, Board *board, int colour) {
         if (TRACE) T.QueenMobility[count][US]++;
 
         // Update King Safety calculations
+        if (several(attacks & ei->kingAreas[US])) {
+            ei->kingDefendersCount[US] += 1;
+        }
+
         if ((attacks &= ei->kingAreas[THEM])) {
             ei->kingAttacksCount[US] += popcount(attacks);
             ei->kingAttackersCount[US] += 1;
@@ -807,7 +819,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         uint64_t rookChecks   = rookThreats   & safe & ei->attackedBy[THEM][ROOK  ];
         uint64_t queenChecks  = queenThreats  & safe & ei->attackedBy[THEM][QUEEN ];
 
-        count  = ei->kingAttackersCount[THEM] * ei->kingAttackersWeight[THEM];
+        count  = ((3 * ei->kingAttackersCount[THEM] - 2 * ei->kingDefendersCount[US]) * ei->kingAttackersWeight[THEM])/2;
 
         count += KSAttackValue     * scaledAttackCounts
                + KSWeakSquares     * popcount(weak & ei->kingAreas[US])
@@ -1194,6 +1206,7 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     // Init all of the King Safety information
     ei->kingAttacksCount[WHITE]    = ei->kingAttacksCount[BLACK]    = 0;
     ei->kingAttackersCount[WHITE]  = ei->kingAttackersCount[BLACK]  = 0;
+    ei->kingDefendersCount[WHITE]  = ei->kingDefendersCount[BLACK]  = 0;
     ei->kingAttackersWeight[WHITE] = ei->kingAttackersWeight[BLACK] = 0;
 
     // Try to read a hashed Pawn King Eval. Otherwise, start from scratch

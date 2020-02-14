@@ -115,6 +115,7 @@ struct EvalInfo {
     int kingSquare[COLOUR_NB];
     int kingAttacksCount[COLOUR_NB];
     int kingAttackersCount[COLOUR_NB];
+    int kingDefendersCount[COLOUR_NB];
     int kingAttackersWeight[COLOUR_NB];
     int pkeval[COLOUR_NB];
     PKEntry *pkentry;
