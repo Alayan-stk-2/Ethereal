@@ -1142,6 +1142,9 @@ int evaluateScaleFactor(Board *board, int eval) {
     if (onlyOne(queens) && several(pieces) && pieces == (weak & pieces))
         return SCALE_LONE_QUEEN;
 
+    if (!pieces && several(queens))
+        return SCALE_QUEEN_EG;
+
     // Lone Minor vs King + Pawns should never be won
     if ((strong & minors) && popcount(strong) == 2)
         return SCALE_DRAW;
