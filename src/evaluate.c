@@ -284,7 +284,7 @@ const int KSSafeQueenCheck  =   95;
 const int KSSafeRookCheck   =   94;
 const int KSSafeBishopCheck =   51;
 const int KSSafeKnightCheck =  123;
-const int KSAdjustment      =  -28;
+const int KSAdjustment      =  -18;
 
 /* Passed Pawn Evaluation Terms */
 
@@ -782,7 +782,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         // than once and only defended by our Queens or our King
         uint64_t weak =   ei->attacked[THEM]
                       &  ~ei->attackedBy2[US]
-                      & (~ei->attacked[US] | ei->attackedBy2[THEM] | ei->attackedBy[US][QUEEN] | ei->attackedBy[US][KING]);
+                      & (~ei->attacked[US] | (ei->attackedBy2[THEM] & ~ei->attackedBy[US][PAWN]) | ei->attackedBy[US][QUEEN] | ei->attackedBy[US][KING]);
 
         // Usually the King Area is 9 squares. Scale are attack counts to account for
         // when the king is in an open area and expects more attacks, or the opposite
