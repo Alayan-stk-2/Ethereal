@@ -201,7 +201,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
     int quietsSeen = 0, quietsPlayed = 0, played = 0;
     int ttHit, ttValue = 0, ttEval = 0, ttDepth = 0, ttBound = 0;
     int R, newDepth, rAlpha, rBeta, oldAlpha = alpha;
-    int inCheck, isQuiet, improving, extension, singular, skipQuiets = 0;
+    int inCheck, isQuiet, improving, improving2, extension, singular, skipQuiets = 0;
     int eval, value = -MATE, best = -MATE, futilityMargin, seeMargin[2];
     uint16_t move, ttMove = NONE_MOVE, bestMove = NONE_MOVE, quietsTried[MAX_MOVES];
     MovePicker movePicker;
@@ -318,6 +318,11 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
 
     // Improving if our static eval increased in the last move
     improving = height >= 2 && eval > thread->evalStack[height-2];
+
+    // Improving2 if our static eval increased compared to 2 moves ago
+    improving2 = 1;
+    if (height >= 4)
+        improving2 = eval > thread->evalStack[height-4];
 
     // Reset Killer moves for our children
     thread->killers[height+1][0] = NONE_MOVE;
@@ -466,7 +471,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             R  = LMRTable[MIN(depth, 63)][MIN(played, 63)];
 
             // Increase for non PV and non improving nodes
-            R += !PvNode + !improving;
+            R += !PvNode + !(improving || improving2);
 
             // Increase for King moves that evade checks
             R += inCheck && pieceType(board->squares[MoveTo(move)]) == KING;
