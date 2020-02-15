@@ -346,7 +346,7 @@ const int ClosednessRookAdjustment[9] = {
     S( -26, -16),
 };
 
-const int PawnValueQueensOnly = S( -10, -22);
+const int PawnValueQueensOnly = S( -14, -31);
 
 /* Complexity Evaluation Terms */
 
@@ -1058,7 +1058,7 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
     if (TRACE) T.ClosednessRookAdjustment[closedness][WHITE] += count;
 
     if(   board->pieces[QUEEN]
-       && !knights 
+       && !knights
        && !rooks
        && !board->pieces[BISHOP]) {
         count = popcount(white & pawns) - popcount(black & pawns);
