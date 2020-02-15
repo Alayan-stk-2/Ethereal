@@ -346,6 +346,8 @@ const int ClosednessRookAdjustment[9] = {
     S( -26, -16),
 };
 
+const int PawnValueQueensOnly = S( -10, -22);
+
 /* Complexity Evaluation Terms */
 
 const int ComplexityTotalPawns  = S(   0,   7);
@@ -1037,6 +1039,7 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
 
     uint64_t knights = board->pieces[KNIGHT];
     uint64_t rooks   = board->pieces[ROOK  ];
+    uint64_t pawns   = board->pieces[PAWN  ];
 
     // Compute Closedness factor for this position
     closedness = 1 * popcount(board->pieces[PAWN])
@@ -1053,6 +1056,15 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
     count = popcount(white & rooks) - popcount(black & rooks);
     eval += count * ClosednessRookAdjustment[closedness];
     if (TRACE) T.ClosednessRookAdjustment[closedness][WHITE] += count;
+
+    if(   board->pieces[QUEEN]
+       && !knights 
+       && !rooks
+       && !board->pieces[BISHOP]) {
+        count = popcount(white & pawns) - popcount(black & pawns);
+        eval += count * PawnValueQueensOnly;
+        if (TRACE) T.PawnValueQueensOnly[WHITE] += count;
+    }
 
     return eval;
 }
