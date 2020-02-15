@@ -183,7 +183,11 @@ const int BishopMobility[14] = {
 
 /* Rook Evaluation Terms */
 
-const int RookFile[2] = { S(  15,   4), S(  35,   3) };
+const int RookFile[2][6] = {
+   {S(   0,   0), S(  12,   4), S(  11,   6), S(  15,   0), S(  20,  -2), S(  20,   7)},
+   {S(   0,   0), S(  27,   7), S(  28,  10), S(  33,   4), S(  38,   1), S(  51,  -8)},
+};
+
 
 const int RookOnSeventh = S(  -2,  26);
 
@@ -682,8 +686,9 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
         // colour on the file. If there are no pawns at all, it is an open file
         if (!(myPawns & Files[fileOf(sq)])) {
             open = !(enemyPawns & Files[fileOf(sq)]);
-            eval += RookFile[open];
-            if (TRACE) T.RookFile[open][US]++;
+            count = MIN(5, openFileCount(myPawns));
+            eval += RookFile[open][count];
+            if (TRACE) T.RookFile[open][count][US]++;
         }
 
         // Rook gains a bonus for being located on seventh rank relative to its

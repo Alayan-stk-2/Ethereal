@@ -70,7 +70,7 @@ extern const int BishopOutpost[2][2];
 extern const int BishopBehindPawn;
 extern const int BishopLongDiagonal;
 extern const int BishopMobility[14];
-extern const int RookFile[2];
+extern const int RookFile[2][6];
 extern const int RookOnSeventh;
 extern const int RookMobility[15];
 extern const int QueenMobility[28];
@@ -226,7 +226,7 @@ void initTexelEntries(TexelEntry *tes, Thread *thread) {
         // Vectorize the evaluation coefficients and save the eval
         // relative to WHITE. We must first clear the coeff vector.
         T = EmptyTrace;
-        tes[i].eval = evaluateBoard(&thread->board, NULL);
+        tes[i].eval = evaluateBoard(&thread->board, NULL, 0);
         if (thread->board.turn == BLACK) tes[i].eval *= -1;
         initCoefficients(coeffs);
 
