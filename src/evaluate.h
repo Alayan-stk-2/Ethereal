@@ -59,7 +59,7 @@ struct EvalTrace {
     int KnightBehindPawn[COLOUR_NB];
     int KnightInSiberia[4][COLOUR_NB];
     int KnightMobility[9][COLOUR_NB];
-    int BishopPair[COLOUR_NB];
+    int BishopPair[2][COLOUR_NB];
     int BishopRammedPawns[COLOUR_NB];
     int BishopOutpost[2][2][COLOUR_NB];
     int BishopBehindPawn[COLOUR_NB];
