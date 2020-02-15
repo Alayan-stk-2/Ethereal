@@ -346,7 +346,7 @@ const int ClosednessRookAdjustment[9] = {
     S( -26, -16),
 };
 
-const int PawnValueQueensOnly = S( -14, -31);
+const int PawnValueQueensOnly = S(   0,  -1);
 
 /* Complexity Evaluation Terms */
 
