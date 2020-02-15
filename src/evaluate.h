@@ -94,6 +94,7 @@ struct EvalTrace {
     int ClosednessKnightAdjustment[9][COLOUR_NB];
     int ClosednessRookAdjustment[9][COLOUR_NB];
     int PawnValueQueensOnly[COLOUR_NB];
+    int PawnValueRooksOnly[COLOUR_NB];
     int ComplexityTotalPawns[COLOUR_NB];
     int ComplexityPawnFlanks[COLOUR_NB];
     int ComplexityPawnEndgame[COLOUR_NB];

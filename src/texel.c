@@ -99,6 +99,7 @@ extern const int ThreatByPawnPush;
 extern const int ClosednessKnightAdjustment[9];
 extern const int ClosednessRookAdjustment[9];
 extern const int PawnValueQueensOnly;
+extern const int PawnValueRooksOnly;
 extern const int ComplexityTotalPawns;
 extern const int ComplexityPawnFlanks;
 extern const int ComplexityPawnEndgame;
