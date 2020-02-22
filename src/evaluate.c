@@ -276,7 +276,7 @@ const int KingStorm[2][FILE_NB/2][RANK_NB] = {
 /* King Safety Evaluation Terms */
 
 const int KSAttackWeight[]  = { 0, 16, 6, 10, 8, 0 };
-const int KSAttackValue     =   50;
+const int KSAttackValue     =   44;
 const int KSWeakSquares     =   38;
 const int KSFriendlyPawns   =  -22;
 const int KSNoEnemyQueens   = -276;
@@ -284,7 +284,7 @@ const int KSSafeQueenCheck  =   95;
 const int KSSafeRookCheck   =   94;
 const int KSSafeBishopCheck =   51;
 const int KSSafeKnightCheck =  123;
-const int KSAdjustment      =   -6;
+const int KSAdjustment      =  -18;
 
 /* Passed Pawn Evaluation Terms */
 
@@ -780,7 +780,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
     // Perform King Safety when we have two attackers, or
     // one attacker with a potential for a Queen attacker
-    if (ei->kingAttackersCount[THEM] >= 1) {
+    if (ei->kingAttackersCount[THEM] > 1 - popcount(enemyQueens)) {
 
         // Weak squares are attacked by the enemy, defended no more
         // than once and only defended by our Queens or our King
