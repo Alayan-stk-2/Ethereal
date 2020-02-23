@@ -219,7 +219,7 @@ const int KingPawnFileProximity[FILE_NB]  = {
     S( -15, -40), S( -14, -56), S( -14, -65), S( -11, -70),
 };
 
-const int KingShelter[2][FILE_NB][RANK_NB] = {
+const int KingShelter[2][FILE_NB/2][RANK_NB] = {
   {{S( -11,   3), S(  15, -26), S(  20,  -9), S(  12,   4),
     S(   6,   4), S(   1,   2), S(  -3, -33), S( -49,  18)},
    {S(  17,  -8), S(  20, -18), S(   1,  -5), S( -14,   4),
@@ -227,15 +227,7 @@ const int KingShelter[2][FILE_NB][RANK_NB] = {
    {S(  35,  -4), S(  14,  -9), S( -28,   7), S( -11,  -8),
     S( -20,  -4), S( -11,   1), S(   0,  66), S( -12,  -2)},
    {S(   4,  11), S(  21, -11), S(   4, -11), S(  15, -22),
-    S(  25, -36), S( -58,   5), S(-136,  52), S(   5,  -7)},
-   {S( -15,   7), S(   4,  -4), S( -26,   1), S( -18,   5),
-    S( -20,  -6), S( -41,  -1), S(  33, -17), S(  -6,  -2)},
-   {S(  46, -18), S(  22, -17), S( -21,   2), S( -12, -18),
-    S(   5, -24), S(  17, -21), S(  41, -30), S( -24,   1)},
-   {S(  25, -13), S(  -1, -16), S( -23,  -2), S( -19,  -8),
-    S( -30,  -7), S( -36,  32), S(   0,  44), S( -10,   1)},
-   {S(  -9, -12), S(   6, -19), S(   7,   0), S(  -2,  11),
-    S( -11,  15), S(  -9,  37), S(-190,  87), S( -17,  14)}},
+    S(  25, -36), S( -58,   5), S(-136,  52), S(   5,  -7)}},
   {{S(   0,   0), S( -11, -23), S(   4, -18), S( -40,  16),
     S( -22,   2), S(   3,  42), S(-167,  -8), S( -46,   7)},
    {S(   0,   0), S(  24, -21), S(   7,  -7), S( -18,  -1),
@@ -243,15 +235,7 @@ const int KingShelter[2][FILE_NB][RANK_NB] = {
    {S(   0,   0), S(  30, -11), S(  -2,  -7), S(   7, -17),
     S(  15,  -7), S( -87,  47), S( -84, -73), S( -20,  -5)},
    {S(   0,   0), S(  -3,   9), S(  -2,   0), S( -17,   2),
-    S( -27,   1), S( -99,  31), S(   7, -41), S( -22,  -7)},
-   {S(   0,   0), S(  12,   2), S(  11,  -5), S(  14, -11),
-    S(  14, -26), S( -57,  15), S(-104, -61), S(  -1,  -7)},
-   {S(   0,   0), S(   6,  -8), S( -20,   0), S( -27,  -6),
-    S(  17, -24), S( -38,   3), S(  55,  38), S( -18,  -6)},
-   {S(   0,   0), S(  22, -15), S(  11, -13), S(  -9,  -7),
-    S( -27,   9), S(  -9,  15), S( -56, -49), S( -31,  11)},
-   {S(   0,   0), S(  12, -38), S(  19, -27), S( -18,  -4),
-    S( -17,  18), S(  -5,  20), S(-228, -55), S( -22,   1)}},
+    S( -27,   1), S( -99,  31), S(   7, -41), S( -22,  -7)}},
 };
 
 const int KingStorm[2][FILE_NB/2][RANK_NB] = {
@@ -852,8 +836,8 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         // Evaluate King Shelter using pawn distance. Use separate evaluation
         // depending on the file, and if we are looking at the King's file
-        ei->pkeval[US] += KingShelter[file == fileOf(kingSq)][file][ourDist];
-        if (TRACE) T.KingShelter[file == fileOf(kingSq)][file][ourDist][US]++;
+        ei->pkeval[US] += KingShelter[file == fileOf(kingSq)][mirrorFile(file)][ourDist];
+        if (TRACE) T.KingShelter[file == fileOf(kingSq)][mirrorFile(file)][ourDist][US]++;
 
         // Evaluate King Storm using enemy pawn distance. Use a separate evaluation
         // depending on the file, and if the opponent's pawn is blocked by our own
