@@ -118,7 +118,7 @@ const int PawnCandidatePasser[2][RANK_NB] = {
     S(  17,  82), S(  32,  54), S(   0,   0), S(   0,   0)},
 };
 
-const int PawnIsolated = S(  -7, -11);
+const int PawnIsolated[2] = { S(  -5,  -6), S(  -9, -16) };
 
 const int PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
 
@@ -452,6 +452,7 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         if (TRACE) T.PawnValue[US]++;
         if (TRACE) T.PawnPSQT32[relativeSquare32(US, sq)][US]++;
 
+        int unopposed = !(enemyPawns & forwardFileMasks(US, sq));
         uint64_t neighbors   = myPawns    & adjacentFilesMasks(fileOf(sq));
         uint64_t backup      = myPawns    & passedPawnMasks(THEM, sq);
         uint64_t stoppers    = enemyPawns & passedPawnMasks(US, sq);
@@ -476,8 +477,8 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // are able to capture another pawn to not be isolated, as they may
         // have the potential to deisolate by capturing, or be traded away
         if (!threats && !neighbors) {
-            pkeval += PawnIsolated;
-            if (TRACE) T.PawnIsolated[US]++;
+            pkeval += PawnIsolated[unopposed];
+            if (TRACE) T.PawnIsolated[unopposed][US]++;
         }
 
         // Apply a penalty if the pawn is stacked. We adjust the bonus for when
