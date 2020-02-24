@@ -480,7 +480,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         if(!extension && singular) {
             extension = moveIsSingular(thread, ttMove, ttValue, depth, height, beta, &multiCut);
             if (extension)
-                singularLMR = 2;
+                singularLMR = 1;
         }
 
         if (multiCut) {
