@@ -205,6 +205,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
     int ttHit, ttValue = 0, ttEval = 0, ttDepth = 0, ttBound = 0;
     int R, newDepth, rAlpha, rBeta, oldAlpha = alpha;
     int inCheck, isQuiet, improving, extension, singular, skipQuiets = 0;
+    int singularLMR = 0;
     int eval, value = -MATE, best = -MATE, futilityMargin, seeMargin[2];
     uint16_t move, ttMove = NONE_MOVE, bestMove = NONE_MOVE, quietsTried[MAX_MOVES];
     MovePicker movePicker;
@@ -457,9 +458,35 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
 
         // The UCI spec allows us to output information about the current move
         // that we are going to search. We only do this from the main thread,
-        // and we wait a few seconds in order to avoid floiding the output
+        // and we wait a few seconds in order to avoid flooding the output
         if (RootNode && !thread->index && elapsedTime(thread->info) > CurrmoveTimerMS)
             uciReportCurrentMove(board, move, played + thread->multiPV, depth);
+
+        // Identify moves which are candidate singular moves
+        singular =  !RootNode
+                 &&  depth >= 8
+                 &&  move == ttMove
+                 &&  ttDepth >= depth - 2
+                 && (ttBound & BOUND_LOWER);
+
+        // Step 14 (~60 elo). Extensions. Search an additional ply when we are in check,
+        // when an early move has excellent continuation history, or when we have a move
+        // from the transposition table which appears to beat all other moves by a
+        // relativly large margin,
+        int multiCut = 0;
+        extension =  (inCheck)
+                  || (isQuiet && quietsSeen <= 4 && cmhist >= 10000 && fmhist >= 10000);
+
+        if(!extension && singular) {
+            extension = moveIsSingular(thread, ttMove, ttValue, depth, height, beta, &multiCut);
+            if (extension)
+                singularLMR = 2;
+        }
+
+        if (multiCut) {
+            revert(thread, board, move, height);
+            return MAX(ttValue - depth, -MATE);
+        }
 
         // Step 13 (~249 elo). Late Move Reductions. Compute the reduction,
         // allow the later steps to perform the reduced searches
@@ -477,6 +504,9 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             // Reduce for Killers and Counters
             R -= movePicker.stage < STAGE_QUIET;
 
+            // Decrease reduction if the tt move has had a singular extension
+            R -= singularLMR;
+
             // Adjust based on history scores
             R -= MAX(-2, MIN(2, (hist + cmhist + fmhist) / 5000));
 
@@ -484,27 +514,6 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             R  = MIN(depth - 1, MAX(R, 1));
 
         } else R = 1;
-
-        // Identify moves which are candidate singular moves
-        singular =  !RootNode
-                 &&  depth >= 8
-                 &&  move == ttMove
-                 &&  ttDepth >= depth - 2
-                 && (ttBound & BOUND_LOWER);
-
-        // Step 14 (~60 elo). Extensions. Search an additional ply when we are in check,
-        // when an early move has excellent continuation history, or when we have a move
-        // from the transposition table which appears to beat all other moves by a
-        // relativly large margin,
-        int multiCut = 0;
-        extension =  (inCheck)
-                  || (isQuiet && quietsSeen <= 4 && cmhist >= 10000 && fmhist >= 10000)
-                  || (singular && moveIsSingular(thread, ttMove, ttValue, depth, height, beta, &multiCut));
-
-        if (multiCut) {
-            revert(thread, board, move, height);
-            return MAX(ttValue - depth, -MATE);
-        }
 
         // Factor the extension into the new depth. Do not extend at the root
         newDepth = depth + (extension && !RootNode);
