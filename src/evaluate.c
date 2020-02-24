@@ -299,6 +299,11 @@ const int PassedPawn[2][2][RANK_NB] = {
     S(  -1,  52), S(  92, 117), S( 161, 275), S(   0,   0)}},
 };
 
+const int PassedQuiet[RANK_NB] = {
+    S(   0,   0), S(   6,   0), S(  10,   0), S(  15,   0),
+    S(   3,   0), S(   0,   0), S(   0,   0), S(   0,   0)
+};
+
 const int PassedFriendlyDistance[8] = {
     S(   0,   0), S(   0,   0), S(   3,  -4), S(   7, -10),
     S(   6, -14), S(  -8, -13), S( -15,  -9), S(   0,   0),
@@ -825,6 +830,10 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         // Convert safety to an MG and EG score, if we are unsafe
         if (count > 0) eval -= MakeScore(count * count / 720, count / 20);
+        else ei->isSafe[US] = 1;
+    }
+    else {
+        ei->isSafe[US] = 1;
     }
 
     // Everything else is stored in the Pawn King Table
@@ -889,6 +898,12 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         safeAdvance = !(bitboard & ei->attacked[THEM]);
         eval += PassedPawn[canAdvance][safeAdvance][rank];
         if (TRACE) T.PassedPawn[canAdvance][safeAdvance][rank][US]++;
+
+        // Rank-based bonus if our king is safe
+        if (ei->isSafe[US]) {
+            eval += PassedQuiet[rank];
+            if (TRACE) T.PassedQuiet[rank][US]++;
+        }
 
         // Evaluate based on distance from our king
         dist = distanceBetween(sq, ei->kingSquare[US]);
@@ -1222,6 +1237,7 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->kingAttacksCount[WHITE]    = ei->kingAttacksCount[BLACK]    = 0;
     ei->kingAttackersCount[WHITE]  = ei->kingAttackersCount[BLACK]  = 0;
     ei->kingAttackersWeight[WHITE] = ei->kingAttackersWeight[BLACK] = 0;
+    ei->isSafe[WHITE]              = ei->isSafe[BLACK]              = 0;
 
     // Try to read a hashed Pawn King Eval. Otherwise, start from scratch
     ei->pkentry       =     pktable == NULL ? NULL : getPKEntry(pktable, board->pkhash);

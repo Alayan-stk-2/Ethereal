@@ -75,6 +75,7 @@ struct EvalTrace {
     int KingShelter[2][8][8][COLOUR_NB];
     int KingStorm[2][4][8][COLOUR_NB];
     int PassedPawn[2][2][8][COLOUR_NB];
+    int PassedQuiet[8][COLOUR_NB];
     int PassedFriendlyDistance[8][COLOUR_NB];
     int PassedEnemyDistance[8][COLOUR_NB];
     int PassedSafePromotionPath[COLOUR_NB];
@@ -114,6 +115,7 @@ struct EvalInfo {
     uint64_t occupiedMinusRooks[COLOUR_NB];
     uint64_t passedPawns;
     uint8_t closedness;
+    int isSafe[COLOUR_NB];
     int kingSquare[COLOUR_NB];
     int kingAttacksCount[COLOUR_NB];
     int kingAttackersCount[COLOUR_NB];
