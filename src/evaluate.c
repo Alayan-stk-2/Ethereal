@@ -279,24 +279,25 @@ const int KSAttackWeight[]  = { 0, 16, 6, 10, 8, 0 };
 const int KSAttackValue     =   44;
 const int KSWeakSquares     =   38;
 const int KSFriendlyPawns   =  -22;
+const int KSSemiOpen        =   30;
 const int KSNoEnemyQueens   = -276;
 const int KSSafeQueenCheck  =   95;
 const int KSSafeRookCheck   =   94;
 const int KSSafeBishopCheck =   51;
 const int KSSafeKnightCheck =  123;
-const int KSAdjustment      =  -18;
+const int KSAdjustment      =  -24;
 
 /* Passed Pawn Evaluation Terms */
 
 const int PassedPawn[2][2][RANK_NB] = {
-  {{S(   0,   0), S( -38,   3), S( -55,  21), S( -82,  27),
-    S(  -6,  12), S(  70,  -5), S( 157,  56), S(   0,   0)},
-   {S(   0,   0), S( -29,   7), S( -51,  24), S( -73,  30),
-    S( -13,  31), S(  89,  32), S( 182, 101), S(   0,   0)}},
-  {{S(   0,   0), S( -24,  16), S( -50,  19), S( -73,  33),
-    S(  -3,  36), S(  89,  40), S( 263, 114), S(   0,   0)},
-   {S(   0,   0), S( -29,  12), S( -45,  17), S( -67,  38),
-    S(  -1,  52), S(  92, 117), S( 161, 275), S(   0,   0)}},
+  {{S(   0,   0), S( -32,   3), S( -45,  21), S( -67,  25),
+    S(  -3,  12), S(  70,  -5), S( 157,  56), S(   0,   0)},
+   {S(   0,   0), S( -23,   7), S( -41,  24), S( -58,  28),
+    S( -10,  31), S(  89,  32), S( 182, 101), S(   0,   0)}},
+  {{S(   0,   0), S( -18,  16), S( -40,  19), S( -58,  31),
+    S(   0,  36), S(  89,  40), S( 263, 114), S(   0,   0)},
+   {S(   0,   0), S( -23,  12), S( -35,  17), S( -52,  36),
+    S(   2,  52), S(  92, 117), S( 161, 275), S(   0,   0)}},
 };
 
 const int PassedFriendlyDistance[8] = {
@@ -397,7 +398,7 @@ int evaluateBoard(Board *board, PKTable *pktable, int contempt) {
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
-        storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
+        storePKEntry(pktable, board->pkhash, ei.passedPawns, ei.semiOpenFiles[WHITE], ei.semiOpenFiles[BLACK], pkeval);
 
     // Return the evaluation relative to the side to move
     return board->turn == WHITE ? eval : -eval;
@@ -460,6 +461,9 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         uint64_t pushThreats = enemyPawns & pawnAttacks(US, sq + Forward);
         uint64_t pushSupport = myPawns    & pawnAttacks(THEM, sq + Forward);
         uint64_t leftovers   = stoppers ^ threats ^ pushThreats;
+
+        // Save open file information for later evaluation
+        ei->semiOpenFiles[US] &= ~Files[fileOf(sq)];
 
         // Save passed pawn information for later evaluation
         if (!stoppers) setBit(&ei->passedPawns, sq);
@@ -811,12 +815,18 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         uint64_t rookChecks   = rookThreats   & safe & ei->attackedBy[THEM][ROOK  ];
         uint64_t queenChecks  = queenThreats  & safe & ei->attackedBy[THEM][QUEEN ];
 
+        int semiOpenFiles = 0;
+        for (int file = MAX(0, fileOf(kingSq) - 1); file <= MIN(FILE_NB - 1, fileOf(kingSq) + 1); file++) {
+            semiOpenFiles += ((Files[file] & ei->semiOpenFiles[THEM]) > 0);
+        }
+
         count  = ei->kingAttackersCount[THEM] * ei->kingAttackersWeight[THEM];
 
         count += KSAttackValue     * scaledAttackCounts
                + KSWeakSquares     * popcount(weak & ei->kingAreas[US])
                + KSFriendlyPawns   * popcount(myPawns & ei->kingAreas[US] & ~weak)
                + KSNoEnemyQueens   * !enemyQueens
+               + KSSemiOpen        * semiOpenFiles
                + KSSafeQueenCheck  * popcount(queenChecks)
                + KSSafeRookCheck   * popcount(rookChecks)
                + KSSafeBishopCheck * popcount(bishopChecks)
@@ -1226,6 +1236,8 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     // Try to read a hashed Pawn King Eval. Otherwise, start from scratch
     ei->pkentry       =     pktable == NULL ? NULL : getPKEntry(pktable, board->pkhash);
     ei->passedPawns   = ei->pkentry == NULL ? 0ull : ei->pkentry->passed;
+    ei->semiOpenFiles[WHITE]   = ei->pkentry == NULL ? 0xFFFFFFFFFFFFFFFFull : ei->pkentry->semiOpen[WHITE];
+    ei->semiOpenFiles[BLACK]   = ei->pkentry == NULL ? 0xFFFFFFFFFFFFFFFFull : ei->pkentry->semiOpen[BLACK];
     ei->pkeval[WHITE] = ei->pkentry == NULL ? 0    : ei->pkentry->eval;
     ei->pkeval[BLACK] = ei->pkentry == NULL ? 0    : 0;
 }
