@@ -300,7 +300,7 @@ const int PassedPawn[2][2][RANK_NB] = {
 };
 
 const int PassedQuiet[RANK_NB] = {
-    S(   0,   0), S(   6,   0), S(  10,   0), S(  15,   0),
+    S(   0,   0), S(   8,   0), S(  12,   0), S(  20,   0),
     S(   3,   0), S(   0,   0), S(   0,   0), S(   0,   0)
 };
 
@@ -830,7 +830,7 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         // Convert safety to an MG and EG score, if we are unsafe
         if (count > 0) eval -= MakeScore(count * count / 720, count / 20);
-        else ei->isSafe[US] = 1;
+        if (count < 50) ei->isSafe[US] = 1;
     }
     else {
         ei->isSafe[US] = 1;
