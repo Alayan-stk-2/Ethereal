@@ -475,7 +475,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             R += inCheck && pieceType(board->squares[MoveTo(move)]) == KING;
 
             // Reduce for Killers and Counters
-            R -= (depth < 9 ? 2 : 1) * (movePicker.stage < STAGE_QUIET);
+            R -= (depth > 9 ? 2 : 1) * (movePicker.stage < STAGE_QUIET);
 
             // Adjust based on history scores
             R -= MAX(-2, MIN(2, (hist + cmhist + fmhist) / 5000));
