@@ -53,7 +53,7 @@ void initSearch() {
     // Init Late Move Reductions Table
     for (int depth = 1; depth < 64; depth++)
         for (int played = 1; played < 64; played++)
-            LMRTable[depth][played] = 0.75 + log(depth) * log(played) / 2.25;
+            LMRTable[depth][played] = 0.78 + log(depth) * log(played) / 2.25;
 }
 
 void getBestMove(Thread *threads, Board *board, Limits *limits, uint16_t *best, uint16_t *ponder) {
@@ -475,7 +475,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
             R += inCheck && pieceType(board->squares[MoveTo(move)]) == KING;
 
             // Reduce for Killers and Counters
-            R -= movePicker.stage < STAGE_QUIET;
+            R -= 2 * (movePicker.stage < STAGE_QUIET);
 
             // Adjust based on history scores
             R -= MAX(-2, MIN(2, (hist + cmhist + fmhist) / 5000));
