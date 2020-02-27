@@ -759,10 +759,9 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int count, dist, blocked, eval = 0;
+    int count, dist, eval = 0;
 
     uint64_t myPawns     = board->pieces[PAWN ] & board->colours[  US];
-    uint64_t enemyPawns  = board->pieces[PAWN ] & board->colours[THEM];
     uint64_t enemyQueens = board->pieces[QUEEN] & board->colours[THEM];
 
     uint64_t defenders  = (board->pieces[PAWN  ] & board->colours[US])
@@ -837,6 +836,56 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
     ei->pkeval[US] += KingPawnFileProximity[dist];
     if (TRACE) T.KingPawnFileProximity[dist][US]++;
 
+    // Evaluate shelter
+    // TODO : clean up this mess. While this should work as intended,
+    // the code is very ugly
+
+    int shelterEval = evaluateShelter(board, US, kingSq, 0);
+    int shelterEvalKS, shelterEvalQS;
+
+    shelterEvalKS = shelterEvalQS = shelterEval - 1;
+
+    if (board->castleRooks && rightFilesMasks(fileOf(kingSq))) {
+        shelterEvalKS = evaluateShelter(board, US, (US == WHITE) ? SQ_G1 : SQ_G8, 0);
+    }
+
+    if (board->castleRooks && leftFilesMasks(fileOf(kingSq))) {
+        shelterEvalQS = evaluateShelter(board, US, (US == WHITE) ? SQ_C1 : SQ_C8, 0);
+    }
+
+    int max = 0;
+    if (ScoreMG(shelterEvalKS) > ScoreMG(shelterEval)) {
+        shelterEval = shelterEvalKS;
+        max = 1;
+    }
+    if (ScoreMG(shelterEvalQS) > ScoreMG(shelterEval)) {
+        shelterEval = shelterEvalQS;
+        max = 2;
+    }
+
+    ei->pkeval[US] += shelterEval;
+
+    if (TRACE) {
+        int tempSq = (max == 0)              ? kingSq :
+                     (max == 1 && US==WHITE) ? SQ_G1  :
+                     (max == 1)              ? SQ_G8  :
+                     (max == 2 && US==WHITE) ? SQ_C1  :
+                                               SQ_C8;
+
+        tempSq = evaluateShelter(board, US, tempSq, 1);
+    }
+
+    return eval;
+}
+
+int evaluateShelter(Board *board, int colour, int kingSq, int useTrace) {
+
+    const int US = colour, THEM = !colour;
+    int blocked, shelterEval = 0;
+
+    uint64_t myPawns     = board->pieces[PAWN ] & board->colours[  US];
+    uint64_t enemyPawns  = board->pieces[PAWN ] & board->colours[THEM];
+
     // Evaluate King Shelter & King Storm threat by looking at the file of our King,
     // as well as the adjacent files. When looking at pawn distances, we will use a
     // distance of 7 to denote a missing pawn, since distance 7 is not possible otherwise.
@@ -852,17 +901,17 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
 
         // Evaluate King Shelter using pawn distance. Use separate evaluation
         // depending on the file, and if we are looking at the King's file
-        ei->pkeval[US] += KingShelter[file == fileOf(kingSq)][file][ourDist];
-        if (TRACE) T.KingShelter[file == fileOf(kingSq)][file][ourDist][US]++;
+        shelterEval += KingShelter[file == fileOf(kingSq)][file][ourDist];
+        if (TRACE && useTrace) T.KingShelter[file == fileOf(kingSq)][file][ourDist][US]++;
 
         // Evaluate King Storm using enemy pawn distance. Use a separate evaluation
         // depending on the file, and if the opponent's pawn is blocked by our own
         blocked = (ourDist != 7 && (ourDist == theirDist - 1));
-        ei->pkeval[US] += KingStorm[blocked][mirrorFile(file)][theirDist];
-        if (TRACE) T.KingStorm[blocked][mirrorFile(file)][theirDist][US]++;
+        shelterEval += KingStorm[blocked][mirrorFile(file)][theirDist];
+        if (TRACE && useTrace) T.KingStorm[blocked][mirrorFile(file)][theirDist][US]++;
     }
 
-    return eval;
+    return shelterEval;
 }
 
 int evaluatePassed(EvalInfo *ei, Board *board, int colour) {

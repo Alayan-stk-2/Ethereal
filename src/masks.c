@@ -30,6 +30,8 @@ int KingPawnFileDistance[FILE_NB][1 << FILE_NB];
 uint64_t BitsBetweenMasks[SQUARE_NB][SQUARE_NB];
 uint64_t KingAreaMasks[COLOUR_NB][SQUARE_NB];
 uint64_t ForwardRanksMasks[COLOUR_NB][RANK_NB];
+uint64_t LeftFilesMasks[FILE_NB];
+uint64_t RightFilesMasks[FILE_NB];
 uint64_t ForwardFileMasks[COLOUR_NB][SQUARE_NB];
 uint64_t AdjacentFilesMasks[FILE_NB];
 uint64_t PassedPawnMasks[COLOUR_NB][SQUARE_NB];
@@ -101,6 +103,17 @@ void initMasks() {
         ForwardRanksMasks[BLACK][rank] = ~ForwardRanksMasks[WHITE][rank] | Ranks[rank];
     }
 
+    // Init a table of bitmasks for the files to the right (towards the h-file) of a given file
+    for (int file = 0; file < FILE_NB; file++) {
+        for (int i = file + 1; i < FILE_NB; i++)
+            RightFilesMasks[file] |= Files[i];
+    }
+
+    // Init a table of bitmasks for the files to the left (towards the a-file) of a given file
+    for (int file = 0; file < FILE_NB; file++) {
+        for (int i = 0; i < file; i++)
+            LeftFilesMasks[file] |= Files[i];
+    }
     // Init a table of bitmasks for the squares on a file above a given square, by colour
     for (int sq = 0; sq < SQUARE_NB; sq++) {
         ForwardFileMasks[WHITE][sq] = Files[fileOf(sq)] & ForwardRanksMasks[WHITE][rankOf(sq)];
@@ -173,6 +186,15 @@ uint64_t forwardRanksMasks(int colour, int rank) {
     return ForwardRanksMasks[colour][rank];
 }
 
+uint64_t rightFilesMasks(int file) {
+    assert(0 <= file && file < FILE_NB);
+    return RightFilesMasks[file];
+}
+
+uint64_t leftFilesMasks(int file) {
+    assert(0 <= file && file < FILE_NB);
+    return LeftFilesMasks[file];
+}
 uint64_t forwardFileMasks(int colour, int sq) {
     assert(0 <= colour && colour < COLOUR_NB);
     assert(0 <= sq && sq < SQUARE_NB);

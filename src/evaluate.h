@@ -130,6 +130,7 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour);
 int evaluateRooks(EvalInfo *ei, Board *board, int colour);
 int evaluateQueens(EvalInfo *ei, Board *board, int colour);
 int evaluateKings(EvalInfo *ei, Board *board, int colour);
+int evaluateShelter(Board *board, int colour, int kingSq, int useTrace);
 int evaluatePassed(EvalInfo *ei, Board *board, int colour);
 int evaluateThreats(EvalInfo *ei, Board *board, int colour);
 int evaluateSpace(EvalInfo *ei, Board *board, int colour);
