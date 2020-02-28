@@ -38,6 +38,7 @@ void initSearch();
 void getBestMove(Thread *threads, Board *board, Limits *limits, uint16_t *best, uint16_t *ponder);
 void* iterativeDeepening(void *vthread);
 void aspirationWindow(Thread *thread);
+int drawScore(Thread *thread);
 int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int height);
 int qsearch(Thread *thread, PVariation *pv, int alpha, int beta, int height);
 int staticExchangeEvaluation(Board *board, uint16_t move, int threshold);
