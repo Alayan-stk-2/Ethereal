@@ -506,7 +506,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         }
 
         // Factor the extension into the new depth. Do not extend at the root
-        newDepth = depth + (extension && !RootNode);
+        newDepth = MIN(2*thread->depth - height + 2, depth + (extension && !RootNode));
 
         // Step 15A. If we triggered the LMR conditions (which we know by the value of R),
         // then we will perform a reduced search on the null alpha window, as we have no
