@@ -48,12 +48,12 @@ int LMRTable[64][64];      // Late Move Reductions
 volatile int ABORT_SIGNAL; // Global ABORT flag for threads
 volatile int IS_PONDERING; // Global PONDER flag for threads
 
-void initSearch() {
+void initSearch(int nthreads) {
 
     // Init Late Move Reductions Table
     for (int depth = 1; depth < 64; depth++)
         for (int played = 1; played < 64; played++)
-            LMRTable[depth][played] = 0.75 + log(depth) * log(played) / 2.25;
+            LMRTable[depth][played] = 0.75 + ((100 + 4 * log(nthreads)) * log(depth) * log(played) / 225);
 }
 
 void getBestMove(Thread *threads, Board *board, Limits *limits, uint16_t *best, uint16_t *ponder) {

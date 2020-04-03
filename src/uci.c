@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 
     // Initialize core components of Ethereal
     initAttacks(); initMasks(); initEval();
-    initSearch(); initZobrist(); initTT(16);
+    initSearch(1); initZobrist(); initTT(16);
     threads = createThreadPool(1);
     boardFromFEN(&board, StartPosition, chess960);
 
@@ -242,6 +242,7 @@ void uciSetOption(char *str, Thread **threads, int *multiPV, int *chess960) {
     if (strStartsWith(str, "setoption name Threads value ")) {
         int nthreads = atoi(str + strlen("setoption name Threads value "));
         free(*threads); *threads = createThreadPool(nthreads);
+        initSearch(nthreads); //Reinitialize the LMR table
         printf("info string set Threads to %d\n", nthreads);
     }
 
