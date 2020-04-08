@@ -44,14 +44,14 @@ const int KingValue   = S(   0,   0);
 /* Piece Square Evaluation Terms */
 
 const int PawnPSQT32[32] = {
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
-    S( -20,   5), S(   2,   1), S( -13,   4), S(  -8,  -2),
-    S( -23,   2), S( -16,   2), S( -10,  -7), S(  -5, -15),
-    S( -18,   8), S( -14,   8), S(  10, -14), S(   8, -27),
-    S(  -9,  10), S(  -5,   6), S(  -7,  -8), S(   2, -24),
-    S(  -8,  23), S(  -5,  21), S(   2,  10), S(  29, -17),
-    S( -19, -48), S( -67, -15), S(   1, -29), S(  38, -43),
-    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
+    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0), 
+    S( -20,   4), S(  -1,  -2), S( -16,   1), S(  -9,  -5), 
+    S( -22,   1), S( -20,   0), S( -13,  -9), S(  -8, -17), 
+    S( -17,   6), S( -19,   6), S(   5, -16), S(   2, -27), 
+    S(  -9,   7), S( -12,   3), S( -14, -11), S(  -8, -25), 
+    S(  -8,  17), S( -11,  12), S(  -8,   3), S(  19, -24), 
+    S( -22, -58), S( -69, -25), S(  -2, -38), S(  35, -52), 
+    S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0), 
 };
 
 const int KnightPSQT32[32] = {
@@ -120,7 +120,10 @@ const int PawnCandidatePasser[2][RANK_NB] = {
 
 const int PawnIsolated = S(  -7, -11);
 
-const int PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
+const int PawnStacked[2][2] = {
+   {S(  -4, -15), S(  -8,  -6)},
+   {S( -11, -25), S( -12, -15)},
+};
 
 const int PawnBackwards[2][8] = {
    {S(   0,   0), S(   3,  -7), S(   9,  -5), S(   7,  -9),
@@ -420,7 +423,7 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
     const int Forward = (colour == WHITE) ? 8 : -8;
 
-    int sq, flag, eval = 0, pkeval = 0;
+    int sq, flag, outside, eval = 0, pkeval = 0;
     uint64_t pawns, myPawns, tempPawns, enemyPawns, attacks;
 
     // Store off pawn attacks for king safety and threat computations
@@ -479,11 +482,15 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // the pawn appears to be a candidate to unstack. This occurs when the
         // pawn is not passed but may capture or be recaptured by our own pawns,
         // and when the pawn may freely advance on a file and then be traded away
+        // The penalty is adjusted for A/H file doubled pawns, that are typically
+        // much weaker.
+        outside  = testBit(FILE_A | FILE_H, sq);
+
         if (several(Files[fileOf(sq)] & myPawns)) {
             flag = (stoppers && (threats || neighbors))
                 || (stoppers & ~forwardFileMasks(US, sq));
-            pkeval += PawnStacked[flag];
-            if (TRACE) T.PawnStacked[flag][US]++;
+            pkeval += PawnStacked[outside][flag];
+            if (TRACE) T.PawnStacked[outside][flag][US]++;
         }
 
         // Apply a penalty if the pawn is backward. We follow the usual definition
