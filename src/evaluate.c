@@ -122,12 +122,13 @@ const int PawnIsolated = S(  -7, -11);
 
 const int PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
 
-const int PawnBackwards[2][8] = {
-   {S(   0,   0), S(   3,  -7), S(   9,  -5), S(   7,  -9),
-    S(   9,  -9), S(   0,   0), S(   0,   0), S(   0,   0)},
-   {S(   0,   0), S( -10, -30), S(  -5, -26), S(   2, -26),
-    S(   5, -23), S(   0,   0), S(   0,   0), S(   0,   0)},
+const int PawnBackwards[2][2][8] = {
+  {{S(   0,   0), S(   6,  -9), S(  11,  -7), S(   6, -11), S(  10, -10), S(   0,   0), S(   0,   0), S(   0,   0)},
+   {S(   0,   0), S(   6,  -4), S(   9,  -2), S(   2,  -9), S(   9, -10), S(   0,   0), S(   0,   0), S(   0,   0)}},
+  {{S(   0,   0), S(  -6, -32), S(  -4, -27), S(   2, -27), S(   8, -24), S(   0,   0), S(   0,   0), S(   0,   0)},
+   {S(   0,   0), S( -10, -30), S(  -6, -28), S(  -6, -29), S(   6, -23), S(   0,   0), S(   0,   0), S(   0,   0)}},
 };
+
 
 const int PawnConnected32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
@@ -489,10 +490,15 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // Apply a penalty if the pawn is backward. We follow the usual definition
         // of backwards, but also specify that the pawn is not both isolated and
         // backwards at the same time. We don't give backward pawns a connected bonus
+        // Different penalty if there is an enemy pawn ahead in the file,
+        // and different penalty if both neighbouring files are closed.
         if (neighbors && pushThreats && !backup) {
             flag = !(Files[fileOf(sq)] & enemyPawns);
-            pkeval += PawnBackwards[flag][relativeRankOf(US, sq)];
-            if (TRACE) T.PawnBackwards[flag][relativeRankOf(US, sq)][US]++;
+            int file1 = MIN(7, fileOf(sq)+1);
+            int file2 = MAX(0, fileOf(sq)-1);
+            int open = !(Files[file1] & pawns) || !(Files[file2] & pawns);
+            pkeval += PawnBackwards[flag][open][relativeRankOf(US, sq)];
+            if (TRACE) T.PawnBackwards[flag][open][relativeRankOf(US, sq)][US]++;
         }
 
         // Apply a bonus if the pawn is connected and not backwards. We consider a
