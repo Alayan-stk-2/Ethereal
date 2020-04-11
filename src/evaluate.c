@@ -129,7 +129,7 @@ const int PawnBackwards[2][8] = {
     S(   5, -23), S(   0,   0), S(   0,   0), S(   0,   0)},
 };
 
-const int PawnThreeOne = S(   6, -10);
+const int PawnThreeOne = S(  -2,  -8);
 
 const int PawnConnected32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
