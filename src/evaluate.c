@@ -129,7 +129,9 @@ const int PawnBackwards[2][8] = {
     S(   5, -23), S(   0,   0), S(   0,   0), S(   0,   0)},
 };
 
-const int PawnThreeOne = S(  -2,  -8);
+const int PawnThreeOne = S(  -5,  -6);
+
+const int PawnThreeOneAdvance = S(  0,  -6);
 
 const int PawnConnected32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
@@ -486,8 +488,14 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
             && (stoppers & Files[fileOf(sq)])
             && (stoppers & Files[fileOf(sq)+1]))
         {
+            uint64_t MiddleRanks = RANK_4 | RANK_5;
+            int count = popcount(stoppers & MiddleRanks); 
+
             pkeval += PawnThreeOne;
             if (TRACE) T.PawnThreeOne[US]++;
+
+            pkeval += count * PawnThreeOneAdvance;
+            if (TRACE) T.PawnThreeOneAdvance[US]++;
         }
 
         // Apply a penalty if the pawn is stacked. We adjust the bonus for when
