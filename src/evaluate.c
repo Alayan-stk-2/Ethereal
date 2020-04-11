@@ -129,6 +129,8 @@ const int PawnBackwards[2][8] = {
     S(   5, -23), S(   0,   0), S(   0,   0), S(   0,   0)},
 };
 
+const int PawnThreeOne = S(   6, -10);
+
 const int PawnConnected32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
     S(  -2,  -8), S(  11,   1), S(   3,   1), S(   5,  16),
@@ -475,11 +477,24 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
             if (TRACE) T.PawnIsolated[US]++;
         }
 
+        int stacked = several(Files[fileOf(sq)] & myPawns);
+
+        // Apply a penalty for isolated pawns facing three pawns
+        if (   !neighbors && !stacked
+            && !testBit(FILE_A | FILE_H, sq)
+            && (stoppers & Files[fileOf(sq)-1])
+            && (stoppers & Files[fileOf(sq)])
+            && (stoppers & Files[fileOf(sq)+1]))
+        {
+            pkeval += PawnThreeOne;
+            if (TRACE) T.PawnThreeOne[US]++;
+        }
+
         // Apply a penalty if the pawn is stacked. We adjust the bonus for when
         // the pawn appears to be a candidate to unstack. This occurs when the
         // pawn is not passed but may capture or be recaptured by our own pawns,
         // and when the pawn may freely advance on a file and then be traded away
-        if (several(Files[fileOf(sq)] & myPawns)) {
+        if (stacked) {
             flag = (stoppers && (threats || neighbors))
                 || (stoppers & ~forwardFileMasks(US, sq));
             pkeval += PawnStacked[flag];
