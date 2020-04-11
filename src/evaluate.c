@@ -402,6 +402,9 @@ int evaluatePieces(EvalInfo *ei, Board *board) {
 
     int eval;
 
+    populateAttackTables(ei, board, WHITE);
+    populateAttackTables(ei, board, BLACK);
+
     eval  =   evaluatePawns(ei, board, WHITE)   - evaluatePawns(ei, board, BLACK);
     eval += evaluateKnights(ei, board, WHITE) - evaluateKnights(ei, board, BLACK);
     eval += evaluateBishops(ei, board, WHITE) - evaluateBishops(ei, board, BLACK);
@@ -415,6 +418,68 @@ int evaluatePieces(EvalInfo *ei, Board *board) {
     return eval;
 }
 
+void populateAttackTables(EvalInfo *ei, Board *board, int colour) {
+
+    const int US = colour;
+    int sq;
+    uint64_t attacks;
+
+    // Store off pawn attacks for king safety and threat computations
+    ei->attackedBy2[US]      = ei->pawnAttacks[US] & ei->attacked[US];
+    ei->attacked[US]        |= ei->pawnAttacks[US];
+    ei->attackedBy[US][PAWN] = ei->pawnAttacks[US];
+
+    uint64_t tempKnights = board->pieces[KNIGHT] & board->colours[US];
+    uint64_t tempBishops = board->pieces[BISHOP] & board->colours[US];
+    uint64_t tempRooks   = board->pieces[ROOK  ] & board->colours[US];
+    uint64_t tempQueens  = board->pieces[QUEEN ] & board->colours[US];
+
+    ei->attackedBy[US][KNIGHT] = 0ull;
+    ei->attackedBy[US][BISHOP] = 0ull;
+    ei->attackedBy[US][ROOK]   = 0ull;
+    ei->attackedBy[US][QUEEN]  = 0ull;
+
+    while (tempKnights) {
+
+        // Pop off the next knight
+        sq = poplsb(&tempKnights);
+        attacks = knightAttacks(sq);
+        ei->attackedBy2[US]        |= attacks & ei->attacked[US];
+        ei->attacked[US]           |= attacks;
+        ei->attackedBy[US][KNIGHT] |= attacks;
+    }
+
+    while (tempBishops) {
+
+        // Pop off the next Bishop
+        sq = poplsb(&tempBishops);
+        attacks = bishopAttacks(sq, ei->occupiedMinusBishops[US]);
+        ei->attackedBy2[US]        |= attacks & ei->attacked[US];
+        ei->attacked[US]           |= attacks;
+        ei->attackedBy[US][BISHOP] |= attacks;
+    }
+
+    while (tempRooks) {
+
+        // Pop off the next rook
+        sq = poplsb(&tempRooks);
+        attacks = rookAttacks(sq, ei->occupiedMinusRooks[US]);
+        ei->attackedBy2[US]      |= attacks & ei->attacked[US];
+        ei->attacked[US]         |= attacks;
+        ei->attackedBy[US][ROOK] |= attacks;
+    }
+
+    while (tempQueens) {
+
+        // Pop off the next queen
+        sq = poplsb(&tempQueens);
+        attacks = queenAttacks(sq, board->colours[WHITE] | board->colours[BLACK]);
+        ei->attackedBy2[US]       |= attacks & ei->attacked[US];
+        ei->attacked[US]          |= attacks;
+        ei->attackedBy[US][QUEEN] |= attacks;
+    }
+}
+
 int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
@@ -422,11 +487,6 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
 
     int sq, flag, eval = 0, pkeval = 0;
     uint64_t pawns, myPawns, tempPawns, enemyPawns, attacks;
-
-    // Store off pawn attacks for king safety and threat computations
-    ei->attackedBy2[US]      = ei->pawnAttacks[US] & ei->attacked[US];
-    ei->attacked[US]        |= ei->pawnAttacks[US];
-    ei->attackedBy[US][PAWN] = ei->pawnAttacks[US];
 
     // Update King Safety calculations
     attacks = ei->pawnAttacks[US] & ei->kingAreas[THEM];
@@ -530,9 +590,6 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
 
         // Compute possible attacks and store off information for king safety
         attacks = knightAttacks(sq);
-        ei->attackedBy2[US]        |= attacks & ei->attacked[US];
-        ei->attacked[US]           |= attacks;
-        ei->attackedBy[US][KNIGHT] |= attacks;
 
         // Apply a bonus if the knight is on an outpost square, and cannot be attacked
         // by an enemy pawn. Increase the bonus if one of our pawns supports the knight
@@ -583,8 +640,6 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
     uint64_t tempBishops = board->pieces[BISHOP] & board->colours[US  ];
 
-    ei->attackedBy[US][BISHOP] = 0ull;
-
     // Apply a bonus for having a pair of bishops
     if ((tempBishops & WHITE_SQUARES) && (tempBishops & BLACK_SQUARES)) {
         eval += BishopPair;
@@ -601,9 +656,6 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
         // Compute possible attacks and store off information for king safety
         attacks = bishopAttacks(sq, ei->occupiedMinusBishops[US]);
-        ei->attackedBy2[US]        |= attacks & ei->attacked[US];
-        ei->attacked[US]           |= attacks;
-        ei->attackedBy[US][BISHOP] |= attacks;
 
         // Apply a penalty for the bishop based on number of rammed pawns
         // of our own colour, which reside on the same shade of square as the bishop
@@ -673,9 +725,6 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
 
         // Compute possible attacks and store off information for king safety
         attacks = rookAttacks(sq, ei->occupiedMinusRooks[US]);
-        ei->attackedBy2[US]      |= attacks & ei->attacked[US];
-        ei->attacked[US]         |= attacks;
-        ei->attackedBy[US][ROOK] |= attacks;
 
         // Rook is on a semi-open file if there are no pawns of the rook's
         // colour on the file. If there are no pawns at all, it is an open file
@@ -730,9 +779,6 @@ int evaluateQueens(EvalInfo *ei, Board *board, int colour) {
 
         // Compute possible attacks and store off information for king safety
         attacks = queenAttacks(sq, board->colours[WHITE] | board->colours[BLACK]);
-        ei->attackedBy2[US]       |= attacks & ei->attacked[US];
-        ei->attacked[US]          |= attacks;
-        ei->attackedBy[US][QUEEN] |= attacks;
 
         // Apply a bonus (or penalty) based on the mobility of the queen
         count = popcount(ei->mobilityAreas[US] & attacks);

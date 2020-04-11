@@ -136,6 +136,7 @@ int evaluateClosedness(EvalInfo *ei, Board *board);
 int evaluateComplexity(EvalInfo *ei, Board *board, int eval);
 int evaluateScaleFactor(Board *board, int eval);
 void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable);
+void populateAttackTables(EvalInfo *ei, Board *board, int colour);
 void initEval();
 
 #define MakeScore(mg, eg) ((int)((unsigned int)(eg) << 16) + (mg))
