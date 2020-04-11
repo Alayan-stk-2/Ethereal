@@ -578,8 +578,6 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
     uint64_t tempKnights = board->pieces[KNIGHT] & board->colours[US  ];
 
-    ei->attackedBy[US][KNIGHT] = 0ull;
-
     // Evaluate each knight
     while (tempKnights) {
 
@@ -713,8 +711,6 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
     uint64_t enemyPawns = board->pieces[PAWN] & board->colours[THEM];
     uint64_t tempRooks  = board->pieces[ROOK] & board->colours[  US];
 
-    ei->attackedBy[US][ROOK] = 0ull;
-
     // Evaluate each rook
     while (tempRooks) {
 
@@ -766,8 +762,6 @@ int evaluateQueens(EvalInfo *ei, Board *board, int colour) {
     uint64_t tempQueens, attacks;
 
     tempQueens = board->pieces[QUEEN] & board->colours[US];
-
-    ei->attackedBy[US][QUEEN] = 0ull;
 
     // Evaluate each queen
     while (tempQueens) {
