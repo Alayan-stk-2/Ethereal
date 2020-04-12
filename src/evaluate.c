@@ -118,6 +118,11 @@ const int PawnCandidatePasser[2][RANK_NB] = {
     S(  17,  82), S(  32,  54), S(   0,   0), S(   0,   0)},
 };
 
+const int PawnCandidatePasserEnemyDistance[8] = {
+    S(   0,   0), S(   1,   0), S(   1,   1), S(   1,   1), 
+    S(  -2,   3), S(  -2,   5), S(   0,   0), S(   0,   0), 
+};
+
 const int PawnIsolated = S(  -7, -11);
 
 const int PawnStacked[2] = { S(  -9, -14), S(  -9,  -9) };
@@ -420,7 +425,7 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
     const int Forward = (colour == WHITE) ? 8 : -8;
 
-    int sq, flag, eval = 0, pkeval = 0;
+    int sq, rank, dist, flag, eval = 0, pkeval = 0;
     uint64_t pawns, myPawns, tempPawns, enemyPawns, attacks;
 
     // Store off pawn attacks for king safety and threat computations
@@ -456,6 +461,8 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         uint64_t pushSupport = myPawns    & pawnAttacks(THEM, sq + Forward);
         uint64_t leftovers   = stoppers ^ threats ^ pushThreats;
 
+        rank = relativeRankOf(US, sq);
+
         // Save passed pawn information for later evaluation
         if (!stoppers) setBit(&ei->passedPawns, sq);
 
@@ -463,8 +470,13 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // square then exchanging our supporters with the remaining stoppers
         else if (!leftovers && popcount(pushSupport) >= popcount(pushThreats)) {
             flag = popcount(support) >= popcount(threats);
-            pkeval += PawnCandidatePasser[flag][relativeRankOf(US, sq)];
-            if (TRACE) T.PawnCandidatePasser[flag][relativeRankOf(US, sq)][US]++;
+            pkeval += PawnCandidatePasser[flag][rank];
+            if (TRACE) T.PawnCandidatePasser[flag][rank][US]++;
+
+            // Evaluate based on distance from their king
+            dist = distanceBetween(sq, ei->kingSquare[THEM]);
+            eval += dist * PawnCandidatePasserEnemyDistance[rank];
+            if (TRACE) T.PawnCandidatePasserEnemyDistance[rank][US] += dist;
         }
 
         // Apply a penalty if the pawn is isolated. We consider pawns that
@@ -491,8 +503,8 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
         // backwards at the same time. We don't give backward pawns a connected bonus
         if (neighbors && pushThreats && !backup) {
             flag = !(Files[fileOf(sq)] & enemyPawns);
-            pkeval += PawnBackwards[flag][relativeRankOf(US, sq)];
-            if (TRACE) T.PawnBackwards[flag][relativeRankOf(US, sq)][US]++;
+            pkeval += PawnBackwards[flag][rank];
+            if (TRACE) T.PawnBackwards[flag][rank][US]++;
         }
 
         // Apply a bonus if the pawn is connected and not backwards. We consider a
