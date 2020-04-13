@@ -314,6 +314,7 @@ const int PassedSafePromotionPath = S( -29,  37);
 /* Threat Evaluation Terms */
 
 const int ThreatWeakPawn             = S( -13, -26);
+const int ThreatWeakKeyPawn          = S(  -8, -25);
 const int ThreatMinorAttackedByPawn  = S( -51, -53);
 const int ThreatMinorAttackedByMinor = S( -26, -36);
 const int ThreatMinorAttackedByMajor = S( -23, -44);
@@ -392,7 +393,7 @@ int evaluateBoard(Board *board, PKTable *pktable, int contempt) {
 
     // Store a new Pawn King Entry if we did not have one
     if (ei.pkentry == NULL && pktable != NULL)
-        storePKEntry(pktable, board->pkhash, ei.passedPawns, pkeval);
+        storePKEntry(pktable, board->pkhash, ei.passedPawns, ei.keyPawns, pkeval);
 
     // Return the evaluation relative to the side to move
     return board->turn == WHITE ? eval : -eval;
@@ -458,6 +459,9 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
 
         // Save passed pawn information for later evaluation
         if (!stoppers) setBit(&ei->passedPawns, sq);
+
+        // Save key blocker information for later evaluation
+        if (several(stoppers) && !neighbors && !threats) setBit(&ei->keyPawns, sq);
 
         // Apply a bonus for pawns which will become passers by advancing a
         // square then exchanging our supporters with the remaining stoppers
@@ -953,6 +957,11 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     eval += count * ThreatWeakPawn;
     if (TRACE) T.ThreatWeakPawn[US] += count;
 
+    // Penalty for each of our weak key pawns
+    count = popcount(pawns & ei->keyPawns & (poorlyDefended | ei->attackedBy2[THEM]));
+    eval += count * ThreatWeakKeyPawn;
+    if (TRACE) T.ThreatWeakKeyPawn[US] += count;
+
     // Penalty for pawn threats against our minors
     count = popcount((knights | bishops) & attacksByPawns);
     eval += count * ThreatMinorAttackedByPawn;
@@ -1218,6 +1227,7 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     // Try to read a hashed Pawn King Eval. Otherwise, start from scratch
     ei->pkentry       =     pktable == NULL ? NULL : getPKEntry(pktable, board->pkhash);
     ei->passedPawns   = ei->pkentry == NULL ? 0ull : ei->pkentry->passed;
+    ei->keyPawns      = ei->pkentry == NULL ? 0ull : ei->pkentry->key;
     ei->pkeval[WHITE] = ei->pkentry == NULL ? 0    : ei->pkentry->eval;
     ei->pkeval[BLACK] = ei->pkentry == NULL ? 0    : 0;
 }
