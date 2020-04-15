@@ -129,6 +129,10 @@ const int PawnBackwards[2][8] = {
     S(   5, -23), S(   0,   0), S(   0,   0), S(   0,   0)},
 };
 
+const int PawnUnpushable[4] = {
+    S(  12,   2), S(   0,  -3), S(  -1,  -3), S(   5,   1), 
+};
+
 const int PawnConnected32[32] = {
     S(   0,   0), S(   0,   0), S(   0,   0), S(   0,   0),
     S(  -2,  -8), S(  11,   1), S(   3,   1), S(   5,  16),
@@ -493,6 +497,12 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
             flag = !(Files[fileOf(sq)] & enemyPawns);
             pkeval += PawnBackwards[flag][relativeRankOf(US, sq)];
             if (TRACE) T.PawnBackwards[flag][relativeRankOf(US, sq)][US]++;
+
+            // Apply a penalty to backward pawns that are unlikely to be pushed
+            if(several(pushThreats) && !testBit(ei->blockedPawns[US], sq)) {
+                pkeval += PawnUnpushable[relativeRankOf(US, sq)-1];
+                if (TRACE) T.PawnUnpushable[relativeRankOf(US, sq)-1][US]++;
+            }
         }
 
         // Apply a bonus if the pawn is connected and not backwards. We consider a
