@@ -149,7 +149,7 @@ const int KnightOutpost[2][2] = {
 
 const int KnightBehindPawn = S(   4,  20);
 
-const int KnightBlocksPawn = S(  -1,   1);
+const int KnightBlocksPawn = S(  -3,   1);
 
 const int KnightInSiberia[4] = {
     S(  -8,  -1), S( -11,  -6), S( -22,  -3), S( -25,  -6),
@@ -174,7 +174,7 @@ const int BishopOutpost[2][2] = {
 
 const int BishopBehindPawn = S(   2,  19);
 
-const int BishopBlocksPawn = S(  -2,   0);
+const int BishopBlocksPawn = S(  -4,   0);
 
 const int BishopLongDiagonal = S(  21,  10);
 
