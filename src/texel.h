@@ -24,13 +24,13 @@
 
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
-#define REPORTING    (    100) // How often to report progress
-#define NTERMS       (      0) // Total terms in the Tuner (647)
+#define REPORTING    (     25) // How often to report progress
+#define NTERMS       (      2) // Total terms in the Tuner (649)
 
-#define LEARNING     (    5.0) // Learning rate
+#define LEARNING     (    8.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
 #define BATCHSIZE    (  16384) // FENs per mini-batch
-#define NPOSITIONS   (5888224) // Total FENS in the book
+#define NPOSITIONS   (5832689) // Total FENS in the book
 
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 32))
 
@@ -53,12 +53,14 @@
 #define TunePawnConnected32             (0)
 #define TuneKnightOutpost               (0)
 #define TuneKnightBehindPawn            (0)
+#define TuneKnightBlocksPawn            (1)
 #define TuneKnightInSiberia             (0)
 #define TuneKnightMobility              (0)
 #define TuneBishopPair                  (0)
 #define TuneBishopRammedPawns           (0)
 #define TuneBishopOutpost               (0)
 #define TuneBishopBehindPawn            (0)
+#define TuneBishopBlocksPawn            (1)
 #define TuneBishopLongDiagonal          (0)
 #define TuneBishopMobility              (0)
 #define TuneRookFile                    (0)
@@ -250,12 +252,14 @@ void print_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, int B, int 
     ENABLE_1(F, PawnConnected32, 32, NORMAL, "[32]");                       \
     ENABLE_2(F, KnightOutpost, 2, 2, NORMAL, "[2][2]");                     \
     ENABLE_0(F, KnightBehindPawn, NORMAL, "");                              \
+    ENABLE_0(F, KnightBlocksPawn, NORMAL, "");                              \
     ENABLE_1(F, KnightInSiberia, 4, NORMAL, "[4]");                         \
     ENABLE_1(F, KnightMobility, 9, NORMAL, "[9]");                          \
     ENABLE_0(F, BishopPair, NORMAL, "");                                    \
     ENABLE_0(F, BishopRammedPawns, NORMAL, "");                             \
     ENABLE_2(F, BishopOutpost, 2, 2, NORMAL, "[2][2]");                     \
     ENABLE_0(F, BishopBehindPawn, NORMAL, "");                              \
+    ENABLE_0(F, BishopBlocksPawn, NORMAL, "");                              \
     ENABLE_0(F, BishopLongDiagonal, NORMAL, "");                            \
     ENABLE_1(F, BishopMobility, 14, NORMAL, "[14]");                        \
     ENABLE_1(F, RookFile, 2, NORMAL, "[2]");                                \

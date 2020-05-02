@@ -149,6 +149,8 @@ const int KnightOutpost[2][2] = {
 
 const int KnightBehindPawn = S(   4,  20);
 
+const int KnightBlocksPawn = S(  -1,   1);
+
 const int KnightInSiberia[4] = {
     S(  -8,  -1), S( -11,  -6), S( -22,  -3), S( -25,  -6),
 };
@@ -171,6 +173,8 @@ const int BishopOutpost[2][2] = {
 };
 
 const int BishopBehindPawn = S(   2,  19);
+
+const int BishopBlocksPawn = S(  -2,   0);
 
 const int BishopLongDiagonal = S(  21,  10);
 
@@ -550,6 +554,12 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
             if (TRACE) T.KnightBehindPawn[US]++;
         }
 
+        // Apply a penalty if the knight is blocking the advance of a friendly pawn
+        if (testBit(pawnAdvance(board->pieces[PAWN] & board->colours[US], 0ull, US), sq)) {
+            eval += KnightBlocksPawn;
+            if (TRACE) T.KnightBlocksPawn[US]++;
+        }
+
         // Apply a penalty if the knight is far from both kings
         kingDistance = MIN(distanceBetween(sq, ei->kingSquare[THEM]), distanceBetween(sq, ei->kingSquare[US]));
         if (kingDistance >= 4) {
@@ -625,6 +635,12 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         if (testBit(pawnAdvance(board->pieces[PAWN], 0ull, THEM), sq)) {
             eval += BishopBehindPawn;
             if (TRACE) T.BishopBehindPawn[US]++;
+        }
+
+        // Apply a penalty if the bishop is blocking the advance of a friendly pawn
+        if (testBit(pawnAdvance(board->pieces[PAWN] & board->colours[US], 0ull, US), sq)) {
+            eval += BishopBlocksPawn;
+            if (TRACE) T.BishopBlocksPawn[US]++;
         }
 
         // Apply a bonus when controlling both central squares on a long diagonal
