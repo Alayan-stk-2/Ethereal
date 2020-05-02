@@ -185,6 +185,8 @@ const int BishopMobility[14] = {
 
 const int RookFile[2] = { S(  12,   3), S(  34,   3) };
 
+const int RookBlockedFile = S(    0,   0);
+
 const int RookOnSeventh = S(  -4,  30);
 
 const int RookMobility[15] = {
@@ -683,6 +685,12 @@ int evaluateRooks(EvalInfo *ei, Board *board, int colour) {
             open = !(enemyPawns & Files[fileOf(sq)]);
             eval += RookFile[open];
             if (TRACE) T.RookFile[open][US]++;
+        }
+
+        // Apply a penalty if the rook is on a file behind a blocked pawn
+        if (forwardFileMasks(US, sq) & ei->blockedPawns[US]) {
+            eval += RookBlockedFile;
+            if (TRACE) T.RookBlockedFile[US]++;
         }
 
         // Rook gains a bonus for being located on seventh rank relative to its
