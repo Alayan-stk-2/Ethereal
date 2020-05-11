@@ -165,6 +165,8 @@ const int BishopPair = S(  21,  68);
 
 const int BishopRammedPawns = S(  -8, -14);
 
+const int BishopOnPawns = S(  -2,  -1);
+
 const int BishopOutpost[2][2] = {
    {S(  14, -13), S(  43,  -2)},
    {S(   6, -12), S(  10,  -4)},
@@ -610,6 +612,12 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         count = popcount(ei->rammedPawns[US] & squaresOfMatchingColour(sq));
         eval += count * BishopRammedPawns;
         if (TRACE) T.BishopRammedPawns[US] += count;
+
+        // Apply a penalty for the bishop based on the number of enemy pawns it
+        // targets
+        count = popcount(enemyPawns & bishopAttacks(sq, 0));
+        eval += count * BishopOnPawns;
+        if (TRACE) T.BishopOnPawns[US] += count;
 
         // Apply a bonus if the bishop is on an outpost square, and cannot be attacked
         // by an enemy pawn. Increase the bonus if one of our pawns supports the bishop.
