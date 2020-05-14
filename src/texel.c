@@ -49,6 +49,7 @@ extern const int BishopValue;
 extern const int RookValue;
 extern const int QueenValue;
 extern const int KingValue;
+extern const int MorePieces;
 extern const int PawnPSQT32[32];
 extern const int KnightPSQT32[32];
 extern const int BishopPSQT32[32];

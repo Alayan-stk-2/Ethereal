@@ -34,12 +34,14 @@ int PSQT[32][SQUARE_NB];
 
 /* Material Value Evaluation Terms */
 
-const int PawnValue   = S( 105, 119);
-const int KnightValue = S( 456, 408);
-const int BishopValue = S( 477, 427);
-const int RookValue   = S( 660, 684);
-const int QueenValue  = S(1301,1347);
+const int PawnValue   = S( 106, 119);
+const int KnightValue = S( 459, 416);
+const int BishopValue = S( 480, 435);
+const int RookValue   = S( 666, 688);
+const int QueenValue  = S(1314,1327);
 const int KingValue   = S(   0,   0);
+
+const int MorePieces = S(   6, -17);
 
 /* Piece Square Evaluation Terms */
 
@@ -997,6 +999,12 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     count = popcount(pushThreat);
     eval += count * ThreatByPawnPush;
     if (TRACE) T.ThreatByPawnPush[colour] += count;
+
+    // Bonus for having more non-pawn pieces than them
+    if (popcount(friendly & ~board->pieces[PAWN]) > popcount(enemy & ~board->pieces[PAWN])) {
+        eval += MorePieces;
+        if (TRACE) T.MorePieces[colour]++;
+    }
 
     return eval;
 }

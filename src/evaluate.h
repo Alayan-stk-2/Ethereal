@@ -45,6 +45,7 @@ struct EvalTrace {
     int RookValue[COLOUR_NB];
     int QueenValue[COLOUR_NB];
     int KingValue[COLOUR_NB];
+    int MorePieces[COLOUR_NB];
     int PawnPSQT32[32][COLOUR_NB];
     int KnightPSQT32[32][COLOUR_NB];
     int BishopPSQT32[32][COLOUR_NB];
