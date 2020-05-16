@@ -36,7 +36,7 @@ int PSQT[32][SQUARE_NB];
 
 const int PawnValue   = S( 105, 119);
 const int KnightValue = S( 456, 408);
-const int BishopValue = S( 477, 427);
+const int BishopValue = S( 477, 428);
 const int RookValue   = S( 660, 684);
 const int QueenValue  = S(1301,1347);
 const int KingValue   = S(   0,   0);
@@ -173,6 +173,8 @@ const int BishopOutpost[2][2] = {
 const int BishopBehindPawn = S(   2,  19);
 
 const int BishopLongDiagonal = S(  21,  10);
+
+const int BishopOneSide = S(  -3,  -5);
 
 const int BishopMobility[14] = {
     S( -69,-149), S( -33, -99), S( -12, -54), S(  -2, -28),
@@ -578,7 +580,7 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
 
     int sq, outside, defended, count, eval = 0;
-    uint64_t attacks;
+    uint64_t attacks, xrayattacks;
 
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
     uint64_t tempBishops = board->pieces[BISHOP] & board->colours[US  ];
@@ -627,11 +629,20 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             if (TRACE) T.BishopBehindPawn[US]++;
         }
 
+        xrayattacks = bishopAttacks(sq, board->pieces[PAWN]);
+
         // Apply a bonus when controlling both central squares on a long diagonal
         if (   testBit(LONG_DIAGONALS & ~CENTER_SQUARES, sq)
-            && several(bishopAttacks(sq, board->pieces[PAWN]) & CENTER_SQUARES)) {
+            && several(xrayattacks & CENTER_SQUARES)) {
             eval += BishopLongDiagonal;
             if (TRACE) T.BishopLongDiagonal[US]++;
+        }
+
+        // Apply a penalty to a bishop that can only aim at one side of the board
+        if (   !(xrayattacks & LEFT_FLANK)
+            || !(xrayattacks & RIGHT_FLANK)) {
+            eval += BishopOneSide;
+            if (TRACE) T.BishopOneSide[US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
