@@ -1176,6 +1176,10 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     uint64_t rooks   = board->pieces[ROOK  ] | board->pieces[QUEEN];
     uint64_t kings   = board->pieces[KING  ];
 
+    uint64_t whitepieces = white & ~pawns;
+    uint64_t blackpieces = black & ~pawns;
+
+
     // Save some general information about the pawn structure for later
     ei->pawnAttacks[WHITE]    = pawnAttackSpan(white & pawns, ~0ull, WHITE);
     ei->pawnAttacks[BLACK]    = pawnAttackSpan(black & pawns, ~0ull, BLACK);
@@ -1194,8 +1198,8 @@ void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable) {
     ei->kingAreas[BLACK] = kingAreaMasks(BLACK, ei->kingSquare[BLACK]);
 
     // Exclude squares attacked by our opponents, our blocked pawns, and our own King
-    ei->mobilityAreas[WHITE] = ~(ei->pawnAttacks[BLACK] | (white & kings) | ei->blockedPawns[WHITE]);
-    ei->mobilityAreas[BLACK] = ~(ei->pawnAttacks[WHITE] | (black & kings) | ei->blockedPawns[BLACK]);
+    ei->mobilityAreas[WHITE] = ~((ei->pawnAttacks[BLACK] & ~blackpieces) | (white & kings) | ei->blockedPawns[WHITE]);
+    ei->mobilityAreas[BLACK] = ~((ei->pawnAttacks[WHITE] & ~whitepieces) | (black & kings) | ei->blockedPawns[BLACK]);
 
     // Init part of the attack tables. By doing this step here, evaluatePawns()
     // can start by setting up the attackedBy2 table, since King attacks are resolved
