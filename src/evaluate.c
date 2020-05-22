@@ -122,6 +122,8 @@ const int PawnIsolated = S(  -5, -12);
 
 const int PawnStacked[2] = { S(  -6, -18), S(  -7,  -9) };
 
+const int PawnStackedIsolated = S(  -4, -12);
+
 const int PawnBackwards[2][RANK_NB] = {
    {S(   0,   0), S(   3,  -7), S(  10,  -5), S(   8, -11),
     S(   7, -12), S(   0,   0), S(   0,   0), S(   0,   0)},
@@ -484,6 +486,15 @@ int evaluatePawns(EvalInfo *ei, Board *board, int colour) {
                 || (stoppers & ~forwardFileMasks(US, sq));
             pkeval += PawnStacked[flag];
             if (TRACE) T.PawnStacked[flag][US]++;
+
+            // If stacked, isolated and facing a single isolated pawn, add an extra penalty.
+            // We don't check how much isolated enemy pawns are in front, as the
+            // eval term will cancel out in 2v2 situations.
+            if (   !neighbors
+                && stoppers
+                && !(stoppers & ~forwardFileMasks(US, sq))) {
+                pkeval += PawnStackedIsolated;
+            }
         }
 
         // Apply a penalty if the pawn is backward. We follow the usual definition
