@@ -1037,26 +1037,23 @@ int evaluateSpace(EvalInfo *ei, Board *board, int colour) {
 
     // Penalty when we don't have a bishop of a given color and all our pawns next to our
     // king are on the opposite color.
-    uint64_t shelterPawns    = ei->kingAreas[US] & board->pieces[PAWN] & friendly;
-    uint64_t friendlyBishops = friendly & board->pieces[BISHOP];
+    uint64_t defense    =  friendly
+                         & ((ei->kingAreas[US] & board->pieces[PAWN]) | board->pieces[BISHOP]);
     uint64_t enemyBishops    = enemy    & board->pieces[BISHOP];
 
     // 0 : pawn/bishop on black and white squares
     // 1 : if no pawn/bishop on black square
     // 2 : if no pawn/bishop on white square
     // 3 : 1 and 2 are true
-    int color = 3 - 2*((shelterPawns & WHITE_SQUARES) != 0) - ((shelterPawns & BLACK_SQUARES) != 0);
-    int friendlyBishopColors = 3 - 2*((friendlyBishops & WHITE_SQUARES) != 0) - ((friendlyBishops & BLACK_SQUARES) != 0);
-    int enemyBishopColors    = 3 - 2*((enemyBishops    & WHITE_SQUARES) != 0) - ((enemyBishops    & BLACK_SQUARES) != 0);
+    int color = 2*((defense & WHITE_SQUARES) == 0) + ((defense & BLACK_SQUARES) == 0);
+    int enemyBishopColors    = 2*((enemyBishops    & WHITE_SQUARES) == 0) + ((enemyBishops    & BLACK_SQUARES) == 0);
 
     if (   (color & 1)
-        && (friendlyBishopColors & 1)
         && (board->pieces[QUEEN] & board->colours[THEM] || !(enemyBishopColors & 1))) {
         eval += SpaceColorWeakness[!(enemyBishopColors & 1)];
         if (TRACE) T.SpaceColorWeakness[!(enemyBishopColors & 1)][US]++;
     }
     if (   (color & 2)
-        && (friendlyBishopColors & 2)
         && (board->pieces[QUEEN] & board->colours[THEM] || !(enemyBishopColors & 2))) {
         eval += SpaceColorWeakness[!(enemyBishopColors & 2)];
         if (TRACE) T.SpaceColorWeakness[!(enemyBishopColors & 2)][US]++;
