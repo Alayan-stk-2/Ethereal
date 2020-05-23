@@ -95,6 +95,7 @@ extern const int ThreatByPawnPush;
 extern const int SpaceRestrictPiece;
 extern const int SpaceRestrictEmpty;
 extern const int SpaceCenterControl;
+extern const int SpaceColorWeakness[2];
 extern const int ClosednessKnightAdjustment[9];
 extern const int ClosednessRookAdjustment[9];
 extern const int ComplexityTotalPawns;

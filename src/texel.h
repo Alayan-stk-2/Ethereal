@@ -24,13 +24,13 @@
 
 #define NPARTITIONS  (     64) // Total thread partitions
 #define KPRECISION   (     10) // Iterations for computing K
-#define REPORTING    (    100) // How often to report progress
-#define NTERMS       (      0) // Total terms in the Tuner (647)
+#define REPORTING    (     20) // How often to report progress
+#define NTERMS       (      2) // Total terms in the Tuner (649)
 
 #define LEARNING     (    5.0) // Learning rate
 #define LRDROPRATE   (   1.25) // Cut LR by this each failure
 #define BATCHSIZE    (  16384) // FENs per mini-batch
-#define NPOSITIONS   (5888224) // Total FENS in the book
+#define NPOSITIONS   (5808224) // Total FENS in the book
 
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 32))
 
@@ -86,6 +86,7 @@
 #define TuneSpaceRestrictPiece          (0)
 #define TuneSpaceRestrictEmpty          (0)
 #define TuneSpaceCenterControl          (0)
+#define TuneSpaceColorWeakness          (1)
 #define TuneClosednessKnightAdjustment  (0)
 #define TuneClosednessRookAdjustment    (0)
 #define TuneComplexityTotalPawns        (0)
@@ -283,6 +284,7 @@ void print_3(char *name, int params[NTERMS][PHASE_NB], int i, int A, int B, int 
     ENABLE_0(F, SpaceRestrictPiece, NORMAL, "");                            \
     ENABLE_0(F, SpaceRestrictEmpty, NORMAL, "");                            \
     ENABLE_0(F, SpaceCenterControl, NORMAL, "");                            \
+    ENABLE_1(F, SpaceColorWeakness, 2, NORMAL, "[2]");                      \
     ENABLE_1(F, ClosednessKnightAdjustment, 9, NORMAL, "[9]");              \
     ENABLE_1(F, ClosednessRookAdjustment, 9, NORMAL, "[9]");                \
     ENABLE_0(F, ComplexityTotalPawns, EGONLY, "");                          \
