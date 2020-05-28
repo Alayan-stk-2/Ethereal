@@ -142,9 +142,9 @@ const int PawnConnected32[32] = {
 
 /* Knight Evaluation Terms */
 
-const int KnightOutpost[2][2] = {
-   {S(  10, -27), S(  35,  -3)},
-   {S(   4, -22), S(  19,  -5)},
+const int KnightOutpost[2][3] = {
+   {S(  14, -28), S(  38,  -4), S(  38,   1)},
+   {S(   2, -22), S(  19,  -7), S(  19,  -5)},
 };
 
 const int KnightBehindPawn = S(   4,  20);
@@ -512,11 +512,13 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, outside, kingDistance, defended, count, eval = 0;
+    int sq, outside, kingDistance, defended, unchallengeable, count, eval = 0;
     uint64_t attacks;
 
-    uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
-    uint64_t tempKnights = board->pieces[KNIGHT] & board->colours[US  ];
+    uint64_t enemyPawns   = board->pieces[PAWN  ] & board->colours[THEM];
+    uint64_t tempKnights  = board->pieces[KNIGHT] & board->colours[US  ];
+    uint64_t enemyKnights = board->pieces[KNIGHT] & board->colours[THEM];
+    uint64_t enemyBishops = board->pieces[BISHOP] & board->colours[THEM];
 
     ei->attackedBy[US][KNIGHT] = 0ull;
 
@@ -540,8 +542,10 @@ int evaluateKnights(EvalInfo *ei, Board *board, int colour) {
             && !(outpostSquareMasks(US, sq) & enemyPawns)) {
             outside  = testBit(FILE_A | FILE_H, sq);
             defended = testBit(ei->pawnAttacks[US], sq);
-            eval += KnightOutpost[outside][defended];
-            if (TRACE) T.KnightOutpost[outside][defended][US]++;
+            unchallengeable =    defended && !enemyKnights
+                              && !(enemyBishops & squaresOfMatchingColour(sq));
+            eval += KnightOutpost[outside][defended + unchallengeable];
+            if (TRACE) T.KnightOutpost[outside][defended + unchallengeable][US]++;
         }
 
         // Apply a bonus if the knight is behind a pawn

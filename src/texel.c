@@ -60,7 +60,7 @@ extern const int PawnIsolated;
 extern const int PawnStacked[2];
 extern const int PawnBackwards[2][8];
 extern const int PawnConnected32[32];
-extern const int KnightOutpost[2][2];
+extern const int KnightOutpost[2][3];
 extern const int KnightBehindPawn;
 extern const int KnightInSiberia[4];
 extern const int KnightMobility[9];
