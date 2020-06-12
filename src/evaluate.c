@@ -389,7 +389,7 @@ int evaluateBoard(Board *board, PKTable *pktable, int contempt) {
     // Compute the complexity bonus or penalty for the strong side
     // If it is a penalty, it cannot exceed abs(eval) so as to
     // not flip the side with the advantage.
-    complexity = (complexity * phase) / 256;
+    complexity = (complexity * phase * factor / SCALE_NORMAL) / 256;
     sign = (eval > 0) - (eval < 0);
     complexity = sign * MAX(complexity, -abs(eval));
     eval += complexity;
