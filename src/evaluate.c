@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "attacks.h"
 #include "bitboards.h"
@@ -360,7 +361,7 @@ const int Tempo = 20;
 int evaluateBoard(Board *board, PKTable *pktable, int contempt) {
 
     EvalInfo ei;
-    int phase, factor, eval, pkeval;
+    int phase, factor, eval, pkeval, complexity, sign;
 
     // Setup and perform all evaluations
     initEvalInfo(&ei, board, pktable);
@@ -369,7 +370,7 @@ int evaluateBoard(Board *board, PKTable *pktable, int contempt) {
     eval  += pkeval + board->psqtmat;
     eval  += contempt;
     eval  += evaluateClosedness(&ei, board);
-    eval  += evaluateComplexity(&ei, board, eval);
+    complexity = evaluateComplexity(&ei, board);
 
     // Calculate the game phase based on remaining material (Fruit Method)
     phase = 24 - 4 * popcount(board->pieces[QUEEN ])
@@ -384,6 +385,14 @@ int evaluateBoard(Board *board, PKTable *pktable, int contempt) {
     // Compute the interpolated and scaled evaluation
     eval = (ScoreMG(eval) * (256 - phase)
          +  ScoreEG(eval) * phase * factor / SCALE_NORMAL) / 256;
+
+    // Compute the complexity bonus or penalty for the strong side
+    // If it is a penalty, it cannot exceed abs(eval) so as to
+    // not flip the side with the advantage.
+    complexity = (complexity * phase) / 256;
+    sign = (eval > 0) - (eval < 0);
+    complexity = sign * MAX(complexity, -abs(eval));
+    eval += complexity;
 
     // Factor in the Tempo after interpolation and scaling, so that
     // in the search we can assume that if a null move is made, then
@@ -1066,7 +1075,7 @@ int evaluateClosedness(EvalInfo *ei, Board *board) {
     return eval;
 }
 
-int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
+int evaluateComplexity(EvalInfo *ei, Board *board) {
 
     // Adjust endgame evaluation based on features related to how
     // likely the stronger side is to convert the position.
@@ -1075,8 +1084,6 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     (void) ei; // Silence compiler warning
 
     int complexity;
-    int eg = ScoreEG(eval);
-    int sign = (eg > 0) - (eg < 0);
 
     int pawnsOnBothFlanks = (board->pieces[PAWN] & LEFT_FLANK )
                          && (board->pieces[PAWN] & RIGHT_FLANK);
@@ -1092,6 +1099,11 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
                +  ComplexityPawnEndgame * !(knights | bishops | rooks | queens)
                +  ComplexityAdjustment;
 
+    return ScoreEG(complexity);
+
+    /* TODO : figure sound maths for complexity tuning.
+    At this point in eval, we don't know if it benefits white or black */
+/*
     if (TRACE) T.ComplexityTotalPawns[WHITE]  += sign * popcount(board->pieces[PAWN]);
     if (TRACE) T.ComplexityPawnFlanks[WHITE]  += sign * pawnsOnBothFlanks;
     if (TRACE) T.ComplexityPawnEndgame[WHITE] += sign * !(knights | bishops | rooks | queens);
@@ -1101,6 +1113,7 @@ int evaluateComplexity(EvalInfo *ei, Board *board, int eval) {
     int v = sign * MAX(ScoreEG(complexity), -abs(eg));
 
     return MakeScore(0, v);
+*/
 }
 
 int evaluateScaleFactor(Board *board, int eval) {
