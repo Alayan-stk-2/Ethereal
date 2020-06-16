@@ -60,7 +60,7 @@ void updateHistoryHeuristics(Thread *thread, uint16_t *moves, int length, int he
     for (int i = 0; i < length; i++) {
 
         // Apply a malus until the final move
-        int delta = (moves[i] == bestMove) ? bonus : 9 * (-bonus) / 8;
+        int delta = (moves[i] == bestMove) ? bonus : 7 * (-bonus) / 8;
 
         // Extract information from this move
         int to = MoveTo(moves[i]);
