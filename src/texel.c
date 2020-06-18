@@ -81,7 +81,7 @@ extern const int KingStorm[2][4][8];
 extern const int PassedPawn[2][2][8];
 extern const int PassedFriendlyDistance[8];
 extern const int PassedEnemyDistance[8];
-extern const int PassedSafePromotionPath;
+extern const int PassedSafePromotionPath[8];
 extern const int ThreatWeakPawn;
 extern const int ThreatMinorAttackedByPawn;
 extern const int ThreatMinorAttackedByMinor;

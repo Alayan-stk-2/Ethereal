@@ -309,7 +309,10 @@ const int PassedEnemyDistance[FILE_NB] = {
     S(   1,  20), S(   6,  28), S(  27,  25), S(   0,   0),
 };
 
-const int PassedSafePromotionPath = S( -19,  38);
+const int PassedSafePromotionPath[RANK_NB] = { 
+    S(   0,   0), S( -19,  42), S( -19,  42), S( -18,  46), 
+    S( -16,  46), S( -17,  44), S( -17,  37), S(   0,   0), 
+};
 
 /* Threat Evaluation Terms */
 
@@ -901,8 +904,11 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         // Apply a bonus when the path to promoting is uncontested
         bitboard = forwardRanksMasks(US, rankOf(sq)) & Files[fileOf(sq)];
         flag = !(bitboard & (board->colours[THEM] | ei->attacked[THEM]));
-        eval += flag * PassedSafePromotionPath;
-        if (TRACE) T.PassedSafePromotionPath[US] += flag;
+        eval += flag * PassedSafePromotionPath[rank];
+        if (TRACE) T.PassedSafePromotionPath[rank][US] += flag;
+
+        // Apply a bonus when the path to promoting is only
+        // contested by a queen.
     }
 
     return eval;
