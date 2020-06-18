@@ -69,6 +69,7 @@ struct EvalTrace {
     int RookFile[2][COLOUR_NB];
     int RookOnSeventh[COLOUR_NB];
     int RookMobility[15][COLOUR_NB];
+    int QueenRelativePin[COLOUR_NB];
     int QueenMobility[28][COLOUR_NB];
     int KingPawnFileProximity[8][COLOUR_NB];
     int KingDefenders[12][COLOUR_NB];
@@ -134,6 +135,7 @@ int evaluateSpace(EvalInfo *ei, Board *board, int colour);
 int evaluateClosedness(EvalInfo *ei, Board *board);
 int evaluateComplexity(EvalInfo *ei, Board *board, int eval);
 int evaluateScaleFactor(Board *board, int eval);
+int queenIsXrayed(int queenSq, uint64_t occupied, uint64_t enemyRooks, uint64_t enemyBishops);
 void initEvalInfo(EvalInfo *ei, Board *board, PKTable *pktable);
 void initEval();
 
