@@ -1172,7 +1172,7 @@ int evaluateScaleFactor(Board *board, int eval) {
             && onlyOne(strong & minors)
             && popcount(strong) == 3
             && onlyOne(weak & rooks)
-            && onlyOne(weak & pieces) {
+            && onlyOne(weak & pieces)) {
             return SCALE_DRAW;
         }
         // Scale down NN
