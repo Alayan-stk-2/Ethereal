@@ -1165,6 +1165,24 @@ int evaluateScaleFactor(Board *board, int eval) {
     if ((strong & minors) && popcount(strong) == 2)
         return SCALE_DRAW;
 
+    // Scale down pawnless endgames with likely insufficient piece advantage
+    if (   !(strong & pawns)) {
+        // Scale down RBvR(Ps), RNvR(Ps)
+        if (   onlyOne(strong & rooks)
+            && onlyOne(strong & minors)
+            && popcount(strong) == 3
+            && onlyOne(weak & rooks)
+            && onlyOne(weak & pieces) {
+            return SCALE_DRAW;
+        }
+        // Scale down NN
+        if (   popcount(strong & knights) == 2
+            && popcount(strong) == 3) {
+            return SCALE_DRAW;
+        }
+        // To try : RvB, MMvB (BBvN can be a long win)
+    }
+
     // Scale up lone pieces with massive pawn advantages
     if (   !queens
         && !several(pieces & white)
