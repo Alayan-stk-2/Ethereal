@@ -876,6 +876,7 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
     int sq, rank, dist, flag, canAdvance, safeAdvance, eval = 0;
 
     uint64_t bitboard;
+    uint64_t enemyRookBehind;
     uint64_t myPassers = board->colours[US] & ei->passedPawns;
     uint64_t occupied  = board->colours[WHITE] | board->colours[BLACK];
     uint64_t tempPawns = myPassers;
@@ -889,8 +890,10 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
         bitboard = pawnAdvance(1ull << sq, 0ull, US);
 
         // Evaluate based on rank, ability to advance, and safety
+        // Don't consider the push square as safe when attacked from behind by a rook
         canAdvance = !(bitboard & occupied);
-        safeAdvance = !(bitboard & ei->attacked[THEM]);
+        enemyRookBehind = rookAttacks(sq, occupied) & forwardFileMasks(THEM, sq) & board->pieces[ROOK] & board->colours[THEM];
+        safeAdvance = !(bitboard & ei->attacked[THEM]) && !enemyRookBehind;
         eval += PassedPawn[canAdvance][safeAdvance][rank];
         if (TRACE) T.PassedPawn[canAdvance][safeAdvance][rank][US]++;
 
@@ -909,7 +912,7 @@ int evaluatePassed(EvalInfo *ei, Board *board, int colour) {
 
         // Apply a bonus when the path to promoting is uncontested
         bitboard = forwardRanksMasks(US, rankOf(sq)) & Files[fileOf(sq)];
-        flag = !(bitboard & (board->colours[THEM] | ei->attacked[THEM]));
+        flag = !(bitboard & (board->colours[THEM] | ei->attacked[THEM] | !safeAdvance));
         eval += flag * PassedSafePromotionPath;
         if (TRACE) T.PassedSafePromotionPath[US] += flag;
     }
