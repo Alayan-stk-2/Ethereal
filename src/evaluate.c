@@ -165,6 +165,8 @@ const int BishopPair = S(  21,  68);
 
 const int BishopRammedPawns = S(  -8, -14);
 
+const int BishopBlocked = S( -10, -16);
+
 const int BishopOutpost[2][2] = {
    {S(  14, -13), S(  43,  -2)},
    {S(   6, -12), S(  10,  -4)},
@@ -634,6 +636,13 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             && several(bishopAttacks(sq, board->pieces[PAWN]) & CENTER_SQUARES)) {
             eval += BishopLongDiagonal;
             if (TRACE) T.BishopLongDiagonal[US]++;
+        }
+
+        // Apply a penalty to a bishop that only attacks forward blocked pawns and
+        // protected pawn squares
+        if(!(~(ei->attackedBy[THEM][PAWN] | ei->rammedPawns[US]) & forwardRanksMasks(US, rankOf(sq)))) {
+            eval += BishopBlocked;
+            if (TRACE) T.BishopBlocked[US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop

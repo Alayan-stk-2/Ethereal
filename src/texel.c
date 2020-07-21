@@ -66,6 +66,7 @@ extern const int KnightInSiberia[4];
 extern const int KnightMobility[9];
 extern const int BishopPair;
 extern const int BishopRammedPawns;
+extern const int BishopBlocked;
 extern const int BishopOutpost[2][2];
 extern const int BishopBehindPawn;
 extern const int BishopLongDiagonal;
