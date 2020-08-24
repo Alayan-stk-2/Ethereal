@@ -370,7 +370,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int h
         if (   ttProbcut
             && ttMove != NONE_MOVE
             && moveIsTactical(board, ttMove)) {
-            return eval;
+            return beta + ProbCutMargin;
         }
 
         // Try tactical moves which maintain rBeta
