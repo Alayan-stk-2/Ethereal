@@ -174,7 +174,7 @@ const int BishopBehindPawn = S(   4,  20);
 
 const int BishopLongDiagonal = S(  23,  18);
 
-const int BishopStuck = S( -30, -50);
+const int BishopStuck[2] = { S( -18, -24), S( -36, -54) };
 
 const int BishopMobility[14] = {
     S( -78,-158), S( -36,-113), S( -13, -62), S(  -4, -26),
@@ -586,7 +586,7 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, outside, defended, count, eval = 0;
+    int sq, flag, outside, defended, count, eval = 0;
     uint64_t attacks;
 
     uint64_t myPawns     = board->pieces[PAWN] & board->colours[  US];
@@ -648,8 +648,11 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
         // Apply a penalty to bishops blocked on the back rank by friendly pawns
         if (   testBit(backRank, sq)
             && !(attacks & ~myPawns)) {
-            eval += BishopStuck;
-            if (TRACE) T.BishopStuck[US]++;
+            uint64_t occupied = board->colours[WHITE] | board->colours[BLACK];
+            flag = (US == WHITE) ? (((attacks << 8) & ~occupied) == 0)
+                                 : (((attacks >> 8) & ~occupied) == 0);
+            eval += BishopStuck[flag];
+            if (TRACE) T.BishopStuck[flag][US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
