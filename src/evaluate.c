@@ -39,7 +39,7 @@ int PSQT[32][SQUARE_NB];
 
 const int PawnValue   = S(  92, 134);
 const int KnightValue = S( 423, 431);
-const int BishopValue = S( 435, 449);
+const int BishopValue = S( 435, 450);
 const int RookValue   = S( 614, 719);
 const int QueenValue  = S(1276,1374);
 const int KingValue   = S(   0,   0);
@@ -233,6 +233,8 @@ const int BishopOutpost[2][2] = {
 const int BishopBehindPawn = S(   4,  20);
 
 const int BishopLongDiagonal = S(  21,  17);
+
+const int BishopNoPawnTarget = S(   0, -18);
 
 const int BishopMobility[14] = {
     S( -86,-170), S( -41,-117), S( -14, -58), S(  -4, -25),
@@ -699,6 +701,13 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             && several(bishopAttacks(sq, board->pieces[PAWN]) & CENTER_SQUARES)) {
             eval += BishopLongDiagonal;
             if (TRACE) T.BishopLongDiagonal[US]++;
+        }
+
+        // Apply an endgame penalty if no enemy pawn is on the same color
+        // as this bishop
+        if (!(enemyPawns & squaresOfMatchingColour(sq))) {
+            eval += BishopNoPawnTarget;
+            if (TRACE) T.BishopNoPawnTarget[US]++; 
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
