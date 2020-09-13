@@ -300,7 +300,7 @@ void print_3(char *name, TVector params, int i, int A, int B, int C, char *S);
     ENABLE_2(F, BishopOutpost, 2, 2, NORMAL, "[2][2]");                     \
     ENABLE_0(F, BishopBehindPawn, NORMAL, ""); NEWLINE(F);                  \
     ENABLE_0(F, BishopLongDiagonal, NORMAL, ""); NEWLINE(F);                \
-    ENABLE_1(F, BishopStuck, 2, NORMAL, ""); NEWLINE(F);                    \
+    ENABLE_1(F, BishopStuck, 2, NORMAL, "[2]"); NEWLINE(F);                 \
     ENABLE_1(F, BishopMobility, 14, NORMAL, "[14]");                        \
                                                                             \
     COMMENTS(F, "/* Rook Evaluation Terms */\n\n");                         \

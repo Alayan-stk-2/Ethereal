@@ -234,7 +234,7 @@ const int BishopBehindPawn = S(   4,  20);
 
 const int BishopLongDiagonal = S(  21,  17);
 
-const int BishopStuck = { S(  -6, -18), S( -26, -52) };
+const int BishopStuck[2] = { S(  -6, -18), S( -26, -52) };
 
 const int BishopMobility[14] = {
     S( -86,-170), S( -41,-117), S( -14, -58), S(  -4, -25),
