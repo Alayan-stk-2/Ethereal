@@ -148,7 +148,11 @@ void aspirationWindow(Thread *thread) {
     int alpha = -MATE, beta = MATE, delta = WindowSize;
 
     // After a few depths use a previous result to form a window
-    if (thread->depth >= WindowDepth) {
+    if (thread->depth >= WindowDepthSmall && thread->depth < WindowDepth) {
+        alpha = MAX(-MATE, thread->values[0] - WindowSizeSmall);
+        beta  = MIN( MATE, thread->values[0] + WindowSizeSmall);
+    }
+    else { // if thread->depth >= WindowDepth
         alpha = MAX(-MATE, thread->values[0] - delta);
         beta  = MIN( MATE, thread->values[0] + delta);
     }
