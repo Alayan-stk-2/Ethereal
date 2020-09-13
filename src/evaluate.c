@@ -84,23 +84,23 @@ const int KnightPSQT[SQUARE_NB] = {
     S( -26,  11), S(-104,  38), S(-117,  19), S(-167, -17),
 };
 
-const int BishopPSQT[SQUARE_NB] = {
-    S(   6, -21), S(   1,  -4), S(  -4,   2), S(   1,   0),
-    S(   2,   5), S(  -6,  -3), S(  -1,  -2), S(   6, -25),
-    S(  22, -18), S(   4, -29), S(  13,  -6), S(   7,   4),
-    S(   8,   3), S(  13,  -7), S(   9, -29), S(  22, -25),
-    S(   9,   0), S(  19,   5), S(  -3,  -5), S(  16,  12),
-    S(  15,  13), S(  -2,  -8), S(  18,   1), S(  14,   3),
-    S(   1,   7), S(  10,  12), S(  14,  24), S(  15,  25),
-    S(  19,  27), S(  10,  23), S(  14,  12), S(   1,   8),
-    S( -15,  27), S(  13,  24), S(  -1,  31), S(  13,  38),
-    S(   6,  39), S(   3,  30), S(  10,  26), S( -14,  29),
-    S(  -6,  22), S( -12,  38), S(  -5,  18), S(   0,  33),
-    S(   6,  31), S( -16,  26), S( -11,  38), S(  -8,  25),
-    S( -51,  30), S( -42,  16), S( -10,  22), S( -30,  28),
-    S( -32,  28), S( -10,  25), S( -56,  15), S( -55,  30),
-    S( -58,  13), S( -59,  28), S(-108,  37), S( -99,  46),
-    S(-103,  44), S( -88,  35), S( -31,  16), S( -68,  12),
+const int BishopPSQT[SQUARE_NB] = { 
+    S(   6, -21), S(   1,  -6), S(  -2,  -4), S(   1,   0), 
+    S(   2,   2), S(  -3,  -5), S(   0,  -3), S(   7, -25), 
+    S(  21, -16), S(   2, -31), S(  13,  -6), S(   6,   3), 
+    S(   7,   4), S(  13,  -7), S(   7, -32), S(  21, -23), 
+    S(   9,  -1), S(  19,   4), S(  -3,  -6), S(  17,  12), 
+    S(  16,  12), S(  -3,  -7), S(  18,   1), S(  15,   1), 
+    S(  -2,   7), S(   9,  12), S(  16,  24), S(  16,  25), 
+    S(  18,  27), S(  12,  23), S(  13,  12), S(  -2,   8), 
+    S( -16,  26), S(  12,  24), S(   0,  29), S(  14,  37), 
+    S(   9,  38), S(   3,  30), S(   9,  26), S( -17,  29), 
+    S(  -7,  22), S( -10,  37), S(  -8,  19), S(   2,  31), 
+    S(   8,  30), S( -13,  24), S( -11,  38), S(  -9,  24), 
+    S( -53,  27), S( -48,  15), S( -13,  23), S( -32,  25), 
+    S( -33,  26), S( -11,  24), S( -57,  18), S( -51,  28), 
+    S( -65,  10), S( -60,  26), S(-108,  36), S(-101,  41), 
+    S(-102,  43), S( -91,  30), S( -33,  16), S( -70,  12), 
 };
 
 const int RookPSQT[SQUARE_NB] = {
@@ -233,6 +233,8 @@ const int BishopOutpost[2][2] = {
 const int BishopBehindPawn = S(   4,  20);
 
 const int BishopLongDiagonal = S(  21,  17);
+
+const int BishopStuck = { S(  -6, -18), S( -26, -52) };
 
 const int BishopMobility[14] = {
     S( -86,-170), S( -41,-117), S( -14, -58), S(  -4, -25),
@@ -644,11 +646,13 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
 
     const int US = colour, THEM = !colour;
 
-    int sq, outside, defended, count, eval = 0;
+    int sq, flag, outside, defended, count, eval = 0;
     uint64_t attacks;
 
+    uint64_t myPawns     = board->pieces[PAWN] & board->colours[  US];
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
     uint64_t tempBishops = board->pieces[BISHOP] & board->colours[US  ];
+    uint64_t backRank    = (US == WHITE) ? RANK_1 : RANK_8;
 
     ei->attackedBy[US][BISHOP] = 0ull;
 
@@ -699,6 +703,16 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             && several(bishopAttacks(sq, board->pieces[PAWN]) & CENTER_SQUARES)) {
             eval += BishopLongDiagonal;
             if (TRACE) T.BishopLongDiagonal[US]++;
+        }
+
+        // Apply a penalty to bishops blocked on the back rank by friendly pawns
+        if (   testBit(backRank, sq)
+            && !(attacks & ~myPawns)) {
+            uint64_t occupied = board->colours[WHITE] | board->colours[BLACK];
+            flag = (US == WHITE) ? (((attacks << 8) & ~occupied) == 0)
+                                 : (((attacks >> 8) & ~occupied) == 0);
+            eval += BishopStuck[flag];
+            if (TRACE) T.BishopStuck[flag][US]++;
         }
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
