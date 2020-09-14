@@ -281,6 +281,11 @@ const int KingPawnFileProximity[FILE_NB] = {
     S( -30, -65), S( -25, -78), S( -20, -82), S( -12, -69),
 };
 
+const int KingPawnRootDistance[7] = {
+    S(-10, 20), S(-5, 12), S( 0, 6), S( 0, 0),
+    S(  0, -5), S( 0,-10), S( 0,-15),
+};
+
 const int KingShelter[2][FILE_NB][RANK_NB] = {
   {{S(  -6,   1), S(  15, -26), S(  14,  -3), S(  12,   5),
     S(   6,  -6), S( -11,   1), S(  -4, -34), S( -40,  25)},
@@ -925,6 +930,20 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
     dist = kingPawnFileDistance(board->pieces[PAWN], kingSq);
     ei->pkeval[US] += KingPawnFileProximity[dist];
     if (TRACE) T.KingPawnFileProximity[dist][US]++;
+
+    // Evaluate based on the walking distance to the closest enemy pawn chain root
+    // When there are pawns on both flanks, the speed at which a king may threaten
+    // the enemy pawns on his side can be crucial.
+    uint64_t pawnTargets = enemyPawns & ~ei->attackedBy[THEM][PAWN];
+    uint64_t walkable = ~ei->attackedBy[THEM][PAWN] & ~ei->rammedPawns[US];
+
+    dist = 7; // default dist
+    while (pawnTargets) {
+        int sq = poplsb(&pawnTargets);
+        dist = MIN(walkingDistance(kingSq, sq, dist-1, walkable), dist);
+    }
+    ei->pkeval[US] += KingPawnRootDistance[dist-1];
+    if (TRACE) T.KingPawnRootDistance[dist-1][US]++;
 
     // Evaluate King Shelter & King Storm threat by looking at the file of our King,
     // as well as the adjacent files. When looking at pawn distances, we will use a

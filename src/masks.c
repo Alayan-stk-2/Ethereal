@@ -150,6 +150,33 @@ int kingPawnFileDistance(uint64_t pawns, int ksq) {
     return KingPawnFileDistance[fileOf(ksq)][pawns & 0xFF];
 }
 
+// Function to compute the king walk distance from sq1 to sq2,
+// only going through "walkable" squares.
+int walkingDistance(int sq1, int sq2, int max_distance, uint64_t walkable) {
+    int distance = 0;
+
+    uint64_t previous_walked, walked = 0, N, S, W, E;
+    setBit(&walked, sq1);
+
+    do {
+        previous_walked = walked;
+        distance++;
+        N = walked << 8;
+        S = walked >> 8;
+        walked = walked | N | S;
+        E = walked << 1 & ~FILE_A;
+        W = walked >> 1 & ~FILE_H;
+        walked = walked | E | W;
+        walked = walked & walkable;
+    }
+    while (distance < max_distance && !testBit(walked, sq2) && previous_walked != walked);
+
+    if (!testBit(walked, sq2))
+        distance = 99;
+
+    return distance;
+}
+
 int openFileCount(uint64_t pawns) {
     pawns |= pawns >> 8; pawns |= pawns >> 16; pawns |= pawns >> 32;
     return popcount(~pawns & 0xFF);
