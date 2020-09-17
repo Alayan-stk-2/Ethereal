@@ -129,6 +129,7 @@ int terminateSearchEarly(Thread *thread) {
     const Limits *limits = thread->limits;
 
     return  thread->depth > 1
+        && thread->nodes > 512
         && (thread->nodes & 1023) == 1023
         && (limits->limitedBySelf || limits->limitedByTime)
         &&  elapsedTime(thread->info) >= thread->info->maxUsage;
