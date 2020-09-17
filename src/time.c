@@ -91,14 +91,35 @@ void updateTimeManagment(SearchInfo *info, Limits *limits) {
     // we simply are not in control of our own time usage
     if (!limits->limitedBySelf || info->depth < 4) return;
 
+    info->idealUsage /= info->failFactor[7];
+    for (int i=0;i<7;i++) {
+        info->failFactor[i+1] = info->failFactor[i];
+    }
+    info->failFactor[0] = 1.0;
+
     // Increase our time if the score suddenly dropped
-    if (lastValue > thisValue + 10) info->idealUsage *= 1.050;
-    if (lastValue > thisValue + 20) info->idealUsage *= 1.050;
-    if (lastValue > thisValue + 40) info->idealUsage *= 1.050;
+    if (lastValue > thisValue + 9) {
+        info->idealUsage    *= 1.065;
+        info->failFactor[0] *= 1.065;
+    }
+    if (lastValue > thisValue + 18) {
+        info->idealUsage    *= 1.060;
+        info->failFactor[0] *= 1.060;
+    }
+    if (lastValue > thisValue + 35) {
+        info->idealUsage    *= 1.050;
+        info->failFactor[0] *= 1.050;
+    }
 
     // Increase our time if the score suddenly jumped
-    if (lastValue + 15 < thisValue) info->idealUsage *= 1.025;
-    if (lastValue + 30 < thisValue) info->idealUsage *= 1.050;
+    if (lastValue + 15 < thisValue) {
+        info->idealUsage    *= 1.035;
+        info->failFactor[0] *= 1.035;
+    }
+    if (lastValue + 30 < thisValue) {
+        info->idealUsage    *= 1.050;
+        info->failFactor[0] *= 1.050;
+    }
 
     // Always scale back the PV time factor, but also look
     // to reset the PV time factor if the best move changed
@@ -129,7 +150,6 @@ int terminateSearchEarly(Thread *thread) {
     const Limits *limits = thread->limits;
 
     return  thread->depth > 1
-        && thread->nodes > 512
         && (thread->nodes & 1023) == 1023
         && (limits->limitedBySelf || limits->limitedByTime)
         &&  elapsedTime(thread->info) >= thread->info->maxUsage;
