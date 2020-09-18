@@ -1010,6 +1010,15 @@ int evaluateKings(EvalInfo *ei, Board *board, int colour) {
         T.SafetyBishopWeight[US] = 0;
         T.SafetyRookWeight[US]   = 0;
         T.SafetyQueenWeight[US]  = 0;
+
+        for (int i=0;i<4;i++) {
+            for (int j=0;j<8;j++) {
+                T.SafetyShelter[0][i][j][US]  = 0;
+                T.SafetyShelter[1][i][j][US]  = 0;
+                T.SafetyStorm[0][i][j][US]    = 0;
+                T.SafetyStorm[1][i][j][US]    = 0;
+            }
+        }
     }
 
     return eval;
