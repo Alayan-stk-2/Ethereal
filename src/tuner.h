@@ -34,10 +34,10 @@
 #define LRSTEPRATE      (     250) // Cut LR after this many epochs
 
 #define TuneNormal     (        0) // Flag to enable tuning on all Normals
-#define TuneSafety     (        1) // Flag to enable tuning on all Safeties
+#define TuneSafety     (        0) // Flag to enable tuning on all Safeties
 #define TuneComplexity (        0) // Flag to enable tuning on all Complexities
 
-#define NTERMS         (     140) // Total terms in the Tuner (1000)
+#define NTERMS         (     32) // Total terms in the Tuner (1000)
 #define MAXEPOCHS      (   10000) // Max number of epochs allowed
 #define BATCHSIZE      (   16384) // FENs per mini-batch
 #define NPOSITIONS     (32099740) // Total FENS in the book
@@ -90,8 +90,8 @@
 #define TuneSafetySafeRookCheck         (0 || TuneSafety)
 #define TuneSafetySafeBishopCheck       (0 || TuneSafety)
 #define TuneSafetySafeKnightCheck       (0 || TuneSafety)
-#define TuneSafetyShelter               (0 || TuneSafety)
-#define TuneSafetyStorm                 (0 || TuneSafety)
+#define TuneSafetyShelter               (1 || TuneSafety)
+#define TuneSafetyStorm                 (1 || TuneSafety)
 #define TuneSafetyAdjustment            (0 || TuneSafety)
 #define TunePassedPawn                  (0 || TuneNormal)
 #define TunePassedFriendlyDistance      (0 || TuneNormal)
@@ -334,8 +334,8 @@ void print_3(char *name, TVector params, int i, int A, int B, int C, char *S);
     ENABLE_0(F, SafetySafeRookCheck, SAFETY, "  ");                         \
     ENABLE_0(F, SafetySafeBishopCheck, SAFETY, "");                         \
     ENABLE_0(F, SafetySafeKnightCheck, SAFETY, "");                         \
-    ENABLE_3(F, SafetyShelter, 2, 4, 8, SAFETY, "[2][FILE_NB/2][RANK_NB]"); \
-    ENABLE_3(F, SafetyStorm, 2, 4, 8, SAFETY, "[2][FILE_NB/2][RANK_NB]");   \
+    ENABLE_2(F, SafetyShelter, 2, 8, SAFETY, "[2][RANK_NB]");               \
+    ENABLE_2(F, SafetyStorm, 2, 8, SAFETY, "[2][RANK_NB]");                 \
     ENABLE_0(F, SafetyAdjustment, SAFETY, "     ");                         \
                                                                             \
     COMMENTS(F, "\n/* Passed Pawn Evaluation Terms */\n\n");                \
