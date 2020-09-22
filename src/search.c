@@ -159,7 +159,7 @@ void aspirationWindow(Thread *thread) {
     while (1) {
 
         // Perform a search and consider reporting results
-        value = search(thread, pv, alpha, beta, MAX(1, depth));
+        value = search(thread, pv, alpha, beta, MAX(1, depth), 0);
         if (   (mainThread && value > alpha && value < beta)
             || (mainThread && elapsedTime(thread->info) >= WindowTimerMS))
             uciReport(thread->threads, alpha, beta, value);
@@ -190,7 +190,7 @@ void aspirationWindow(Thread *thread) {
     }
 }
 
-int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
+int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int bestRoot) {
 
     const int PvNode   = (alpha != beta - 1);
     const int RootNode = (thread->height == 0);
@@ -349,7 +349,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
         R = 4 + depth / 6 + MIN(3, (eval - beta) / 200);
 
         apply(thread, board, NULL_MOVE);
-        value = -search(thread, &lpv, -beta, -beta+1, depth-R);
+        value = -search(thread, &lpv, -beta, -beta+1, depth-R, 0);
         revert(thread, board, NULL_MOVE);
 
         if (value >= beta) return beta;
@@ -373,11 +373,11 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
 
             // For high depths, verify the move first with a depth one search
             if (depth >= 2 * ProbCutDepth)
-                value = -search(thread, &lpv, -rBeta, -rBeta+1, 1);
+                value = -search(thread, &lpv, -rBeta, -rBeta+1, 1, 0);
 
             // For low depths, or after the above, verify with a reduced search
             if (depth < 2 * ProbCutDepth || value >= rBeta)
-                value = -search(thread, &lpv, -rBeta, -rBeta+1, depth-4);
+                value = -search(thread, &lpv, -rBeta, -rBeta+1, depth-4, 0);
 
             // Revert the board state
             revert(thread, board, move);
@@ -390,8 +390,8 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
     // Step 10. Initialize the Move Picker and being searching through each
     // move one at a time, until we run out or a move generates a cutoff
     initMovePicker(&movePicker, thread, ttMove);
+    int movesLooped = 0;
     while ((move = selectNextMove(&movePicker, board, skipQuiets)) != NONE_MOVE) {
-
         // MultiPV and searchmoves may limit our search options
         if (RootNode && moveExaminedByMultiPV(thread, move)) continue;
         if (RootNode &&    !moveIsInRootMoves(thread, move)) continue;
@@ -401,6 +401,11 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
             getHistory(thread, move, &hist, &cmhist, &fmhist);
             quietsSeen++;
         }
+
+        if (depth >= SEEPruningDepth && movesLooped == 0)
+            bestRoot = 1;
+
+        movesLooped++;
 
         // Step 11 (~175 elo). Quiet Move Pruning. Prune any quiet move that meets one
         // of the criteria below, only after proving a non mated line exists
@@ -501,6 +506,10 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
             /// Use the LMR Formula as a starting point
             R  = LMRTable[MIN(depth, 63)][MIN(played, 63)];
 
+            // Increase reductions in the root's best-move sub-tree
+            // if the side to move is the same as at root
+            R += ((thread->height + 1) % 2) && bestRoot && !RootNode;
+
             // Increase for non PV, non improving, and extended nodes
             R += !PvNode + !improving + extension;
 
@@ -521,21 +530,21 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
         // Step 16A. If we triggered the LMR conditions (which we know by the value of R),
         // then we will perform a reduced search on the null alpha window, as we have no
         // expectation that this move will be worth looking into deeper
-        if (R != 1) value = -search(thread, &lpv, -alpha-1, -alpha, newDepth-R);
+        if (R != 1) value = -search(thread, &lpv, -alpha-1, -alpha, newDepth-R, bestRoot);
 
         // Step 16B. There are two situations in which we will search again on a null window,
         // but without a depth reduction R. First, if the LMR search happened, and failed
         // high, secondly, if we did not try an LMR search, and this is not the first move
         // we have tried in a PvNode, we will research with the normally reduced depth
         if ((R != 1 && value > alpha) || (R == 1 && !(PvNode && played == 1)))
-            value = -search(thread, &lpv, -alpha-1, -alpha, newDepth-1);
+            value = -search(thread, &lpv, -alpha-1, -alpha, newDepth-1, bestRoot);
 
         // Step 16C. Finally, if we are in a PvNode and a move beat alpha while being
         // search on a reduced depth, we will search again on the normal window. Also,
         // if we did not perform Step 15B, we will search for the first time on the
         // normal window. This happens only for the first move in a PvNode
         if (PvNode && (played == 1 || value > alpha))
-            value = -search(thread, &lpv, -beta, -alpha, newDepth-1);
+            value = -search(thread, &lpv, -beta, -alpha, newDepth-1, bestRoot);
 
         // Revert the board state
         revert(thread, board, move);
@@ -803,7 +812,7 @@ int singularity(Thread *thread, MovePicker *mp, int ttValue, int depth, int beta
 
         // Perform a reduced depth search on a null rbeta window
         if (!apply(thread, board, move)) continue;
-        value = -search(thread, &lpv, -rBeta-1, -rBeta, depth / 2 - 1);
+        value = -search(thread, &lpv, -rBeta-1, -rBeta, depth / 2 - 1, 0);
         revert(thread, board, move);
 
         // Move failed high, thus mp->tableMove is not singular
