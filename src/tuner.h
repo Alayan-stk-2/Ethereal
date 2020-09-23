@@ -26,8 +26,8 @@
 #define KPRECISION      (      10) // Iterations for computing K
 
 #define QSRESOLVE       (       0) // Whether to resolve via a qsearch()
-#define PRETTYIFY       (       1) // Whether to format as if we tune everything
-#define REPORTING       (      50) // How often to print the new parameters
+#define PRETTYIFY       (       0) // Whether to format as if we tune everything
+#define REPORTING       (      20) // How often to print the new parameters
 
 #define LRRATE          (    0.10) // Global Learning rate
 #define LRDROPRATE      (    1.00) // Cut LR by this each LR-step
@@ -37,10 +37,10 @@
 #define TuneSafety     (        0) // Flag to enable tuning on all Safeties
 #define TuneComplexity (        0) // Flag to enable tuning on all Complexities
 
-#define NTERMS         (       0) // Total terms in the Tuner (904)
+#define NTERMS         (       1) // Total terms in the Tuner (905)
 #define MAXEPOCHS      (   10000) // Max number of epochs allowed
 #define BATCHSIZE      (   16384) // FENs per mini-batch
-#define NPOSITIONS     ( 9999740) // Total FENS in the book
+#define NPOSITIONS     (32099740) // Total FENS in the book
 
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 64))
 
@@ -110,6 +110,7 @@
 #define TuneSpaceRestrictPiece          (0 || TuneNormal)
 #define TuneSpaceRestrictEmpty          (0 || TuneNormal)
 #define TuneSpaceCenterControl          (0 || TuneNormal)
+#define TuneSpacePieceBlocksPawn        (1 || TuneNormal)
 #define TuneClosednessKnightAdjustment  (0 || TuneNormal)
 #define TuneClosednessRookAdjustment    (0 || TuneNormal)
 #define TuneComplexityTotalPawns        (0 || TuneComplexity)
@@ -360,6 +361,7 @@ void print_3(char *name, TVector params, int i, int A, int B, int C, char *S);
     ENABLE_0(F, SpaceRestrictPiece, NORMAL, "");                            \
     ENABLE_0(F, SpaceRestrictEmpty, NORMAL, "");                            \
     ENABLE_0(F, SpaceCenterControl, NORMAL, "");                            \
+    ENABLE_0(F, SpacePieceBlocksPawn, NORMAL, "");                          \
                                                                             \
     COMMENTS(F, "\n/* Closedness Evaluation Terms */\n\n");                 \
     ENABLE_1(F, ClosednessKnightAdjustment, 9, NORMAL, "[9]");              \

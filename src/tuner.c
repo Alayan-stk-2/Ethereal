@@ -109,6 +109,7 @@ extern const int ThreatByPawnPush;
 extern const int SpaceRestrictPiece;
 extern const int SpaceRestrictEmpty;
 extern const int SpaceCenterControl;
+extern const int SpacePieceBlocksPawn;
 extern const int ClosednessKnightAdjustment[9];
 extern const int ClosednessRookAdjustment[9];
 extern const int ComplexityTotalPawns;
@@ -227,7 +228,7 @@ void initTunerEntries(TEntry *entries, Thread *thread, TArray methods) {
 
         // Resolve the position to mitigate tactics
         if (QSRESOLVE) {
-            qsearch(thread, &thread->pv, -MATE, MATE, 0);
+            qsearch(thread, &thread->pv, -MATE, MATE);
             for (int pvidx = 0; pvidx < thread->pv.length; pvidx++)
                 applyMove(&thread->board, thread->pv.line[pvidx], &undo);
         }

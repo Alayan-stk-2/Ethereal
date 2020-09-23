@@ -407,9 +407,10 @@ const int ThreatByPawnPush           = S(  14,  29);
 
 /* Space Evaluation Terms */
 
-const int SpaceRestrictPiece = S(  -4,  -1);
-const int SpaceRestrictEmpty = S(  -4,  -2);
-const int SpaceCenterControl = S(   4,  -2);
+const int SpaceRestrictPiece   = S(  -4,  -1);
+const int SpaceRestrictEmpty   = S(  -4,  -2);
+const int SpaceCenterControl   = S(   4,  -2);
+const int SpacePieceBlocksPawn = S(  -4,   7);
 
 /* Closedness Evaluation Terms */
 
@@ -1155,9 +1156,11 @@ int evaluateSpace(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
 
     int count, eval = 0;
+    uint64_t blockers;
 
     uint64_t friendly = board->colours[  US];
     uint64_t enemy    = board->colours[THEM];
+    uint64_t ourPawns = friendly & board->pieces[PAWN];
 
     // Squares we attack with more enemy attackers and no friendly pawn attacks
     uint64_t uncontrolled =   ei->attackedBy2[THEM] & ei->attacked[US]
@@ -1182,6 +1185,13 @@ int evaluateSpace(EvalInfo *ei, Board *board, int colour) {
         eval += count * SpaceCenterControl;
         if (TRACE) T.SpaceCenterControl[US] += count;
     }
+
+    // Penalty for pawns that are blocked by a piece
+    blockers = (US == WHITE) ? ourPawns << 8 : ourPawns >> 8;
+    blockers = blockers & (friendly | enemy) & ~board->pieces[PAWN];
+    count = popcount(blockers);
+    eval += count * SpacePieceBlocksPawn;
+    if (TRACE) T.SpacePieceBlocksPawn[US] += count;
 
     return eval;
 }
