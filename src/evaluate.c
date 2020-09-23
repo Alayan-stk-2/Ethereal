@@ -410,7 +410,7 @@ const int ThreatByPawnPush           = S(  14,  29);
 const int SpaceRestrictPiece   = S(  -4,  -1);
 const int SpaceRestrictEmpty   = S(  -4,  -2);
 const int SpaceCenterControl   = S(   4,  -2);
-const int SpacePieceBlocksPawn = S(  -4,   7);
+const int SpacePieceBlocksPawn = S(  -4,  -7);
 
 /* Closedness Evaluation Terms */
 
