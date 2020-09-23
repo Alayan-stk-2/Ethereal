@@ -508,7 +508,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth, int b
 
             // Increase reductions in the root's best-move sub-tree
             // if the side to move is the same as at root
-            R += ((thread->height + 1) % 2) && bestRoot && !RootNode;
+            R += ((thread->height + 1) % 2) && bestRoot && !RootNode && (thread->nodes % 4 == 0);
 
             // Increase for non PV, non improving, and extended nodes
             R += !PvNode + !improving + extension;
