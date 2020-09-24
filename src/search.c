@@ -508,7 +508,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
 
             R += ttTactical && (thread->nodes & 2);
 
-            R -= ttHit && !ttTactical && ((thread->nodes & 3) <= 0)
+            R -= ttHit && !ttTactical && ((thread->nodes & 3) <= 0);
 
             // Increase for King moves that evade checks
             R += inCheck && pieceType(board->squares[MoveTo(move)]) == KING;
