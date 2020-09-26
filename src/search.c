@@ -521,7 +521,7 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
         }
 
         else if (!isQuiet && depth > 2 && played > 1)
-            R = MIN(depth - 1, 1 + (hist <= 0));
+            R = MIN(depth - 1, MAX(1, MIN(3, 3 - (hist + 4000) / 2000)));
 
         else R = 1;
 
