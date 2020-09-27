@@ -523,11 +523,10 @@ int search(Thread *thread, PVariation *pv, int alpha, int beta, int depth) {
         // only applied to Tactical moves with unusually poor Capture History scores
         else if (!isQuiet && depth > 2 && played > 1) {
 
-            // Increase if we already tried many moves
-            R  = 1 + (played > 8);
+            R  = 1;
 
             // Adjust based on history scores
-            R += MAX(0, MIN(2, 2 - (hist + 4000) / 2000));
+            R += MAX(0, MIN(3, 3 - (hist + 6000) / 2000));
 
             // Don't extend or drop into QS
             R  = MIN(depth - 1, MAX(R, 1));
