@@ -25,7 +25,7 @@
 #define NPARTITIONS    (      64) // Total thread partitions
 #define KPRECISION     (      10) // Iterations for computing K
 #define PRETTYIFY      (       0) // Whether to format as if we tune everything
-#define REPORTING      (      50) // How often to print the new parameters
+#define REPORTING      (      20) // How often to print the new parameters
 
 #define LRRATE         (    0.10) // Global Learning rate
 #define LRDROPRATE     (    1.00) // Cut LR by this each LR-step
@@ -35,10 +35,10 @@
 #define TuneSafety     (       0) // Flag to enable all Safeties     ( 44)
 #define TuneComplexity (       0) // Flag to enable all Complexities (  4)
 
-#define NTERMS         (       0) // Total terms in the Tuner (904)
+#define NTERMS         (       1) // Total terms in the Tuner (905)
 #define MAXEPOCHS      (  100000) // Max number of epochs allowed
 #define BATCHSIZE      (   16384) // Training samples per mini-batch
-#define NPOSITIONS     (42487498) // Total Training samples in the book
+#define NPOSITIONS     (32407498) // Total Training samples in the book
 
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 64))
 
@@ -67,6 +67,7 @@
 #define TuneBishopOutpost               (0 || TuneNormal)
 #define TuneBishopBehindPawn            (0 || TuneNormal)
 #define TuneBishopLongDiagonal          (0 || TuneNormal)
+#define TuneBishopWeakPawnTarget        (1 || TuneNormal)
 #define TuneBishopMobility              (0 || TuneNormal)
 #define TuneRookFile                    (0 || TuneNormal)
 #define TuneRookOnSeventh               (0 || TuneNormal)
@@ -303,6 +304,7 @@ void print_3(char *name, TVector params, int i, int A, int B, int C, char *S);
     ENABLE_2(F, BishopOutpost, 2, 2, NORMAL, "[2][2]");                     \
     ENABLE_0(F, BishopBehindPawn, NORMAL, ""); NEWLINE(F);                  \
     ENABLE_0(F, BishopLongDiagonal, NORMAL, ""); NEWLINE(F);                \
+    ENABLE_0(F, BishopWeakPawnTarget, NORMAL, ""); NEWLINE(F);              \
     ENABLE_1(F, BishopMobility, 14, NORMAL, "[14]");                        \
                                                                             \
     COMMENTS(F, "/* Rook Evaluation Terms */\n\n");                         \

@@ -236,6 +236,8 @@ const int BishopBehindPawn = S(   4,  24);
 
 const int BishopLongDiagonal = S(  26,  20);
 
+const int BishopWeakPawnTarget = S(   0,   3);
+
 const int BishopMobility[14] = {
     S( -99,-186), S( -46,-124), S( -16, -54), S(  -4, -14),
     S(   6,   1), S(  14,  20), S(  17,  35), S(  19,  39),
@@ -673,7 +675,7 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
 
     int sq, outside, defended, count, eval = 0;
-    uint64_t attacks;
+    uint64_t attacks, weakPawns;
 
     uint64_t enemyPawns  = board->pieces[PAWN  ] & board->colours[THEM];
     uint64_t tempBishops = board->pieces[BISHOP] & board->colours[US  ];
@@ -728,6 +730,15 @@ int evaluateBishops(EvalInfo *ei, Board *board, int colour) {
             eval += BishopLongDiagonal;
             if (TRACE) T.BishopLongDiagonal[US]++;
         }
+
+        // Apply a bonus when the enemy has weak pawns
+        weakPawns = ei->attackedBy[US][PAWN] & ~ei->attackedBy[THEM][PAWN];
+        weakPawns = (US == WHITE) ? weakPawns >> 8 : weakPawns << 8;
+        weakPawns = (weakPawns | ei->rammedPawns[THEM]) & enemyPawns & ~ei->attackedBy[THEM][PAWN];
+
+        count = popcount(weakPawns & squaresOfMatchingColour(sq));
+        eval += count * BishopWeakPawnTarget;
+        if (TRACE) T.BishopWeakPawnTarget[US] += count;
 
         // Apply a bonus (or penalty) based on the mobility of the bishop
         count = popcount(ei->mobilityAreas[US] & attacks);
