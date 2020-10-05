@@ -104,6 +104,7 @@ struct EvalTrace {
     int ThreatQueenAttackedByOne[COLOUR_NB];
     int ThreatOverloadedPieces[COLOUR_NB];
     int ThreatByPawnPush[COLOUR_NB];
+    int KnightPassedSpread[9][COLOUR_NB];
     int SpaceRestrictPiece[COLOUR_NB];
     int SpaceRestrictEmpty[COLOUR_NB];
     int SpaceCenterControl[COLOUR_NB];

@@ -25,6 +25,7 @@
 void initMasks();
 
 int distanceBetween(int sq1, int sq2);
+int maxSquareDistance(uint64_t bb);
 int kingPawnFileDistance(uint64_t pawns, int ksq);
 int openFileCount(uint64_t pawns);
 uint64_t bitsBetweenMasks(int sq1, int sq2);

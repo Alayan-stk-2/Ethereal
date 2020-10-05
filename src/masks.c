@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "attacks.h"
@@ -143,6 +144,13 @@ int distanceBetween(int s1, int s2) {
     return DistanceBetween[s1][s2];
 }
 
+int maxSquareDistance(uint64_t bb) {
+    int rankwise = rankOf(getmsb(bb)) - rankOf(getlsb(bb));
+    bb |= bb >> 8; bb |= bb >> 16; bb |= bb >> 32;
+    bb &= RANK_1;
+    int filewise = getmsb(bb) - getlsb(bb);
+    return MAX(rankwise, filewise);
+}
 int kingPawnFileDistance(uint64_t pawns, int ksq) {
     pawns |= pawns >> 8; pawns |= pawns >> 16; pawns |= pawns >> 32;
     assert(0 <= fileOf(ksq) && fileOf(ksq) < FILE_NB);

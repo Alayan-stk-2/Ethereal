@@ -106,6 +106,7 @@ extern const int ThreatRookAttackedByKing;
 extern const int ThreatQueenAttackedByOne;
 extern const int ThreatOverloadedPieces;
 extern const int ThreatByPawnPush;
+extern const int KnightPassedSpread[9];
 extern const int SpaceRestrictPiece;
 extern const int SpaceRestrictEmpty;
 extern const int SpaceCenterControl;

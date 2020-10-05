@@ -405,6 +405,12 @@ const int ThreatQueenAttackedByOne   = S( -50,  -7);
 const int ThreatOverloadedPieces     = S(  -7, -16);
 const int ThreatByPawnPush           = S(  15,  32);
 
+const int KnightPassedSpread[9] = { 
+    S(   1,   1), S(  -6,   5), S(   1,   4), S(  -1,  -1), 
+    S(  -2,  -3), S(  -2,  -7), S(  -4, -10), S(  -8, -14), 
+    S( -12, -25), 
+};
+
 /* Space Evaluation Terms */
 
 const int SpaceRestrictPiece = S(  -4,  -1);
@@ -1063,7 +1069,7 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     const int US = colour, THEM = !colour;
     const uint64_t Rank3Rel = US == WHITE ? RANK_3 : RANK_6;
 
-    int count, eval = 0;
+    int count, spread, eval = 0;
 
     uint64_t friendly = board->colours[  US];
     uint64_t enemy    = board->colours[THEM];
@@ -1147,6 +1153,18 @@ int evaluateThreats(EvalInfo *ei, Board *board, int colour) {
     count = popcount(pushThreat);
     eval += count * ThreatByPawnPush;
     if (TRACE) T.ThreatByPawnPush[colour] += count;
+
+    // TODO : find a better place for this, as this is not handling a threat
+    // When we have no slider, a wide spread between passers makes attack/defense difficult
+    if (!((rooks | queens | bishops) & friendly)) {
+        if (!ei->passedPawns)
+            spread = 0;
+        else
+            spread = 1 + maxSquareDistance(ei->passedPawns);
+
+        eval += KnightPassedSpread[spread];
+        if (TRACE) T.KnightPassedSpread[spread][US]++;
+    }
 
     return eval;
 }

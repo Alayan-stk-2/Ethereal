@@ -25,7 +25,7 @@
 #define NPARTITIONS    (      64) // Total thread partitions
 #define KPRECISION     (      10) // Iterations for computing K
 #define PRETTYIFY      (       0) // Whether to format as if we tune everything
-#define REPORTING      (      50) // How often to print the new parameters
+#define REPORTING      (       1) // How often to print the new parameters
 
 #define LRRATE         (    0.10) // Global Learning rate
 #define LRDROPRATE     (    1.00) // Cut LR by this each LR-step
@@ -35,10 +35,10 @@
 #define TuneSafety     (       0) // Flag to enable all Safeties     ( 44)
 #define TuneComplexity (       0) // Flag to enable all Complexities (  4)
 
-#define NTERMS         (       0) // Total terms in the Tuner (904)
+#define NTERMS         (       9) // Total terms in the Tuner (913)
 #define MAXEPOCHS      (  100000) // Max number of epochs allowed
 #define BATCHSIZE      (   16384) // Training samples per mini-batch
-#define NPOSITIONS     (42487498) // Total Training samples in the book
+#define NPOSITIONS     (32407498) // Total Training samples in the book
 
 #define STACKSIZE ((int)((double) NPOSITIONS * NTERMS / 64))
 
@@ -105,6 +105,7 @@
 #define TuneThreatQueenAttackedByOne    (0 || TuneNormal)
 #define TuneThreatOverloadedPieces      (0 || TuneNormal)
 #define TuneThreatByPawnPush            (0 || TuneNormal)
+#define TuneKnightPassedSpread          (1 || TuneNormal)
 #define TuneSpaceRestrictPiece          (0 || TuneNormal)
 #define TuneSpaceRestrictEmpty          (0 || TuneNormal)
 #define TuneSpaceCenterControl          (0 || TuneNormal)
@@ -353,6 +354,7 @@ void print_3(char *name, TVector params, int i, int A, int B, int C, char *S);
     ENABLE_0(F, ThreatQueenAttackedByOne, NORMAL, "  ");                    \
     ENABLE_0(F, ThreatOverloadedPieces, NORMAL, "    ");                    \
     ENABLE_0(F, ThreatByPawnPush, NORMAL, "          ");                    \
+    ENABLE_1(F, KnightPassedSpread, 9, NORMAL, "[9]");                      \
                                                                             \
     COMMENTS(F, "\n/* Space Evaluation Terms */\n\n");                      \
     ENABLE_0(F, SpaceRestrictPiece, NORMAL, "");                            \
