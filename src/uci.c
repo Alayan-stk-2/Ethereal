@@ -34,6 +34,7 @@
 #include "movegen.h"
 #include "network.h"
 #include "nneval.h"
+#include "pin.h"
 #include "search.h"
 #include "thread.h"
 #include "time.h"
@@ -42,6 +43,7 @@
 #include "uci.h"
 #include "zobrist.h"
 
+extern int PinDetection;          // defined by pin.c
 extern int ContemptDrawPenalty;   // Defined by thread.c
 extern int ContemptComplexity;    // Defined by thread.c
 extern int MoveOverhead;          // Defined by time.c
@@ -100,6 +102,7 @@ int main(int argc, char **argv) {
         if (strEquals(str, "uci")) {
             printf("id name Ethereal " ETHEREAL_VERSION "\n");
             printf("id author Andrew Grant, Alayan & Laldon\n");
+            printf("option name PinDetection type check default true\n");
             printf("option name Hash type spin default 16 min 2 max 131072\n");
             printf("option name Threads type spin default 1 min 1 max 2048\n");
             printf("option name MultiPV type spin default 1 min 1 max 256\n");
@@ -262,6 +265,7 @@ void *uciGo(void *cargo) {
 void uciSetOption(char *str, Thread **threads, int *multiPV, int *chess960) {
 
     // Handle setting UCI options in Ethereal. Options include:
+    //  PinDetection        : If enabled, the engine will analyze fens for pins and pinning moves
     //  Hash                : Size of the Transposition Table in Megabyes
     //  Threads             : Number of search threads to use
     //  MultiPV             : Number of search lines to report per iteration
@@ -271,6 +275,13 @@ void uciSetOption(char *str, Thread **threads, int *multiPV, int *chess960) {
     //  SyzygyPath          : Path to Syzygy Tablebases
     //  SyzygyProbeDepth    : Minimal Depth to probe the highest cardinality Tablebase
     //  UCI_Chess960        : Set when playing FRC, but not required in order to work
+
+    if (strStartsWith(str, "setoption name PinDetection value ")) {
+        if (strStartsWith(str, "setoption name PinDetection value true"))
+            printf("info string set PinDetection to true\n"), PinDetection = 1;
+        if (strStartsWith(str, "setoption name PinDetection value false"))
+            printf("info string set PinDetection to false\n"), PinDetection = 0;
+    }
 
     if (strStartsWith(str, "setoption name Hash value ")) {
         int megabytes = atoi(str + strlen("setoption name Hash value "));
@@ -338,8 +349,11 @@ void uciPosition(char *str, Board *board, int chess960) {
     Undo undo[1];
 
     // Position is defined by a FEN, X-FEN or Shredder-FEN
-    if (strContains(str, "fen"))
+    if (strContains(str, "fen")) {
         boardFromFEN(board, strstr(str, "fen") + strlen("fen "), chess960);
+        if (PinDetection)
+            evaluatePins(board);
+    }
 
     // Position is simply the usual starting position
     else if (strContains(str, "startpos"))
